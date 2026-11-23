@@ -23,10 +23,10 @@ from PIL import Image
 SCALE = 4
 SLOT_TILE = {'earth': 'earth', 'cliff': 'cliff', 'grass': 'grass', 'rail': 'rail',
              'stone': 'stone', 'bushA': 'bush_a', 'bushB': 'bush_a', 'sand': 'sand',
-             'river': 'sand', 'tunnel': 'cliff', 'station': 'brick', 'bridge1': 'wood',
+             'river': 'sand', 'tunnel': 'brick', 'station': 'brick', 'bridge1': 'stone',
              'bridge2': 'wood', 'tekkyo': 'wood', 'beach': 'sand'}
 WATER_SLOTS = ('river', 'beach')
-WOOD_SLOTS = ('bridge1', 'bridge2', 'tekkyo')
+WOOD_SLOTS = ('bridge2', 'tekkyo')
 
 
 def yaz0(b):
@@ -149,7 +149,7 @@ def hsv(c):
     return h * 360.0, s_, v
 
 
-def remap(orig, tile, grass, slot, wood=None):
+def remap(orig, tile, grass, slot, wood=None, snow=None, ref=None):
     """Material swap guided by the original palette colors, per ground slot.
 
     water (river/beach): blue entries stay blue
@@ -160,10 +160,15 @@ def remap(orig, tile, grass, slot, wood=None):
     """
     px = orig.load(); tp = tile.load(); gp = grass.load()
     wp = wood.load() if wood is not None else None
+    sp = snow.load() if snow is not None else None
+    refp = ref.load() if ref is not None else None
     res = Image.new('RGBA', orig.size); rp = res.load()
     for y in range(orig.size[1]):
         for x in range(orig.size[0]):
             c = px[x, y]
+            if sp is not None and is_snow(c) and (refp is None or is_green(refp[x, y])):
+                rp[x, y] = snow_px(sp, x, y, c)
+                continue
             L = (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255.0
             hh, ss, vv = hsv(c)
             green = c[1] > c[0] * 1.12 and c[1] > c[2] * 1.12
@@ -178,6 +183,8 @@ def remap(orig, tile, grass, slot, wood=None):
                 base = wp[x, y]
             else:
                 base = tp[x, y]
+            if refp is not None:
+                base = shift_color(base, c, refp[x, y])
             f = 0.55 + 0.9 * L
             rp[x, y] = (min(255, int(base[0] * f)), min(255, int(base[1] * f)),
                         min(255, int(base[2] * f)), c[3])
@@ -228,13 +235,14 @@ def rail_masks(idx, pal):
     return out
 
 
-def remap_rail(idx, pal, tile, grass, wood):
+def remap_rail(idx, pal, tile, grass, wood, snow=None, refpal=None):
     """Rail slot: steel rails and bolts keep their detail, ties become wood,
     gravel becomes the stone tile, green becomes grass. Output at SCALE x."""
     h = len(idx); w = len(idx[0])
     cls = rail_masks(idx, pal)
     res = Image.new('RGBA', (w * SCALE, h * SCALE)); rp = res.load()
     tp = tile.load(); gp = grass.load(); wp = wood.load()
+    sp = snow.load() if snow is not None else None
     for y in range(h):
         for x in range(w):
             c = pal[idx[y][x]]
@@ -245,14 +253,54 @@ def remap_rail(idx, pal, tile, grass, wood):
                     X, Y = x * SCALE + dx, y * SCALE + dy
                     if k == 't':
                         rp[X, Y] = (0, 0, 0, 0); continue
+                    if sp is not None and k != 'm' and is_snow(c) and (
+                            refpal is None or is_green(refpal[idx[y][x]])):
+                        rp[X, Y] = snow_px(sp, X, Y, c); continue
                     if k == 'm':
                         v = 40 + 190 * L ** 1.3
                         rp[X, Y] = (int(v * 0.96), int(v * 1.0), min(255, int(v * 1.08)), 255); continue
                     base = {'g': gp, 'w': wp}.get(k, tp)[X, Y]
+                    if refpal is not None:
+                        base = shift_color(base, c, refpal[idx[y][x]])
                     f = 0.55 + 0.9 * L
                     rp[X, Y] = (min(255, int(base[0] * f)), min(255, int(base[1] * f)),
                                 min(255, int(base[2] * f)), c[3])
     return res
+
+
+def is_snow(c):
+    hh, ss, vv = hsv(c)
+    return c[3] > 0 and ss < 0.3 and vv > 0.85
+
+
+def is_green(c):
+    return c[3] > 0 and c[1] > c[0] * 1.12 and c[1] > c[2] * 1.12
+
+
+def snow_px(snow, x, y, c):
+    """Snow material tinted by the original colour so AC's blue-white pattern shows."""
+    s_ = snow[x, y]
+    return tuple(min(255, int(s_[i] * (0.42 + 0.58 * c[i] / 255.0))) for i in range(3)) + (255,)
+
+
+def shift_color(base, c, cr):
+    """Season recolour: where the season palette entry `c` clearly differs in hue from
+    the summer reference `cr`, take on the palette's hue (and part of its saturation)
+    while keeping the material's own brightness variation."""
+    import colorsys
+    h1, s1, v1 = hsv(c); h0, s0, v0 = hsv(cr)
+    if min(s1, s0) < 0.12:
+        return base
+    d = abs(((h1 - h0 + 180.0) % 360.0) - 180.0)
+    w = min(1.0, max(0.0, (d - 15.0) / 45.0))
+    if w <= 0:
+        return base
+    bh, bs, bv = colorsys.rgb_to_hsv(base[0] / 255.0, base[1] / 255.0, base[2] / 255.0)
+    nh = h1 / 360.0
+    ns = bs * (1 - 0.5 * w) + s1 * 0.5 * w
+    r, g, b = colorsys.hsv_to_rgb(nh, ns, bv)
+    r0, g0, b0 = colorsys.hsv_to_rgb(bh, bs, bv)
+    return (int((r0 + (r - r0) * w) * 255), int((g0 + (g - g0) * w) * 255), int((b0 + (b - b0) * w) * 255))
 
 
 def tonal_ramp(tile_img, lo_pct, hi_pct, steps=32):
@@ -268,14 +316,15 @@ def tonal_ramp(tile_img, lo_pct, hi_pct, steps=32):
     return [tuple(int(v) for v in arr[b].mean(axis=0)) for b in bins]
 
 
-def remap_ramp(orig, tile_img, slot):
+def remap_ramp(orig, tile_img, slot, snow=None):
     """Keep the original structure (planks, rings, bricks); take colors from the
     Warcraft material's tonal ramp and its fine grain.
     bridges: whole ramp.  station: brick faces use the upper ramp, mortar the dark end."""
     from PIL import ImageFilter
     px = orig.load()
-    blur = tile_img.filter(ImageFilter.GaussianBlur(2 if slot == 'station' else 6)).load()
+    blur = tile_img.filter(ImageFilter.GaussianBlur(2 if slot in ('station', 'tunnel') else 6)).load()
     tp = tile_img.load()
+    sp = snow.load() if snow is not None else None
     full = tonal_ramp(tile_img, 3, 97)
     light = tonal_ramp(tile_img, 35, 97)
     dark = [tuple(int(v * 0.4) for v in c) for c in tonal_ramp(tile_img, 1, 10)]
@@ -289,43 +338,84 @@ def remap_ramp(orig, tile_img, slot):
             if c[3] == 0:
                 rp[x, y] = c; continue
             hh, ss, vv = hsv(c)
-            if ss < 0.2 and vv > 0.9:          # snow / white highlights stay
+            if sp is not None and is_snow(c):
+                rp[x, y] = snow_px(sp, x, y, c); continue
+            if ss < 0.2 and vv > 0.9:          # white highlights stay
                 rp[x, y] = c; continue
             L = (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2] - lo) / max(1.0, hi - lo)
             L = min(1.0, max(0.0, L))
-            if slot == 'station':
+            if slot in ('station', 'tunnel'):
                 cream = 30 <= hh <= 60 and vv > 0.75 and ss < 0.5
                 ramp = dark if cream else light
             else:
                 ramp = full
             base = ramp[min(len(ramp) - 1, int(L * (len(ramp) - 1) + 0.5))]
             g = tp[x, y]; b = blur[x, y]
-            grain = [(g[i] - b[i]) * (0.5 if slot == 'station' else 0.8) for i in range(3)]
+            grain = [(g[i] - b[i]) * (0.5 if slot in ('station', 'tunnel') else 0.8) for i in range(3)]
             rp[x, y] = tuple(min(255, max(0, int(base[i] + grain[i]))) for i in range(3)) + (c[3],)
     return res
+
+
+# slot -> (width, height, palette source)
+#   palette source: ('arr', symbol)  season-indexed table (12 entries, index = season palette)
+#                   ('fix', symbol)  one fixed palette
+SLOT_INFO = {
+    'earth':   (64, 64, ('arr', 'mFM_earth_pal')),
+    'grass':   (32, 32, ('arr', 'mFM_earth_pal')),
+    'stone':   (64, 64, ('arr', 'mFM_earth_pal')),
+    'cliff':   (64, 64, ('arr', 'mFM_cliff_pal')),
+    'river':   (64, 32, ('arr', 'mFM_cliff_pal')),
+    'bushA':   (64, 64, ('arr', 'mFM_bush_pal')),
+    'bushB':   (64, 32, ('arr', 'mFM_bush_pal')),
+    'rail':    (64, 64, ('arr', 'mFM_rail_pal')),
+    'sand':    (64, 32, ('arr', 'mFM_beach_pal')),
+    'beach':   (64, 32, ('arr', 'mFM_beach_pal')),
+    'bridge1': (128, 32, ('fix', 'mFM_grd_s_bridge1_pal')),
+    'bridge2': (128, 32, ('fix', 'mFM_grd_s_bridge2_pal')),
+    'station': (128, 32, ('fix', 'mFM_grd_s_station1_pal')),
+    'tunnel':  (64, 64, ('fix', 'mFM_grd_s_station1_pal')),
+}
+
+
+def load_palettes(iso, symbols):
+    rel, base = read_rel_data(iso)
+    want = {v[2][1] for v in SLOT_INFO.values()}
+    out = {}
+    pat = re.compile(r'(\w+) = \.data:0x([0-9A-F]+); // type:object size:0x([0-9A-F]+)')
+    for line in open(symbols):
+        m = pat.match(line)
+        if m and m[1] in want and m[1] not in out:
+            o, sz = int(m[2], 16), int(m[3], 16)
+            raw = rel[base + o:base + o + sz]
+            out[m[1]] = [raw[i * 32:(i + 1) * 32].hex() for i in range(sz // 32)]
+    return out
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--iso', required=True)
     ap.add_argument('--symbols', required=True)
-    ap.add_argument('--pal-logs', nargs='+', required=True)
     ap.add_argument('--tiles', required=True)
     ap.add_argument('--out', required=True)
+    ap.add_argument('--slots', nargs='*', help='only these slots (default: all)')
     a = ap.parse_args()
 
     blocks = load_blocks(a.iso, a.symbols)
-    byhash = collections.defaultdict(list)
+    pals = load_palettes(a.iso, a.symbols)
+    # unique data blocks: hash -> (slot, set of seasons 's'/'w')
+    uniq = {}
     for n, b in blocks.items():
-        byhash[xxhash.xxh64(b, seed=0).hexdigest()].append(n)
-
-    seen = {}  # (hash, palhex) -> (w, h)
-    pat = re.compile(r'\[TEXLOG\] (\d+)x(\d+) fmt=8 hash=([0-9a-f]+) size=\d+ tlut=\d+ pal=([0-9a-f]+)')
-    for path in a.pal_logs:
-        for line in open(path):
-            m = pat.match(line)
-            if m and m[3] in byhash:
-                seen[(m[3], m[4])] = (int(m[1]), int(m[2]))
+        m = re.match(r'mFM_grd_([sw])_(\w+?)(?:_\d)?_tex$', n)
+        if not m or m[2] not in SLOT_INFO:
+            continue
+        if a.slots and m[2] not in a.slots:
+            continue
+        w, h, _src = SLOT_INFO[m[2]]
+        if len(b) != w * h // 2:
+            continue
+        key = xxhash.xxh64(b, seed=0).hexdigest()
+        e = uniq.setdefault(key, [m[2], set(), b])
+        e[1].add(m[1])
 
     count = collections.Counter()
     for faction in ('alliance', 'horde'):
@@ -339,8 +429,6 @@ def main():
                     base = make_seamless(base)
                 if rotate:
                     base = base.rotate(90, expand=True)
-                # sample side: at least the short edge, up to half the long edge,
-                # so wide textures repeat at most twice
                 side = max(min(w, h), max(w, h) // 2)
                 base = base.resize((side, side), Image.LANCZOS)
                 canvas = Image.new('RGB', (w, h))
@@ -349,66 +437,42 @@ def main():
                         canvas.paste(base, (tx, ty))
                 tiles[k] = canvas
             return tiles[k]
-        for (h, palhex), (w, hh) in seen.items():
-            name = byhash[h][0]
-            m = re.match(r'mFM_grd_[sw]_(\w+?)(?:_\d)?_tex', name)
-            slot = m[1] if m else None
-            if slot not in SLOT_TILE:
-                continue
-            data = blocks[name]
-            if slot == 'rail':
-                out = remap_rail(decode_idx(data, w, hh), pal_from_hex(palhex),
-                                 tile('rail', w * SCALE, hh * SCALE),
-                                 tile('grass', w * SCALE, hh * SCALE),
-                                 tile('wood', w * SCALE, hh * SCALE))
-            elif slot in WOOD_SLOTS or slot == 'station':
-                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-                out = remap_ramp(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS), slot)
+        for key, (slot, seasons, data) in sorted(uniq.items()):
+            w, h, (kind, sym) = SLOT_INFO[slot]
+            table = pals[sym]
+            if kind == 'fix':
+                combos = [(table[0], False)]
             else:
-                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-                out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
-                            tile('grass', w * SCALE, hh * SCALE), slot,
-                            tile('wood', w * SCALE, hh * SCALE))
-            th = tlut_hash(data, palhex)
-            fn = f'tex1_{w}x{hh}_{h}_{th:016x}_8.dds'
-            out.save(os.path.join(od, fn), pixel_format='DXT5')
-            count[faction] += 1
-        # Blocks never seen at runtime (winter set, _2/_3 variants, sand, ...):
-        # reuse the palette and size of a seen block of the same slot and emit a
-        # wildcard-palette file (tex1_WxH_<datahash>_$_8.dds).
-        ref = {}
-        for (h, palhex), (w, hh) in seen.items():
-            m = re.match(r'mFM_grd_[sw]_(\w+?)(?:_\d)?_tex', byhash[h][0])
-            if m:
-                ref.setdefault(m[1], (palhex, w, hh))
-        done_hash = {h for (h, _p) in seen}
-        for h, names in byhash.items():
-            if h in done_hash:
-                continue
-            m = re.match(r'mFM_grd_[sw]_(\w+?)(?:_\d)?_tex', names[0])
-            slot = m[1] if m else None
-            if slot not in SLOT_TILE or slot not in ref:
-                continue
-            palhex, w, hh = ref[slot]
-            if len(blocks[names[0]]) != w * hh // 2:
-                continue
-            data = blocks[names[0]]
-            if slot == 'rail':
-                out = remap_rail(decode_idx(data, w, hh), pal_from_hex(palhex),
-                                 tile('rail', w * SCALE, hh * SCALE),
-                                 tile('grass', w * SCALE, hh * SCALE),
-                                 tile('wood', w * SCALE, hh * SCALE))
-            elif slot in WOOD_SLOTS or slot == 'station':
-                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-                out = remap_ramp(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS), slot)
-            else:
-                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-                out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
-                            tile('grass', w * SCALE, hh * SCALE), slot,
-                            tile('wood', w * SCALE, hh * SCALE))
-            out.save(os.path.join(od, f'tex1_{w}x{hh}_{h}_$_8.dds'), pixel_format='DXT5')
-            count[faction + '_wildcard'] += 1
-    print(dict(count), 'files;', len(seen), 'texture+palette combinations seen')
+                combos = []
+                for ssn in sorted(seasons):
+                    idxs = range(0, 9) if ssn == 's' else range(9, 12)
+                    for i in idxs:
+                        combos.append((table[i], ssn == 'w'))
+            done = set()
+            for palhex, winter in combos:
+                th = tlut_hash(data, palhex)
+                if th in done:
+                    continue
+                done.add(th)
+                pal = pal_from_hex(palhex)
+                refhex = table[1] if kind == 'arr' else palhex
+                refpal = pal_from_hex(refhex)
+                W, H = w * SCALE, h * SCALE
+                snow = tile('snow', W, H) if winter else None
+                if slot == 'rail':
+                    out = remap_rail(decode_idx(data, w, h), pal, tile('rail', W, H),
+                                     tile('grass', W, H), tile('wood', W, H), snow, refpal)
+                elif slot in WOOD_SLOTS or slot in ('station', 'tunnel'):
+                    orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
+                    out = remap_ramp(orig, tile(SLOT_TILE[slot], W, H, slot in WOOD_SLOTS), slot, snow)
+                else:
+                    orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
+                    ref = decode_ci4(data, w, h, refpal).resize((W, H), Image.NEAREST)
+                    out = remap(orig, tile(SLOT_TILE[slot], W, H), tile('grass', W, H), slot,
+                                tile('wood', W, H), snow, ref)
+                out.save(os.path.join(od, f'tex1_{w}x{h}_{key}_{th:016x}_8.dds'), pixel_format='DXT5')
+                count[faction] += 1
+    print(dict(count), 'files from', len(uniq), 'unique ground blocks')
 
 
 if __name__ == '__main__':
