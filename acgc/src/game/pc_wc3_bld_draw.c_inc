@@ -81,6 +81,7 @@ static int pc_bld_try_draw(GAME* game, cKF_SkeletonInfo_R_c* keyframe) {
         }
     }
     if (!pc_bld_enabled()) return 0;
+    if (i >= 13 && i <= 15) return 0; /* train stations keep the original model for now */
     Matrix_push();
     Matrix_scale(2.0f, 2.0f, 2.0f, MTX_MULT);
     OPEN_POLY_OPA_DISP(graph);
