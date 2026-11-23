@@ -195,7 +195,7 @@ static int pc_player_custom_model_enabled(void) {
 
 static void pc_player_custom_model_draw(GAME* game, ACTOR* actorx) {
     GRAPH* graph = game->graph;
-    float sc = 0.45f, yaw_deg = 0.0f;
+    float sc = 41.0f, yaw_deg = 0.0f;
     const char* e;
     if ((e = getenv("AC_PEON_SCALE"))) sc = (float)atof(e);
     if ((e = getenv("AC_PEON_YAW"))) yaw_deg = (float)atof(e);
