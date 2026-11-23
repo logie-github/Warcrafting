@@ -48,6 +48,7 @@ typedef struct {
     cKF_Animation_R_c* animation;
     s16 pal_idx;    /* index into structure_pal_adrs_nowinter/winter, or -1 for no palette */
     u8 is_winter;   /* 1 = use winter palette */
+    Gfx** dls;      /* static (non-skeletal) models: NULL-terminated display list array, skeleton is NULL */
 } MVModelEntry;
 
 extern u16* structure_pal_adrs_nowinter[];
@@ -223,6 +224,53 @@ extern cKF_Animation_R_c cKF_ba_r_obj_clock_museum1;
 extern cKF_Animation_R_c cKF_ba_r_obj_clock_tailor;
 extern cKF_Animation_R_c cKF_ba_r_obj_museum5_hasu;
 
+extern Gfx obj_s_museum_t1_model[];
+extern Gfx obj_s_museum_t2_model[];
+extern Gfx obj_s_museum_t3T_model[];
+extern Gfx obj_s_museum_windowT_model[];
+extern Gfx obj_w_museum_t1_model[];
+extern Gfx obj_w_museum_t2_model[];
+extern Gfx obj_w_museum_t3T_model[];
+extern Gfx obj_w_museum_windowT_model[];
+extern Gfx obj_s_kouban_model[];
+extern Gfx obj_w_kouban_model[];
+extern Gfx dump_s_DL_model[];
+extern Gfx dump_w_DL_model[];
+extern Gfx obj_s_tent_model[];
+extern Gfx kamakura_DL_model[];
+extern Gfx obj_e_yatai_l_model[];
+extern Gfx obj_e_yatai_r_model[];
+extern Gfx obj_e_mikuji_model[];
+extern Gfx obj_s_shrine_bubble_model[];
+extern Gfx obj_s_shrine_trunk_model[];
+extern Gfx obj_s_shrine_leaf_model[];
+extern Gfx obj_s_shrine_figure_model[];
+extern Gfx obj_s_shrine_base_model[];
+extern Gfx obj_s_shrine_statue_model[];
+extern Gfx obj_s_shrine_water_model[];
+extern Gfx obj_s_shrine_sprash_model[];
+extern Gfx obj_w_shrine_bubble_model[];
+extern Gfx obj_w_shrine_trunk_model[];
+extern Gfx obj_w_shrine_leaf_model[];
+extern Gfx obj_w_shrine_figure_model[];
+extern Gfx obj_w_shrine_base_model[];
+extern Gfx obj_w_shrine_statue_model[];
+extern Gfx obj_w_shrine_water_model[];
+extern Gfx obj_w_shrine_sprash_model[];
+
+static Gfx* mv_dl_museum_s[] = { obj_s_museum_t1_model, obj_s_museum_t2_model, obj_s_museum_t3T_model, obj_s_museum_windowT_model, NULL };
+static Gfx* mv_dl_museum_w[] = { obj_w_museum_t1_model, obj_w_museum_t2_model, obj_w_museum_t3T_model, obj_w_museum_windowT_model, NULL };
+static Gfx* mv_dl_kouban_s[] = { obj_s_kouban_model, NULL };
+static Gfx* mv_dl_kouban_w[] = { obj_w_kouban_model, NULL };
+static Gfx* mv_dl_dump_s[] = { dump_s_DL_model, NULL };
+static Gfx* mv_dl_dump_w[] = { dump_w_DL_model, NULL };
+static Gfx* mv_dl_tent[] = { obj_s_tent_model, NULL };
+static Gfx* mv_dl_kamakura[] = { kamakura_DL_model, NULL };
+static Gfx* mv_dl_yatai[] = { obj_e_yatai_l_model, obj_e_yatai_r_model, NULL };
+static Gfx* mv_dl_mikuji[] = { obj_e_mikuji_model, NULL };
+static Gfx* mv_dl_shrine_s[] = { obj_s_shrine_bubble_model, obj_s_shrine_trunk_model, obj_s_shrine_leaf_model, obj_s_shrine_figure_model, obj_s_shrine_base_model, obj_s_shrine_statue_model, obj_s_shrine_water_model, obj_s_shrine_sprash_model, NULL };
+static Gfx* mv_dl_shrine_w[] = { obj_w_shrine_bubble_model, obj_w_shrine_trunk_model, obj_w_shrine_leaf_model, obj_w_shrine_figure_model, obj_w_shrine_base_model, obj_w_shrine_statue_model, obj_w_shrine_water_model, obj_w_shrine_sprash_model, NULL };
+
 static const MVModelEntry s_model_table[] = {
     { "Shop 1 (Summer)",        &cKF_bs_r_obj_s_shop1,   &cKF_ba_r_obj_s_shop1,   aSTR_PAL_SHOP1, 0 },
     { "Shop 1 (Winter)",        &cKF_bs_r_obj_w_shop1,   &cKF_ba_r_obj_w_shop1,   aSTR_PAL_SHOP1, 1 },
@@ -310,6 +358,19 @@ static const MVModelEntry s_model_table[] = {
     { "Clock (Tailor)",         &cKF_bs_r_obj_clock_tailor, &cKF_ba_r_obj_clock_tailor, aSTR_PAL_TAILOR, 0 },
 
     { "Museum Lily Pad",        &cKF_bs_r_obj_museum5_hasu, &cKF_ba_r_obj_museum5_hasu, aSTR_PAL_MUSEUM, 0 },
+    /* static (non-skeletal) buildings: indices 76+ */
+    { "Museum (Summer)",        NULL, NULL, aSTR_PAL_MUSEUM, 0, mv_dl_museum_s },
+    { "Museum (Winter)",        NULL, NULL, aSTR_PAL_MUSEUM, 1, mv_dl_museum_w },
+    { "Police Box (Summer)",    NULL, NULL, aSTR_PAL_POLICE_BOX, 0, mv_dl_kouban_s },
+    { "Police Box (Winter)",    NULL, NULL, aSTR_PAL_POLICE_BOX, 1, mv_dl_kouban_w },
+    { "Dump (Summer)",          NULL, NULL, aSTR_PAL_DUMP, 0, mv_dl_dump_s },
+    { "Dump (Winter)",          NULL, NULL, aSTR_PAL_DUMP, 1, mv_dl_dump_w },
+    { "Tent",                   NULL, NULL, -1, 0, mv_dl_tent },
+    { "Igloo (Kamakura)",       NULL, NULL, aSTR_PAL_KAMAKURA, 1, mv_dl_kamakura },
+    { "Food Stall (Yatai)",     NULL, NULL, aSTR_PAL_YATAI, 0, mv_dl_yatai },
+    { "Fortune Stall (Mikuji)", NULL, NULL, aSTR_PAL_MIKUJI, 0, mv_dl_mikuji },
+    { "Shrine (Summer)",        NULL, NULL, aSTR_PAL_SHRINE, 0, mv_dl_shrine_s },
+    { "Shrine (Winter)",        NULL, NULL, aSTR_PAL_SHRINE, 1, mv_dl_shrine_w },
 };
 
 #define STRUCTURE_COUNT (int)(sizeof(s_model_table) / sizeof(s_model_table[0]))
@@ -452,6 +513,7 @@ static void mv_setup_model(GAME_MODEL_VIEWER* mv) {
     switch (cat) {
         case MV_CAT_STRUCTURES: {
             const MVModelEntry* entry = &s_model_table[idx];
+            if (entry->skeleton == NULL) break;
             cKF_SkeletonInfo_R_ct(&mv->skeleton_info, entry->skeleton, NULL,
                                   mv->joint_work, mv->joint_target);
             cKF_SkeletonInfo_R_init_standard_stop(&mv->skeleton_info, entry->animation, NULL);
@@ -762,6 +824,20 @@ static void mv_draw_structures(GAME_MODEL_VIEWER* mv) {
         gDPLoadTLUT_Dolphin(NOW_POLY_OPA_DISP++, 15, 16, 1, pal);
     }
     CLOSE_DISP(g);
+
+    if (s_model_table[idx].dls != NULL) {
+        Gfx** d;
+        Matrix_push();
+        Matrix_translate(0.0f, 0.0f, 0.0f, 0);
+        OPEN_DISP(g);
+        gSPMatrix(NOW_POLY_OPA_DISP++, _Matrix_to_Mtx_new(g), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        for (d = s_model_table[idx].dls; *d != NULL; d++) {
+            gSPDisplayList(NOW_POLY_OPA_DISP++, *d);
+        }
+        CLOSE_DISP(g);
+        Matrix_pull();
+        return;
+    }
 
     /* Draw skeleton */
     {
