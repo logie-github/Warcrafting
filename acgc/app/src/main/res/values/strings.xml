@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Animal Crossing</string>
+    <string name="app_name">Warcrafting</string>
     <string name="tagline">Native GameCube port · bring your own game data</string>
     <string name="play">Play</string>
     <string name="play_ready">Ready to play</string>

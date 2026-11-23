@@ -772,7 +772,7 @@ static void aAL_pc_logo_draw(GAME* game, ANIMAL_LOGO_ACTOR* actor) {
   extern double atof(const char*);
   static int inited = 0;
   GRAPH* graph = game->graph;
-  float cx = 1000.0f, cy = 640.0f, w = 1500.0f;
+  float cx = -60.0f, cy = 790.0f, w = 3400.0f;
   const char* e;
   if (!inited) {
     inited = 1;
@@ -845,7 +845,7 @@ static void aAL_title_draw(GAME* game, ANIMAL_LOGO_ACTOR* actor) {
       aAL_skl_draw(game, &actor->animal.skeleton);
       aAL_skl_draw(game, &actor->cros.skeleton);
     }
-    aAL_skl_draw(game, &actor->sing.skeleton);
+    if (getenv("AC_ORIG_LOGO") != NULL) aAL_skl_draw(game, &actor->sing.skeleton);
   }
 #else
   aAL_skl_draw(game, &actor->animal.skeleton);
@@ -922,6 +922,9 @@ static void aAL_pc_menu_draw(ANIMAL_LOGO_ACTOR* actor, GAME* game) {
 #endif
 
 static int aAL_draw_log_counter = 0;
+#ifdef TARGET_PC
+extern char* getenv(const char*);
+#endif
 static void aAL_actor_draw(ACTOR* actor, GAME* game) {
   ANIMAL_LOGO_ACTOR* logo_actor = (ANIMAL_LOGO_ACTOR*)actor;
   GRAPH* graph = game->graph;
@@ -949,7 +952,11 @@ static void aAL_actor_draw(ACTOR* actor, GAME* game) {
 
   mFont_SetMatrix(graph, mFont_MODE_FONT);
 
-  if (logo_actor->action >= aAL_ACTION_BACK_FADE_IN) {
+  if (logo_actor->action >= aAL_ACTION_BACK_FADE_IN
+#ifdef TARGET_PC
+      && getenv("AC_ORIG_LOGO") != NULL
+#endif
+  ) {
     aAL_back_draw(graph, logo_actor);
   }
 
@@ -957,6 +964,9 @@ static void aAL_actor_draw(ACTOR* actor, GAME* game) {
 
   if (logo_actor->action >= aAL_ACTION_START_KEY_CHK_START) {
     aAL_copyright_draw(logo_actor, graph);
+#ifdef TARGET_PC
+    if (getenv("AC_ORIG_LOGO") != NULL)
+#endif
     aAL_tm_draw(graph);
   }
 

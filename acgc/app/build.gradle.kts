@@ -59,11 +59,11 @@ android {
     ndkVersion = "27.0.12077973"
 
     defaultConfig {
-        applicationId = "com.acpc.port"
+        applicationId = "com.logie.warcrafting"
         minSdk = 26
         targetSdk = 34
-        versionCode = 5
-        versionName = "0.5.0"
+        versionCode = (System.getenv("WARCRAFTING_VERSION_CODE") ?: "5").toInt()
+        versionName = System.getenv("WARCRAFTING_VERSION_NAME") ?: "0.5.0-warcrafting"
         ndk {
             // armeabi-v7a: the original 32-bit port. arm64-v8a: for devices without
             // 32-bit support; built from the same sources with the 64-bit code paths

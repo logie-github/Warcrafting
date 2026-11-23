@@ -97,8 +97,55 @@ public class GameActivity extends SDLActivity {
         };
         for (File d : dirs) if (!d.exists()) d.mkdirs();
 
+        installMod(dir);
         copyAssetIfNeeded("shaders/default.vert", new File(dir, "shaders/default.vert"));
         copyAssetIfNeeded("shaders/default.frag", new File(dir, "shaders/default.frag"));
+    }
+
+    /** Mod texture pack bundled in the APK (assets/mod). Re-extracted when the app version or the town changes. */
+    private void installMod(File filesDir) {
+        try {
+            String town = getSharedPreferences("warcrafting", MODE_PRIVATE).getString("town", "alliance");
+            if (!"horde".equals(town)) town = "alliance";
+            String version;
+            try {
+                version = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            } catch (Exception e) {
+                version = "0";
+            }
+            String stamp = version + "|" + town;
+            File packDir = new File(filesDir, "texture_pack");
+            File marker = new File(packDir, ".warcrafting_mod");
+            if (marker.exists()) {
+                try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.FileReader(marker))) {
+                    if (stamp.equals(r.readLine())) return;
+                }
+            }
+            // drop the previous town's files, then copy this town's pack plus the common files
+            File[] old = packDir.listFiles();
+            if (old != null) {
+                for (File f : old) {
+                    if (f.getName().startsWith("tex1_") && f.getName().endsWith(".dds")) f.delete();
+                }
+            }
+            for (String sub : new String[] { town, "common" }) {
+                String[] names = getAssets().list("mod/" + sub);
+                if (names == null) continue;
+                for (String n : names) {
+                    File out = new File(packDir, n);
+                    try (InputStream in = getAssets().open("mod/" + sub + "/" + n);
+                         OutputStream os = new FileOutputStream(out)) {
+                        byte[] buf = new byte[1 << 16];
+                        int c;
+                        while ((c = in.read(buf)) > 0) os.write(buf, 0, c);
+                    }
+                }
+            }
+            try (java.io.FileWriter w = new java.io.FileWriter(marker)) {
+                w.write(stamp + "\n");
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     private void copyAssetIfNeeded(String asset, File target) {
