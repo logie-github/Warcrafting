@@ -17,7 +17,7 @@ import mdx_render as M
 import render_player_candidates as RP
 from make_peon_mesh import chunks
 
-TARGET_HEIGHT = 7900.0 * 2.0 / 3.0       # game model units; 2/3 of the first version
+TARGET_HEIGHT = 7900.0 * 4.0 / 3.0       # game model units; 2x the 2/3 version
 FRAMES = {'stand': 6, 'walk': 8, 'act': 8}
 SEQ = {'stand': ['Stand'], 'walk': ['Walk'],
        'act': ['Attack', 'Attack - 1', 'Spell Attack', 'Spell']}

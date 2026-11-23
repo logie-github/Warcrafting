@@ -3808,4 +3808,4 @@ const u16* pc_wc3_map[6] = { pc_wc3_0_map, pc_wc3_1_map, pc_wc3_2_map, pc_wc3_3_
 int pc_wc3_nverts[6] = { sizeof(pc_wc3_0_map) / sizeof(pc_wc3_0_map[0]), sizeof(pc_wc3_1_map) / sizeof(pc_wc3_1_map[0]), sizeof(pc_wc3_2_map) / sizeof(pc_wc3_2_map[0]), sizeof(pc_wc3_3_map) / sizeof(pc_wc3_3_map[0]), sizeof(pc_wc3_4_map) / sizeof(pc_wc3_4_map[0]), sizeof(pc_wc3_5_map) / sizeof(pc_wc3_5_map[0]) };
 const s16* pc_wc3_frames[6][3] = { { pc_wc3_0_f0, pc_wc3_0_f1, pc_wc3_0_f2 }, { pc_wc3_1_f0, pc_wc3_1_f1, pc_wc3_1_f2 }, { pc_wc3_2_f0, pc_wc3_2_f1, pc_wc3_2_f2 }, { pc_wc3_3_f0, pc_wc3_3_f1, pc_wc3_3_f2 }, { pc_wc3_4_f0, pc_wc3_4_f1, pc_wc3_4_f2 }, { pc_wc3_5_f0, pc_wc3_5_f1, pc_wc3_5_f2 } };
 int pc_wc3_nframes[3] = { 6, 8, 8 };
-float pc_wc3_scale[6] = { 56.82f, 61.86f, 40.02f, 47.31f, 34.59f, 26.51f };
+float pc_wc3_scale[6] = { 113.64f, 123.72f, 80.04f, 94.62f, 69.18f, 53.02f };
