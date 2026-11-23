@@ -1,3 +1,4 @@
+#include <stdlib.h>
 /* pc_audio.c - SDL2 audio backend with dedicated producer thread.
  *
  * Architecture (matches GC):
@@ -93,6 +94,11 @@ static void pc_audio_callback(void* userdata, Uint8* stream, int len) {
         memset(&out[copy], 0, (total_samples - copy) * sizeof(s16));
     }
 
+    {
+        extern void pc_music_mix(short* out, int n_samples);
+        pc_music_mix(out, total_samples);
+    }
+
     SDL_MemoryBarrierRelease();
     SDL_AtomicSet(&ring_read_pos, (int)(rp + copy));
 }
@@ -112,6 +118,11 @@ void AIInit(u8* stack) {
     want.callback = pc_audio_callback;
 
     audio_device = SDL_OpenAudioDevice(NULL, 0, &want, &have, 0);
+    {
+        extern int pc_music_override_start(unsigned char id);
+        const char* t = getenv("AC_MUSIC_TEST");
+        if (t) pc_music_override_start((unsigned char)atoi(t));
+    }
     if (audio_device != 0) {
         printf("[AUDIO] Opened: freq=%d fmt=0x%04X ch=%d samples=%d (requested: freq=%d)\n",
                have.freq, have.format, have.channels, have.samples, want.freq);

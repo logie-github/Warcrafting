@@ -46,6 +46,14 @@ def main(root, assets):
     for sub in ('mod/logo', 'mod/players'):
         for fn in convert_dir(os.path.join(root, sub), os.path.join(out, 'common')):
             manifest.append(f'common/{fn}')
+    mdir = os.path.join(root, 'mod/music')
+    if os.path.isdir(mdir):
+        os.makedirs(os.path.join(out, 'music'), exist_ok=True)
+        for fn in sorted(os.listdir(mdir)):
+            if fn.lower().endswith('.ogg'):
+                with open(os.path.join(mdir, fn), 'rb') as a, open(os.path.join(out, 'music', fn), 'wb') as b:
+                    b.write(a.read())
+                manifest.append(f'music/{fn}')
     with open(os.path.join(out, 'manifest.txt'), 'w') as f:
         f.write('\n'.join(manifest) + '\n')
     print(len(manifest), 'files')

@@ -41,6 +41,7 @@ public class GameActivity extends SDLActivity {
             android.system.Os.setenv("AC_PLAYER_MODEL", String.valueOf(Math.max(0, Math.min(3, ch))), true);
             String town = getSharedPreferences("warcrafting", MODE_PRIVATE).getString("town", "alliance");
             android.system.Os.setenv("AC_TOWN", "horde".equals(town) ? "horde" : "alliance", true);
+            android.system.Os.setenv("AC_MUSIC", "horde".equals(town) ? "orgrimmar" : "off", true);
         } catch (Exception ignored) {
         }
         super.onCreate(savedInstanceState);
@@ -141,6 +142,21 @@ public class GameActivity extends SDLActivity {
                 for (String n : names) {
                     File out = new File(packDir, n);
                     try (InputStream in = getAssets().open("mod/" + sub + "/" + n);
+                         OutputStream os = new FileOutputStream(out)) {
+                        byte[] buf = new byte[1 << 16];
+                        int c;
+                        while ((c = in.read(buf)) > 0) os.write(buf, 0, c);
+                    }
+                }
+            }
+            // replacement town music (OGG) next to the working directory: music/
+            String[] tracks = getAssets().list("mod/music");
+            if (tracks != null && tracks.length > 0) {
+                File musicDir = new File(filesDir, "music");
+                musicDir.mkdirs();
+                for (String n : tracks) {
+                    File out = new File(musicDir, n);
+                    try (InputStream in = getAssets().open("mod/music/" + n);
                          OutputStream os = new FileOutputStream(out)) {
                         byte[] buf = new byte[1 << 16];
                         int c;

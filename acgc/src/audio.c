@@ -47,11 +47,22 @@ extern void sAdo_GameFrame() {
     /* pc_audio_process_frame() now runs on dedicated audio producer thread */
 }
 
+#ifdef TARGET_PC
+extern int pc_music_override_start(unsigned char id);
+extern void pc_music_override_stop(void);
+#endif
+
 extern void sAdo_BgmStart(u8 id) {
+#ifdef TARGET_PC
+    if (pc_music_override_start(id)) return;
+#endif
     Na_BgmStart(id);
 }
 
 extern void sAdo_BgmStop(u16 id) {
+#ifdef TARGET_PC
+    pc_music_override_stop();
+#endif
     Na_BgmStop(id);
 }
 extern void sAdo_SysTrgStart(u16 id) {
@@ -231,6 +242,9 @@ extern void sAdo_BGMVolume(f32 volume, u16 vol_move_ctr) {
 }
 
 extern void sAdo_BgmCrossfadeStart(u8 b) {
+#ifdef TARGET_PC
+    if (pc_music_override_start(b)) return;
+#endif
     Na_BgmCrossfadeStart(b);
 }
 

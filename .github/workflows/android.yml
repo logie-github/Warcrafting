@@ -86,7 +86,8 @@ jobs:
             rm -rf stage && mkdir -p stage/texture_pack
             cp acgc/app/src/main/assets/mod/$town/*.dds stage/texture_pack/
             cp acgc/app/src/main/assets/mod/common/*.dds stage/texture_pack/
-            (cd stage && zip -qr "../dist/Warcrafting-mod-$town.zip" texture_pack)
+            if [ "$town" = horde ]; then mkdir -p stage/music && cp acgc/app/src/main/assets/mod/music/*.ogg stage/music/; fi
+            (cd stage && zip -qr "../dist/Warcrafting-mod-$town.zip" .)
           done
           ls -la dist
 
