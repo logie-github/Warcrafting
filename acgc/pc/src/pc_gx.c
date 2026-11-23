@@ -700,9 +700,32 @@ int pc_gx_draw_call_count = 0;
 /* Draws the deferred run. Must run before any GL call that bypasses the
  * dirty system (viewport, scissor, readpixels, raw texture binds, swap)
  * so the run renders with the state it was built under. */
+/* AC_BBOX_FILE: accumulate the world-space bounding box of everything drawn and write it at exit
+ * (used to measure building footprints in the model viewer). */
+float g_pc_bbox_min[3] = { 1e30f, 1e30f, 1e30f };
+float g_pc_bbox_max[3] = { -1e30f, -1e30f, -1e30f };
+int g_pc_bbox_on = -1;
+static void pc_bbox_accumulate(const PCGXVertex* v, int count) {
+    const float* m = (const float*)g_gx.pos_mtx[g_gx.current_mtx];
+    for (int i = 0; i < count; i++) {
+        float x = v[i].position[0], y = v[i].position[1], z = v[i].position[2];
+        float wx = m[0] * x + m[1] * y + m[2] * z + m[3];
+        float wy = m[4] * x + m[5] * y + m[6] * z + m[7];
+        float wz = m[8] * x + m[9] * y + m[10] * z + m[11];
+        if (wx < g_pc_bbox_min[0]) g_pc_bbox_min[0] = wx;
+        if (wy < g_pc_bbox_min[1]) g_pc_bbox_min[1] = wy;
+        if (wz < g_pc_bbox_min[2]) g_pc_bbox_min[2] = wz;
+        if (wx > g_pc_bbox_max[0]) g_pc_bbox_max[0] = wx;
+        if (wy > g_pc_bbox_max[1]) g_pc_bbox_max[1] = wy;
+        if (wz > g_pc_bbox_max[2]) g_pc_bbox_max[2] = wz;
+    }
+}
+
 void pc_gx_draw_pending(void) {
     int count = g_gx.pending_verts;
     if (count == 0) return;
+    if (g_pc_bbox_on < 0) g_pc_bbox_on = (getenv("AC_BBOX_FILE") != NULL);
+    if (g_pc_bbox_on) pc_bbox_accumulate(g_gx.vertex_buffer, count);
 
     glBindVertexArray(g_gx.vao);
     glBindBuffer(GL_ARRAY_BUFFER, g_gx.vbo);
@@ -2415,3 +2438,13 @@ void GXReadXfRasMetric(u32* xf_wait_in, u32* xf_wait_out, u32* ras_busy, u32* cl
 /* --- Verify --- */
 void GXSetVerifyLevel(u32 level) { (void)level; }
 void* GXSetVerifyCallback(void* cb) { return NULL; }
+
+void pc_bbox_write(void) {
+    const char* path = getenv("AC_BBOX_FILE");
+    if (!path || g_pc_bbox_min[0] > g_pc_bbox_max[0]) return;
+    FILE* f = fopen(path, "w");
+    if (!f) return;
+    fprintf(f, "%f %f %f %f %f %f\n", g_pc_bbox_min[0], g_pc_bbox_min[1], g_pc_bbox_min[2],
+            g_pc_bbox_max[0], g_pc_bbox_max[1], g_pc_bbox_max[2]);
+    fclose(f);
+}

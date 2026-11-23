@@ -514,7 +514,7 @@ static void mv_spin_capture(GAME_MODEL_VIEWER* mv) {
     if (tick < 45) return;
     if (((tick - 45) % 4) == 0) {
         step++;
-        if (step >= n) _exit(0);
+        if (step >= n) { extern void pc_bbox_write(void); pc_bbox_write(); _exit(0); }
         mv->cam_angle_y = base + (float)step * 6.2831853f / (float)n;
         snprintf(g_pc_dump_request_path, sizeof(g_pc_dump_request_path), "%s/%02d.ppm", dir, step);
         g_pc_dump_request = 2; /* dump after the next swap-bound frame has been drawn with the new angle */
