@@ -5,6 +5,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -19,6 +21,19 @@ public class TouchControlsView extends View {
     static final int TRIG_Z = 1 << 4, TRIG_R = 1 << 5, TRIG_L = 1 << 6;
     static final int BTN_A = 1 << 8, BTN_B = 1 << 9, BTN_X = 1 << 10, BTN_Y = 1 << 11, BTN_START = 1 << 12;
     static final int STICK_MAX = 100;
+    /** Gesture controls (no on-screen buttons): swipe = D-stick direction, tap = A, hold = B, pinch = C-stick. */
+    static final boolean GESTURES = true;
+    private static final long HOLD_MS = 350, TAP_PULSE_MS = 90, PINCH_IDLE_MS = 140;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private int gPointer = -1, gStickX, gStickY, gC, gButtons;
+    private float gStartX, gStartY, gPinchLast;
+    private long gDownTime;
+    private boolean gMoved, gHeld, gPinch, gIgnore;
+    private final Runnable holdRun = () -> {
+        if (gPointer >= 0 && !gMoved && !gPinch) { gHeld = true; gButtons |= BTN_B; pushGesture(); }
+    };
+    private final Runnable pulseRelease = () -> { gButtons &= ~BTN_A; pushGesture(); };
+    private final Runnable pinchIdle = () -> { gC = 0; pushGesture(); };
 
     private static class Button {
         final int mask;
@@ -125,6 +140,7 @@ public class TouchControlsView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
+        if (GESTURES) return gestureTouch(e);
         int action = e.getActionMasked();
         int idx = e.getActionIndex();
         int id = e.getPointerId(idx);
@@ -181,6 +197,84 @@ public class TouchControlsView extends View {
         return true;
     }
 
+    private boolean gestureTouch(MotionEvent e) {
+        int action = e.getActionMasked();
+        float slop = 24f * getResources().getDisplayMetrics().density;
+        switch (action) {
+            case MotionEvent.ACTION_DOWN:
+                gPointer = e.getPointerId(0);
+                gStartX = e.getX(); gStartY = e.getY();
+                gDownTime = e.getEventTime();
+                gMoved = gHeld = gPinch = gIgnore = false;
+                gStickX = gStickY = 0;
+                handler.removeCallbacks(holdRun);
+                handler.postDelayed(holdRun, HOLD_MS);
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                if (e.getPointerCount() >= 2) {
+                    handler.removeCallbacks(holdRun);
+                    gPinch = true;
+                    gStickX = gStickY = 0;
+                    gButtons &= ~BTN_B;
+                    gPinchLast = dist(e.getX(0), e.getY(0), e.getX(1), e.getY(1));
+                    pushGesture();
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                if (gPinch && e.getPointerCount() >= 2) {
+                    float d = dist(e.getX(0), e.getY(0), e.getX(1), e.getY(1));
+                    float delta = d - gPinchLast;
+                    if (Math.abs(delta) > 3f * getResources().getDisplayMetrics().density) {
+                        gC = delta > 0 ? STICK_MAX : -STICK_MAX;   // fingers apart = C-stick up, together = down
+                        gPinchLast = d;
+                        handler.removeCallbacks(pinchIdle);
+                        handler.postDelayed(pinchIdle, PINCH_IDLE_MS);
+                        pushGesture();
+                    }
+                } else if (!gPinch && !gIgnore) {
+                    float dx = e.getX() - gStartX, dy = e.getY() - gStartY;
+                    if (!gMoved && dist(e.getX(), e.getY(), gStartX, gStartY) > slop) {
+                        gMoved = true;
+                        handler.removeCallbacks(holdRun);
+                        if (gHeld) { gHeld = false; gButtons &= ~BTN_B; }
+                    }
+                    if (gMoved) {
+                        int nx = 0, ny = 0;
+                        if (Math.abs(dx) >= Math.abs(dy)) nx = dx > 0 ? STICK_MAX : -STICK_MAX;
+                        else ny = dy > 0 ? -STICK_MAX : STICK_MAX;   // screen up = stick up
+                        if (nx != gStickX || ny != gStickY) { gStickX = nx; gStickY = ny; pushGesture(); }
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                handler.removeCallbacks(holdRun);
+                boolean tap = action == MotionEvent.ACTION_UP && !gMoved && !gHeld && !gPinch
+                        && e.getEventTime() - gDownTime < HOLD_MS;
+                gStickX = gStickY = 0;
+                gButtons &= ~BTN_B;
+                if (gPinch) { handler.removeCallbacks(pinchIdle); gC = 0; }
+                gPointer = -1; gHeld = gMoved = gPinch = false;
+                if (tap) {
+                    gButtons |= BTN_A;
+                    handler.removeCallbacks(pulseRelease);
+                    handler.postDelayed(pulseRelease, TAP_PULSE_MS);
+                }
+                pushGesture();
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
+    private void pushGesture() {
+        if (gButtons != lastButtons || gStickX != lastSx || gStickY != lastSy || gC != lastCy || lastCx != 0) {
+            lastButtons = gButtons; lastSx = gStickX; lastSy = gStickY; lastCx = 0; lastCy = gC;
+            GameActivity.nativeTouchPad(gButtons, gStickX, gStickY, 0, gC);
+        }
+    }
+
     private static float dist(float x0, float y0, float x1, float y1) {
         float dx = x0 - x1, dy = y0 - y1;
         return (float) Math.sqrt(dx * dx + dy * dy);
@@ -231,6 +325,7 @@ public class TouchControlsView extends View {
 
     @Override
     protected void onDraw(Canvas c) {
+        if (GESTURES) return;
         // main stick
         fill.setStyle(Paint.Style.FILL);
         fill.setColor(0x33FFFFFF);

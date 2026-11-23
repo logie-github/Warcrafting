@@ -79,7 +79,12 @@ static int pc_wc3_seq_for_player(int idx) {
     }
 }
 
+static void pc_wc3_draw_drop(GAME* game, int k, int seq, int frame_counter, float drop);
 static void pc_wc3_draw(GAME* game, int k, int seq, int frame_counter) {
+    pc_wc3_draw_drop(game, k, seq, frame_counter, 0.0f);
+}
+
+static void pc_wc3_draw_drop(GAME* game, int k, int seq, int frame_counter, float drop) {
     GRAPH* graph = game->graph;
     int nv = pc_wc3_nverts[k];
     int nf = pc_wc3_nframes[seq];
@@ -97,12 +102,90 @@ static void pc_wc3_draw(GAME* game, int k, int seq, int frame_counter) {
     }
     if ((e = getenv("AC_WC3_SCALE"))) sc *= (float)atof(e);
     Matrix_push();
+    if (drop != 0.0f) Matrix_translate(0.0f, -drop, 0.0f, MTX_MULT);
     Matrix_scale(sc, sc, sc, MTX_MULT);
     OPEN_POLY_OPA_DISP(graph);
     gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gSPDisplayList(POLY_OPA_DISP++, pc_wc3_dls[k]);
     CLOSE_POLY_OPA_DISP(graph);
     Matrix_pull();
+}
+
+/* NPC replacement: 0 Nook, 1 Rover.  Horde: Thrall / Grom.  Alliance: Arthas / Jaina. */
+static int pc_wc3_npc_model(int id) {
+    int nook = (id == SP_NPC_SHOP_MASTER || id == SP_NPC_CONV_MASTER || id == SP_NPC_SUPER_MASTER ||
+                id == SP_NPC_DEPART_MASTER || id == SP_NPC_SHOP_MASTERSP || id == SP_NPC_SHOP_MASTERSP_2 ||
+                id == SP_NPC_SHOP_MASTERSP_3 || id == SP_NPC_SHOP_MASTERSP_4);
+    int rover = (id == SP_NPC_GUIDE || id == SP_NPC_GUIDE2 || id == SP_NPC_RCN_GUIDE || id == SP_NPC_RCN_GUIDE2 ||
+                 id == SP_NPC_RCN_GUIDE_1 || id == SP_NPC_RCN_GUIDE2_1 || id == SP_NPC_RCN_GUIDE_2 ||
+                 id == SP_NPC_RCN_GUIDE2_2 || id == SP_NPC_RCN_GUIDE_3 || id == SP_NPC_RCN_GUIDE2_3);
+    if (nook) return pc_wc3_horde() ? 4 : 6;
+    if (rover) return pc_wc3_horde() ? 5 : 7;
+    return -1;
+}
+
+/* Maps the Animal Crossing animation being played to a baked Warcraft animation.  Regular movement uses Walk,
+ * idling and talking use Stand, the special animations (train, doors, bugs, fishing, mail, dancing, ...) use the
+ * Warcraft action animation, and sitting lowers the model onto the seat. */
+enum { PC_NPC_STAND = 0, PC_NPC_WALK = 1, PC_NPC_ACT = 2, PC_NPC_SIT_DOWN = 3, PC_NPC_SIT = 4, PC_NPC_STAND_UP = 5 };
+
+static int pc_wc3_npc_anim_class(int a) {
+    switch (a) {
+        case aNPC_ANIM_RUN1: case aNPC_ANIM_WALK1: case aNPC_ANIM_WALK_KI1: case aNPC_ANIM_WALK_DO1:
+        case aNPC_ANIM_WALK_AI1: case aNPC_ANIM_CRACKER_RUN1:
+            return PC_NPC_WALK;
+        case aNPC_ANIM_SITDOWN_D1:
+            return PC_NPC_SIT_DOWN;
+        case aNPC_ANIM_SITDOWN_WAIT_D1: case aNPC_ANIM_SITDOWN_WAIT1: case aNPC_ANIM_SITDOWN_DRINK1:
+        case aNPC_ANIM_SITDOWN_CLAP1:
+            return PC_NPC_SIT;
+        case aNPC_ANIM_STANDUP_D1:
+            return PC_NPC_STAND_UP;
+        case aNPC_ANIM_OPEN1: case aNPC_ANIM_OPEN_D1: case aNPC_ANIM_OPEN_D2: case aNPC_ANIM_GO_OUT1:
+        case aNPC_ANIM_TO_DECK_D1: case aNPC_ANIM_UMB_OPEN1: case aNPC_ANIM_UMB_CLOSE1: case aNPC_ANIM_TRANSFER1:
+        case aNPC_ANIM_GET1: case aNPC_ANIM_GET_PULL1: case aNPC_ANIM_GET_PUTAWAY1: case aNPC_ANIM_GET_EAT1:
+        case aNPC_ANIM_GET_CHANGE1: case aNPC_ANIM_GET_RETURN1: case aNPC_ANIM_CONTRACT1: case aNPC_ANIM_CONTRACT2:
+        case aNPC_ANIM_CONTRACT3: case aNPC_ANIM_NOT_CONTRACT1: case aNPC_ANIM_DELIVERY1: case aNPC_ANIM_KEITAI_ON1:
+        case aNPC_ANIM_KEITAI_TALK1: case aNPC_ANIM_KEITAI_TALK2: case aNPC_ANIM_KEITAI_OFF1: case aNPC_ANIM_ENSOU_E1:
+        case aNPC_ANIM_BANZAI1: case aNPC_ANIM_CLAP1: case aNPC_ANIM_KOKKURI_D1: case aNPC_ANIM_KOKKURI_D2:
+        case aNPC_ANIM_SAISEN1: case aNPC_ANIM_OMAIRI1: case aNPC_ANIM_DANCE1: case aNPC_ANIM_KUISINBO1:
+        case aNPC_ANIM_SANBASI1: case aNPC_ANIM_TAISOU1: case aNPC_ANIM_TAISOU2: case aNPC_ANIM_TAISOU3_A:
+        case aNPC_ANIM_TAISOU3_B: case aNPC_ANIM_TAISOU4_A: case aNPC_ANIM_TAISOU4_B: case aNPC_ANIM_TAISOU5_A:
+        case aNPC_ANIM_TAISOU5_B: case aNPC_ANIM_TAISOU6_A: case aNPC_ANIM_TAISOU6_B: case aNPC_ANIM_TAISOU7:
+        case aNPC_ANIM_CRACKER_FIRE1: case aNPC_ANIM_CRACKER_COUNT1: case aNPC_ANIM_WARMUP1: case aNPC_ANIM_READY1:
+        case aNPC_ANIM_KOKERU1: case aNPC_ANIM_KOKERU_GETUP1: case aNPC_ANIM_TAMAKOME1: case aNPC_ANIM_YOUI1:
+        case aNPC_ANIM_DON1: case aNPC_ANIM_TUNAHIKI_AIKO1: case aNPC_ANIM_TUNAHIKI_YURI1:
+        case aNPC_ANIM_TUNAHIKI_FURI1: case aNPC_ANIM_HATAFURI1: case aNPC_ANIM_TAMAHIROI1:
+        case aNPC_ANIM_TAMANAGE1: case aNPC_ANIM_SEND_MAIL1: case aNPC_ANIM_MISIN1: case aNPC_ANIM_WIPKOGU1:
+        case aNPC_ANIM_UMBRELLA1: case aNPC_ANIM_TUE1: case aNPC_ANIM_AISATU1: case aNPC_ANIM_AISATU2:
+        case aNPC_ANIM_AISATU3: case aNPC_ANIM_AISATU4: case aNPC_ANIM_GURATUKU1: case aNPC_ANIM_MOGAKU1:
+        case aNPC_ANIM_TIRED1: case aNPC_ANIM_APPEAR1: case aNPC_ANIM_INTRO1_A: case aNPC_ANIM_INTRO1_B:
+        case aNPC_ANIM_DERU1: case aNPC_ANIM_DERU2: case aNPC_ANIM_OTIRU1: case aNPC_ANIM_OTIRU2:
+        case aNPC_ANIM_FLY1: case aNPC_ANIM_FLYAWAY1: case aNPC_ANIM_LANDING1: case aNPC_ANIM_LANDING2:
+        case aNPC_ANIM_LANDING3:
+            return PC_NPC_ACT;
+        default:
+            return PC_NPC_STAND;
+    }
+}
+
+static void pc_wc3_npc_draw(GAME* game, int k, int anim_id, float cur, float end, float speed) {
+    int cls = pc_wc3_npc_anim_class(anim_id);
+    float seat = 0.28f * 7900.0f * 4.0f / 3.0f;
+    float drop = 0.0f;
+    int seq = PC_WC3_STAND;
+    float t = (end > 1.0f) ? (cur / end) : 1.0f;
+    if (t < 0.0f) t = 0.0f;
+    if (t > 1.0f) t = 1.0f;
+    switch (cls) {
+        case PC_NPC_WALK: seq = PC_WC3_WALK; break;
+        case PC_NPC_ACT: seq = PC_WC3_ACT; break;
+        case PC_NPC_SIT_DOWN: drop = seat * t; break;
+        case PC_NPC_SIT: drop = seat; break;
+        case PC_NPC_STAND_UP: drop = seat * (1.0f - t); break;
+        default: seq = (speed > 0.3f) ? PC_WC3_WALK : PC_WC3_STAND; break;
+    }
+    pc_wc3_draw_drop(game, k, seq, game->frame_counter, drop);
 }
 
 #endif

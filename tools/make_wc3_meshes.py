@@ -3,7 +3,7 @@
 
 usage: make_wc3_meshes.py <wc3 root> <out .c> <out texture dir>
 
-Models: 0 Peasant, 1 Peon, 2 Sorceress, 3 Dark Ranger (player options), 4 Thrall, 5 Grom Hellscream.
+Models: 0 Peasant, 1 Peon, 2 Sorceress, 3 Dark Ranger (player options), 4 Thrall, 5 Grom Hellscream, 6 Arthas (Alliance Nook), 7 Jaina (Alliance Rover).
 Output pc_wc3_meshes.c: per model a static triangle display list plus a Vtx array whose positions the
 game overwrites each frame from the baked pose tables (Stand 6 frames, Walk 8, Action 8).
 Skins ship as tex1_32x32_<hash>_0.dds replacing each model's placeholder I4 texture.
@@ -29,6 +29,8 @@ MODELS = [
     ('Dark Ranger', 'FrozenThrone/Units/Creeps/BansheeRanger/BansheeRanger.mdx', {2, 3, 4, 5, 6}, {0: {5, 6, 8, 10, 11}}, 'FrozenThrone'),
     ('Thrall', 'ReignOfChaos/Units/Orc/Thrall/Thrall.mdx', None, {}, 'ReignOfChaos'),
     ('Grom Hellscream', 'ReignOfChaos/Units/Orc/Hellscream/Hellscream.mdx', {3, 4, 5, 6}, {}, 'ReignOfChaos'),
+    ('Arthas', 'ReignOfChaos/Units/Human/Arthas/Arthas.mdx', {2}, {}, 'ReignOfChaos'),
+    ('Jaina', 'ReignOfChaos/Units/Human/Jaina/Jaina.mdx', set(), {1: {2}}, 'ReignOfChaos'),
 ]
 
 
