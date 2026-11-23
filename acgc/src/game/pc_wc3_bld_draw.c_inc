@@ -1,0 +1,71 @@
+/* Warcraft III buildings in place of the Alliance town's Animal Crossing buildings (PC/Android only).
+ * Called from cKF_Si3_draw_R_SV with the skeleton being drawn; when it is one of the building skeletons
+ * the positioned Warcraft mesh (tools/make_building_meshes.py) is drawn in the actor's current matrix. */
+#ifdef TARGET_PC
+extern Gfx* pc_bld_dls[];
+extern cKF_Skeleton_R_c cKF_bs_r_obj_s_shop1, cKF_bs_r_obj_w_shop1, cKF_bs_r_obj_s_shop2, cKF_bs_r_obj_w_shop2,
+    cKF_bs_r_obj_s_shop3, cKF_bs_r_obj_w_shop3, cKF_bs_r_obj_s_shop4, cKF_bs_r_obj_w_shop4, cKF_bs_r_obj_s_house1,
+    cKF_bs_r_obj_w_house1, cKF_bs_r_obj_s_house2, cKF_bs_r_obj_w_house2, cKF_bs_r_obj_s_house3, cKF_bs_r_obj_w_house3,
+    cKF_bs_r_obj_s_house4, cKF_bs_r_obj_w_house4, cKF_bs_r_obj_s_house5, cKF_bs_r_obj_w_house5, cKF_bs_r_obj_s_myhome1,
+    cKF_bs_r_obj_w_myhome1, cKF_bs_r_obj_s_myhome2, cKF_bs_r_obj_w_myhome2, cKF_bs_r_obj_s_myhome3,
+    cKF_bs_r_obj_w_myhome3, cKF_bs_r_obj_s_myhome4, cKF_bs_r_obj_w_myhome4, cKF_bs_r_obj_s_station1,
+    cKF_bs_r_obj_w_station1, cKF_bs_r_obj_s_station2, cKF_bs_r_obj_w_station2, cKF_bs_r_obj_s_station3,
+    cKF_bs_r_obj_w_station3, cKF_bs_r_obj_s_yubinkyoku, cKF_bs_r_obj_w_yubinkyoku, cKF_bs_r_obj_s_tailor,
+    cKF_bs_r_obj_w_tailor, cKF_bs_r_obj_s_yamishop, cKF_bs_r_obj_w_yamishop, cKF_bs_r_obj_s_uranai,
+    cKF_bs_r_obj_w_uranai, cKF_bs_r_obj_s_douzou, cKF_bs_r_obj_w_douzou, cKF_bs_r_obj_s_toudai, cKF_bs_r_obj_w_toudai;
+extern char* getenv(const char*);
+
+static int pc_bld_index(const cKF_Skeleton_R_c* s) {
+    static const cKF_Skeleton_R_c* tbl[22][2];
+    static int init = 0;
+    int i;
+    if (!init) {
+#define B(n, a, b) tbl[n][0] = &a; tbl[n][1] = &b
+        B(0, cKF_bs_r_obj_s_shop1, cKF_bs_r_obj_w_shop1); B(1, cKF_bs_r_obj_s_shop2, cKF_bs_r_obj_w_shop2);
+        B(2, cKF_bs_r_obj_s_shop3, cKF_bs_r_obj_w_shop3); B(3, cKF_bs_r_obj_s_shop4, cKF_bs_r_obj_w_shop4);
+        B(4, cKF_bs_r_obj_s_house1, cKF_bs_r_obj_w_house1); B(5, cKF_bs_r_obj_s_house2, cKF_bs_r_obj_w_house2);
+        B(6, cKF_bs_r_obj_s_house3, cKF_bs_r_obj_w_house3); B(7, cKF_bs_r_obj_s_house4, cKF_bs_r_obj_w_house4);
+        B(8, cKF_bs_r_obj_s_house5, cKF_bs_r_obj_w_house5); B(9, cKF_bs_r_obj_s_myhome1, cKF_bs_r_obj_w_myhome1);
+        B(10, cKF_bs_r_obj_s_myhome2, cKF_bs_r_obj_w_myhome2); B(11, cKF_bs_r_obj_s_myhome3, cKF_bs_r_obj_w_myhome3);
+        B(12, cKF_bs_r_obj_s_myhome4, cKF_bs_r_obj_w_myhome4); B(13, cKF_bs_r_obj_s_station1, cKF_bs_r_obj_w_station1);
+        B(14, cKF_bs_r_obj_s_station2, cKF_bs_r_obj_w_station2); B(15, cKF_bs_r_obj_s_station3, cKF_bs_r_obj_w_station3);
+        B(16, cKF_bs_r_obj_s_yubinkyoku, cKF_bs_r_obj_w_yubinkyoku); B(17, cKF_bs_r_obj_s_tailor, cKF_bs_r_obj_w_tailor);
+        B(18, cKF_bs_r_obj_s_yamishop, cKF_bs_r_obj_w_yamishop); B(19, cKF_bs_r_obj_s_uranai, cKF_bs_r_obj_w_uranai);
+        B(20, cKF_bs_r_obj_s_douzou, cKF_bs_r_obj_w_douzou); B(21, cKF_bs_r_obj_s_toudai, cKF_bs_r_obj_w_toudai);
+#undef B
+        init = 1;
+    }
+    for (i = 0; i < 22; i++) {
+        if (s == tbl[i][0] || s == tbl[i][1]) return i;
+    }
+    return -1;
+}
+
+static int pc_bld_enabled(void) {
+    static int on = -1;
+    if (on < 0) {
+        const char* t = getenv("AC_TOWN");
+        const char* d = getenv("AC_NO_WC3_BUILDINGS");
+        on = (!d && !(t && t[0] == 'h')) ? 1 : 0;
+    }
+    return on;
+}
+
+/* returns nonzero when the skeleton was replaced and nothing else should be drawn */
+static int pc_bld_try_draw(GAME* game, cKF_SkeletonInfo_R_c* keyframe) {
+    GRAPH* graph;
+    int i;
+    if (!pc_bld_enabled()) return 0;
+    i = pc_bld_index(keyframe->skeleton);
+    if (i < 0) return 0;
+    graph = game->graph;
+    Matrix_push();
+    Matrix_scale(2.0f, 2.0f, 2.0f, MTX_MULT);
+    OPEN_POLY_OPA_DISP(graph);
+    gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPDisplayList(POLY_OPA_DISP++, pc_bld_dls[i]);
+    CLOSE_POLY_OPA_DISP(graph);
+    Matrix_pull();
+    return 1;
+}
+#endif

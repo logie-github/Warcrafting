@@ -191,6 +191,7 @@ set(PC_SOURCES
     ${DECOMP_ROOT}/pc/src/pc_assets.c
     ${DECOMP_ROOT}/pc/src/pc_msg_eur.c
     ${DECOMP_ROOT}/pc/src/pc_wc3_meshes.c
+    ${DECOMP_ROOT}/pc/src/pc_wc3_buildings.c
     ${DECOMP_ROOT}/pc/src/pc_music.c
     ${DECOMP_ROOT}/pc/src/pc_disc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/android/android_glue.c

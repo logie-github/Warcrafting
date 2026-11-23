@@ -43,7 +43,7 @@ def main(root, assets):
     for town in ('alliance', 'horde'):
         for fn in convert_dir(os.path.join(root, 'mod/pack', town), os.path.join(out, town)):
             manifest.append(f'{town}/{fn}')
-    for sub in ('mod/logo', 'mod/players'):
+    for sub in ('mod/logo', 'mod/players', 'mod/buildings'):
         for fn in convert_dir(os.path.join(root, sub), os.path.join(out, 'common')):
             manifest.append(f'common/{fn}')
     mdir = os.path.join(root, 'mod/music')

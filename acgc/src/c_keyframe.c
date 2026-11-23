@@ -5,6 +5,7 @@
 #include "libultra/libultra.h"
 #include "sys_math3d.h"
 #include "sys_matrix.h"
+#include "../src/game/pc_wc3_bld_draw.c_inc"
 
 /**
  * Resets and initializes a frame control structure with default parameters.
@@ -874,6 +875,11 @@ extern void cKF_Si3_draw_R_SV(GAME* game, cKF_SkeletonInfo_R_c* keyframe, Mtx* m
     int joint_num;
     Mtx* mtx_p = mtxp;
 
+#ifdef TARGET_PC
+    if (pc_bld_try_draw(game, keyframe)) {
+        return;
+    }
+#endif
     if (mtxp != NULL) {
         GRAPH* graph = game->graph;
         OPEN_DISP(graph);

@@ -1,0 +1,178 @@
+[
+ {
+  "model": "Town Hall",
+  "s": null,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": 0
+ },
+ {
+  "model": "Blacksmith",
+  "s": null,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": 0
+ },
+ {
+  "model": "Arcane Sanctum",
+  "s": null,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": 0
+ },
+ {
+  "model": "Arcane Sanctum",
+  "s": null,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": 0
+ },
+ {
+  "model": "Farm",
+  "s": 1.2086,
+  "yaw": -38,
+  "ox": 0,
+  "oz": -12.65,
+  "oy": -105.0
+ },
+ {
+  "model": "Farm",
+  "s": 1.2086,
+  "yaw": -38,
+  "ox": 0,
+  "oz": -12.65,
+  "oy": -105.0
+ },
+ {
+  "model": "Farm",
+  "s": 1.2086,
+  "yaw": -38,
+  "ox": 0,
+  "oz": -12.65,
+  "oy": -105.0
+ },
+ {
+  "model": "Farm",
+  "s": 1.2086,
+  "yaw": -38,
+  "ox": 0,
+  "oz": -12.65,
+  "oy": -105.0
+ },
+ {
+  "model": "Farm",
+  "s": 1.2086,
+  "yaw": -38,
+  "ox": 0,
+  "oz": -12.65,
+  "oy": -105.0
+ },
+ {
+  "model": "Farm",
+  "s": 1.2013,
+  "yaw": -90,
+  "ox": 0,
+  "oz": 0,
+  "oy": -88.5
+ },
+ {
+  "model": "Village Inn",
+  "s": 0.6549,
+  "yaw": -5,
+  "ox": 0,
+  "oz": 0,
+  "oy": -36.0
+ },
+ {
+  "model": "Village Barn",
+  "s": 0.8426,
+  "yaw": -76,
+  "ox": 12.73,
+  "oz": 0,
+  "oy": -57.5
+ },
+ {
+  "model": "Shipyard",
+  "s": 1.5295,
+  "yaw": -77,
+  "ox": 7.97,
+  "oz": 31.87,
+  "oy": -186.25
+ },
+ {
+  "model": "Gryphon Aviary",
+  "s": 1.0106,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -152.75
+ },
+ {
+  "model": "Gryphon Aviary",
+  "s": null,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": 0
+ },
+ {
+  "model": "Arcane Sanctum",
+  "s": null,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": 0
+ },
+ {
+  "model": "Windmill",
+  "s": 1.0994,
+  "yaw": -89,
+  "ox": -26.44,
+  "oz": -17.44,
+  "oy": -59.75
+ },
+ {
+  "model": "Workshop",
+  "s": 0.8136,
+  "yaw": 70,
+  "ox": 0,
+  "oz": 0,
+  "oy": -90.75
+ },
+ {
+  "model": "Arcane Vault",
+  "s": 0.5613,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -86.0
+ },
+ {
+  "model": "Arcane Sanctum",
+  "s": 0.6528,
+  "yaw": 17,
+  "ox": 0,
+  "oz": 0,
+  "oy": -76.5
+ },
+ {
+  "model": "Altar of Kings",
+  "s": 1.2209,
+  "yaw": -45,
+  "ox": 0,
+  "oz": 0,
+  "oy": -129.0
+ },
+ {
+  "model": "Scout Tower",
+  "s": 1.623,
+  "yaw": -36,
+  "ox": 0,
+  "oz": 0,
+  "oy": -131.25
+ }
+]
