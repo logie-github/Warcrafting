@@ -36,12 +36,13 @@ jobs:
       - name: Python tools
         run: pip install pillow
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Android SDK packages
+      - name: Android SDK packages (preinstalled SDK on the runner)
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-34" "build-tools;34.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          [ -x "$SDKM" ] || SDKM=$(ls "$ANDROID_HOME"/cmdline-tools/*/bin/sdkmanager | head -n 1)
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "platforms;android-34" "build-tools;34.0.0" "ndk;27.0.12077973" "cmake;3.22.1"
 
       - name: Build mod assets (uncompressed RGBA texture pack for Android)
         run: python tools/make_android_pack.py . acgc/app/src/main/assets
