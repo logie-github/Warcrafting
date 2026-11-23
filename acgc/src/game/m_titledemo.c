@@ -246,7 +246,9 @@ static void mTD_game_end_init(GAME_PLAY* play) {
 #ifdef TARGET_PC
 /* AC_TOWN_DUMP=<file>: write the acre block kinds and all structure/background/npc actors of the demo town. */
 extern char* getenv(const char*);
+extern void pc_geo_arm(void);
 static void pc_town_dump(GAME_PLAY* play) {
+    { extern char* getenv(const char*); static int armed = 0; if (!armed && S_tdemo_time > 3.0f && getenv("AC_GEODUMP")) { armed = 1; pc_geo_arm(); } }
     static int done = 0;
     const char* path;
     FILE* f;

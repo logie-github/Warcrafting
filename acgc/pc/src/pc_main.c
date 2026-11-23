@@ -358,8 +358,11 @@ static void pc_dump_frame_hook(void) {
     free(px);
 }
 
+extern void pc_geo_frame(void);
+extern void pc_geo_arm(void);
 void pc_platform_swap_buffers(void) {
     pc_gx_draw_pending();
+    pc_geo_frame();
     pc_dump_frame_hook();
     pc_dump_at_hook();
     SDL_GL_SwapWindow(g_pc_window);

@@ -721,11 +721,108 @@ static void pc_bbox_accumulate(const PCGXVertex* v, int count) {
     }
 }
 
+
+/* AC_GEODUMP=<file>: record every perspective draw of one frame (eye-space positions, uv, colour, bound texture)
+ * plus the RGBA data of the textures used, for the HTML town builder. Armed by pc_geo_arm(). */
+#include <stdio.h>
+static int g_geo_state = 0; /* 0 off, 1 armed, 2 recording */
+static FILE* g_geo_f = NULL;
+static GLuint g_geo_tex[4096];
+static int g_geo_ntex = 0;
+void pc_geo_arm(void) {
+    if (g_geo_state == 0 && getenv("AC_GEODUMP") != NULL) g_geo_state = 1;
+}
+static void pc_geo_emit(const PCGXVertex* v, int i, GLuint tex_unused) {
+    const float* m = (const float*)g_gx.pos_mtx[g_gx.current_mtx];
+    float x = v[i].position[0], y = v[i].position[1], z = v[i].position[2];
+    float o[5];
+    o[0] = m[0] * x + m[1] * y + m[2] * z + m[3];
+    o[1] = m[4] * x + m[5] * y + m[6] * z + m[7];
+    o[2] = m[8] * x + m[9] * y + m[10] * z + m[11];
+    o[3] = v[i].texcoord[0][0];
+    o[4] = v[i].texcoord[0][1];
+    fwrite(o, 4, 5, g_geo_f);
+    fwrite(v[i].color0, 1, 4, g_geo_f);
+    (void)tex_unused;
+}
+static void pc_geo_record(const PCGXVertex* v, int count, int prim) {
+    GLuint tex;
+    int i, nv = 0, n;
+    int idx[3];
+    if (g_geo_state != 2 || g_geo_f == NULL || g_gx.projection_type != GX_PERSPECTIVE) return;
+    { GLint cur = 0; glActiveTexture(GL_TEXTURE0); glGetIntegerv(GL_TEXTURE_BINDING_2D, &cur); tex = (GLuint)cur; }
+    if (tex != 0) {
+        for (i = 0; i < g_geo_ntex; i++) if (g_geo_tex[i] == tex) break;
+        if (i == g_geo_ntex && g_geo_ntex < 4096) g_geo_tex[g_geo_ntex++] = tex;
+    }
+    /* triangle count */
+    if (prim == GX_QUADS) nv = (count / 4) * 6;
+    else if (prim == GX_TRIANGLES) nv = (count / 3) * 3;
+    else if (prim == GX_TRIANGLESTRIP || prim == GX_TRIANGLEFAN) nv = count >= 3 ? (count - 2) * 3 : 0;
+    else return;
+    if (nv == 0) return;
+    {
+        unsigned int hdr[2] = { (unsigned int)tex, (unsigned int)nv };
+        fwrite(hdr, 4, 2, g_geo_f);
+    }
+    if (prim == GX_QUADS) {
+        for (n = 0; n + 3 < count; n += 4) {
+            int q[6] = { n, n + 1, n + 2, n, n + 2, n + 3 };
+            for (i = 0; i < 6; i++) pc_geo_emit(v, q[i], tex);
+        }
+    } else if (prim == GX_TRIANGLES) {
+        for (n = 0; n + 2 < count; n += 3) for (i = 0; i < 3; i++) pc_geo_emit(v, n + i, tex);
+    } else if (prim == GX_TRIANGLESTRIP) {
+        for (n = 0; n + 2 < count; n++) {
+            idx[0] = (n & 1) ? n + 1 : n; idx[1] = (n & 1) ? n : n + 1; idx[2] = n + 2;
+            for (i = 0; i < 3; i++) pc_geo_emit(v, idx[i], tex);
+        }
+    } else {
+        for (n = 1; n + 1 < count; n++) { idx[0] = 0; idx[1] = n; idx[2] = n + 1; for (i = 0; i < 3; i++) pc_geo_emit(v, idx[i], tex); }
+    }
+}
+/* called once per swap: arm -> record the next frame -> write textures and quit */
+void pc_geo_frame(void) {
+    if (g_geo_state == 1) {
+        g_geo_f = fopen(getenv("AC_GEODUMP"), "wb");
+        if (g_geo_f) { fwrite("GEO1", 1, 4, g_geo_f); g_geo_state = 2; } else g_geo_state = 3;
+        return;
+    }
+    if (g_geo_state == 2 && g_geo_f) {
+        int t;
+        unsigned int hdr[2] = { 0xFFFFFFFFu, (unsigned int)g_geo_ntex };
+        fwrite(hdr, 4, 2, g_geo_f);
+        for (t = 0; t < g_geo_ntex; t++) {
+            GLint w = 0, h = 0;
+            unsigned char* px;
+            glBindTexture(GL_TEXTURE_2D, g_geo_tex[t]);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &w);
+            glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &h);
+            {
+                unsigned int th[3] = { g_geo_tex[t], (unsigned int)w, (unsigned int)h };
+                fwrite(th, 4, 3, g_geo_f);
+            }
+            if (w > 0 && h > 0 && w * h <= 4096 * 4096) {
+                px = (unsigned char*)malloc((size_t)w * h * 4);
+                glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, px);
+                fwrite(px, 1, (size_t)w * h * 4, g_geo_f);
+                free(px);
+            }
+        }
+        fclose(g_geo_f);
+        g_geo_f = NULL;
+        g_geo_state = 3;
+        fflush(stdout);
+        _exit(0);
+    }
+}
+
 void pc_gx_draw_pending(void) {
     int count = g_gx.pending_verts;
     if (count == 0) return;
     if (g_pc_bbox_on < 0) g_pc_bbox_on = (getenv("AC_BBOX_FILE") != NULL);
     if (g_pc_bbox_on) pc_bbox_accumulate(g_gx.vertex_buffer, count);
+    if (g_geo_state == 2) pc_geo_record(g_gx.vertex_buffer, count, g_gx.pending_prim);
 
     glBindVertexArray(g_gx.vao);
     glBindBuffer(GL_ARRAY_BUFFER, g_gx.vbo);
@@ -1173,6 +1270,7 @@ void pc_gx_flush_vertices(void) {
         return;
     }
 
+    if (g_geo_state == 2) pc_geo_record(g_gx.vertex_buffer, count, prim);
     pc_gx_buffer_data_profiled(GL_ARRAY_BUFFER, count * sizeof(PCGXVertex), g_gx.vertex_buffer, GL_STREAM_DRAW);
 
     Uint64 draw_start = pc_profiler_begin_timer();
