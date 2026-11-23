@@ -1,0 +1,74 @@
+# IDE folders
+.idea/
+.vs/
+.vscode/*
+
+# Caches
+__pycache__
+.mypy_cache
+.cache/
+
+# Original files
+orig/*/*
+!orig/*/.gitkeep
+*.dol
+*.rel
+*.elf
+*.o
+*.map
+*.MAP
+
+# Build files
+build/
+build32/
+.ninja_*
+build.ninja
+
+# decompctx output
+ctx.*
+*.ctx
+
+# Generated configs
+objdiff.json
+compile_commands.json
+
+# Miscellaneous
+/*.txt
+!requirements.txt
+*.exe
+
+# For saving work files into (like IDB)
+temp/
+
+# Ignore the N64 SDK headers since we download them
+# NOTE: include/PR/gbi.h and include/PR/ultratypes.h are force-tracked
+# (git add -f) because they have TARGET_PC modifications for LE bitfields.
+# configure.py skips download when they already exist.
+include/PR/
+include/gcc/
+include/compiler/gcc/stdlib.h
+
+# Android build
+.gradle/
+local.properties
+app/.cxx/
+app/build/
+*.apk
+*.aab
+# downloaded by the fetchThirdParty Gradle task
+app/src/main/cpp/third_party/
+# game data and generated content never belong in the repo
+*.iso
+*.gcm
+*.ciso
+*.nkit*
+*.tgc
+*.dds
+translations/
+texture_pack/
+
+# release signing (never commit)
+keystore.properties
+*.jks
+*.p12
+*.keystore
