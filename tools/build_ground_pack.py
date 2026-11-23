@@ -125,6 +125,11 @@ def remap(orig, tile, grass, is_grass_slot):
             c = px[x, y]
             L = (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255.0
             green = c[1] > c[0] * 1.12 and c[1] > c[2] * 1.12
+            blue = c[2] > c[0] * 1.15 and c[2] > c[1] * 1.05
+            if blue:
+                # water stays water: keep the original blue (shaded below)
+                rp[x, y] = c
+                continue
             base = gp[x, y] if (green and not is_grass_slot) else tp[x, y]
             f = 0.55 + 0.9 * L
             rp[x, y] = (min(255, int(base[0] * f)), min(255, int(base[1] * f)),
