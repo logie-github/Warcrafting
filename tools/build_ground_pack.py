@@ -177,6 +177,31 @@ def main():
             fn = f'tex1_{w}x{hh}_{h}_{th:016x}_8.dds'
             out.save(os.path.join(od, fn), pixel_format='DXT5')
             count[faction] += 1
+        # Blocks never seen at runtime (winter set, _2/_3 variants, sand, ...):
+        # reuse the palette and size of a seen block of the same slot and emit a
+        # wildcard-palette file (tex1_WxH_<datahash>_$_8.dds).
+        ref = {}
+        for (h, palhex), (w, hh) in seen.items():
+            m = re.match(r'mFM_grd_[sw]_(\w+?)(?:_\d)?_tex', byhash[h][0])
+            if m:
+                ref.setdefault(m[1], (palhex, w, hh))
+        done_hash = {h for (h, _p) in seen}
+        for h, names in byhash.items():
+            if h in done_hash:
+                continue
+            m = re.match(r'mFM_grd_[sw]_(\w+?)(?:_\d)?_tex', names[0])
+            slot = m[1] if m else None
+            if slot not in SLOT_TILE or slot not in ref:
+                continue
+            palhex, w, hh = ref[slot]
+            if len(blocks[names[0]]) != w * hh // 2:
+                continue
+            data = blocks[names[0]]
+            orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
+            out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE),
+                        tile('grass', w * SCALE, hh * SCALE), slot == 'grass')
+            out.save(os.path.join(od, f'tex1_{w}x{hh}_{h}_$_8.dds'), pixel_format='DXT5')
+            count[faction + '_wildcard'] += 1
     print(dict(count), 'files;', len(seen), 'texture+palette combinations seen')
 
 
