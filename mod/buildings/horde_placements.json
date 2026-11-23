@@ -9,27 +9,27 @@
  },
  {
   "model": "Barracks",
-  "s": 1.1775,
+  "s": 0.8742,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -119.48
+  "oy": -88.71
  },
  {
   "model": "Bestiary",
-  "s": 1.477,
+  "s": 1.055,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -131.93
+  "oy": -94.24
  },
  {
   "model": "Great Hall",
-  "s": 1.99,
+  "s": 1.4215,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -219.51
+  "oy": -156.79
  },
  {
   "model": "Troll Burrow",
@@ -89,51 +89,51 @@
  },
  {
   "model": "Voodoo Lounge",
-  "s": 1.0284,
+  "s": 1.0175,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -63.64
+  "oy": -62.96
  },
  {
   "model": "Barracks",
-  "s": 0.8623,
+  "s": 0.8316,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -87.5
+  "oy": -84.38
  },
  {
   "model": "Great Hall",
-  "s": 1.0056,
+  "s": 0.7183,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -110.92
+  "oy": -79.23
  },
  {
   "model": "Altar of Storms",
-  "s": 1.5465,
+  "s": 1.1047,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -121.2
+  "oy": -86.57
  },
  {
   "model": "Great Hall",
-  "s": 1.0445,
+  "s": 0.7461,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -115.21
+  "oy": -82.29
  },
  {
   "model": "Watch Tower",
-  "s": 1.7932,
+  "s": 1.665,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -152.27
+  "oy": -141.38
  },
  {
   "model": "Spirit Lodge",
@@ -145,11 +145,11 @@
  },
  {
   "model": "Voodoo Lounge",
-  "s": 1.4134,
+  "s": 1.0903,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -87.46
+  "oy": -67.47
  },
  {
   "model": "Tauren Totem",
@@ -161,18 +161,18 @@
  },
  {
   "model": "Altar of Storms",
-  "s": 1.2343,
+  "s": 1.0615,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -96.73
+  "oy": -83.18
  },
  {
   "model": "Watch Tower",
-  "s": 2.0055,
+  "s": 1.7095,
   "yaw": 0,
   "ox": 0,
   "oz": 0,
-  "oy": -170.29
+  "oy": -145.16
  }
 ]
