@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Warcrafting Town Builder</title>
+<style>
+:root{--bg:#15161a;--panel:#212329;--panel2:#2a2d35;--text:#eceae4;--dim:#9a9ca5;--gold:#e6b94a;--ok:#5fcf80;--line:#3a3d47}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+select,input[type=search],.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font:inherit}
+.btn{cursor:pointer}.btn:active{transform:scale(.97)}.btn.ok{border-color:var(--ok);color:var(--ok)}.btn.on{background:var(--gold);color:#1b1a14;font-weight:700;border-color:var(--gold)}.btn.warn{border-color:#c75a5a;color:#ff9a9a}
+#app{display:grid;grid-template-columns:330px 1fr 300px;grid-template-rows:auto 1fr;height:100%}
+header{grid-column:1/4;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px;background:var(--panel)}
+h1{font-size:16px;margin:0 8px 0 0;color:var(--gold)}
+.grow{flex:1}
+#left,#right{background:var(--panel);overflow:auto;padding:8px;min-height:0}
+#center{position:relative;min-height:0;background:#1b1c2e;touch-action:none}
+#gl{width:100%;height:100%;display:block}
+#hud{position:absolute;left:10px;bottom:8px;font-size:12px;color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
+h2{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);margin:6px 0}
+details{border-top:1px solid var(--line);padding:2px 0}
+summary{cursor:pointer;padding:6px 2px;color:var(--gold);font-weight:600}
+summary small{color:var(--dim);font-weight:400}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:6px;padding:4px 0 8px}
+.card{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:4px;cursor:pointer;text-align:center;font-size:11px;line-height:1.2;color:var(--text)}
+.card.sel{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+.card img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;display:block;background:#2a2b3b}
+.item{display:flex;gap:6px;align-items:center;padding:5px 6px;border:1px solid var(--line);border-radius:8px;margin-bottom:4px;cursor:pointer;background:var(--panel2);font-size:13px}
+.item.sel{border-color:var(--gold)}
+.item small{color:var(--dim)}
+.ctl{display:grid;grid-template-columns:70px 1fr 60px;gap:6px;align-items:center;margin:4px 0}
+.ctl label{color:var(--dim);font-size:12px}.ctl output{text-align:right;font-size:12px}
+input[type=range]{width:100%}
+.row{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0}
+dialog{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:16px;max-width:860px;width:94vw;padding:16px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+textarea{width:100%;height:52vh;background:#101115;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace}
+.note{font-size:12px;color:var(--dim)}
+@media (max-width:980px){#app{grid-template-columns:1fr;grid-template-rows:auto 55vh auto auto;overflow:auto}html,body{overflow:auto}header{grid-column:1}}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <h1>Town Builder</h1>
+  <button class="btn" id="tabA">Alliance</button><button class="btn" id="tabH">Horde</button>
+  <button class="btn on" id="vTop">Top view</button><button class="btn" id="vIso">3D view</button>
+  <label class="note"><input type="checkbox" id="snap" checked> snap to 40-unit cells</label>
+  <label class="note"><input type="checkbox" id="ghosts" checked> original buildings</label>
+  <span class="grow"></span><span id="prog" class="note"></span>
+  <button class="btn ok" id="export">Report</button>
+</header>
+<aside id="left">
+  <h2>Model library <span id="libCount" class="note"></span></h2>
+  <input type="search" id="q" placeholder="Search models" style="width:100%;margin-bottom:6px">
+  <div id="folders"></div>
+</aside>
+<div id="center"><canvas id="gl"></canvas><div id="hud"></div></div>
+<aside id="right">
+  <h2>Placing</h2>
+  <div class="note" id="armed">Pick a model in the library, then click the town to place it. Click a placed model to select it; drag to move it.</div>
+  <h2>Selected</h2>
+  <div id="selInfo" class="note">Nothing selected.</div>
+  <div class="ctl"><label>Scale</label><input type="range" id="sScale" min="-2" max="2" step="0.005"><output id="oScale"></output></div>
+  <div class="ctl"><label>Rotate</label><input type="range" id="sYaw" min="-180" max="180" step="1"><output id="oYaw"></output></div>
+  <div class="ctl"><label>Raise</label><input type="range" id="sOy" min="-300" max="300" step="0.5"><output id="oOy"></output></div>
+  <div class="row"><button class="btn" id="replBtn">Replace original building here</button></div>
+  <div class="row"><button class="btn" id="rot90">Rotate 90°</button><button class="btn" id="dup">Duplicate</button><button class="btn warn" id="del">Delete</button></div>
+  <h2>Placed <span id="placedCount" class="note"></span></h2>
+  <div id="list"></div>
+  <div class="row"><button class="btn warn" id="clearAll">Clear all</button></div>
+  <p class="note" id="appnote">The acre layout (rivers, cliffs, ocean, station, shop and other building acres) comes from the game's demo town. Your own town's layout differs. Original building markers sit at the middle of their acre.</p>
+</aside>
+</div>
+<dialog id="dlg"><h3 style="margin:0 0 8px">Town report</h3><textarea id="out" readonly></textarea>
+  <div class="row"><button class="btn ok" id="dlTxt">⬇ town-report.txt</button><button class="btn" id="dlJson">⬇ town-report.json</button><button class="btn" id="cp">Copy</button><button class="btn" id="close">Close</button></div></dialog>
+<script>
+const D = /*DATA*/null;
+// D.town {bx,bz,blocks:[{x,z,kind}]}, D.slots{name:{w,d,h}}, D.repl{marker:{slots:[..],cx,cz}}, D.models, D.folders, D.thumbs, D.textures
+const ACRE=640, CELL=40, KEY='warcrafting-townbuilder-v1';
+const K={PLAYER:1,SHOP:2,SHRINE:4,POLICE:8,POST:16,STATION:32,CLIFF:64,RIVER:128,WATERFALL:256,BRIDGE:512,RAIL:1024,MARINE:2048,BORDER:4096,TUNNEL:8192,SLOPE:16384,POOL:32768,DUMP:65536,MUSEUM:131072,TAILORS:524288,OCEAN:1048576,ISLAND:2097152,OFFING:4194304,DOCK:1073741824};
+let st={}; try{st=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(st));}catch(e){}try{if(window.Android&&Android.save)Android.save(faction,gameText());}catch(e){}};
+const $=id=>document.getElementById(id);
+let faction=st.faction||'Alliance'; st.items=st.items||{Alliance:[],Horde:[]}; st.repl=st.repl||{Alliance:{},Horde:{}};
+const items=()=>st.items[faction]; let sel=-1, armed=null;
+const M4={
+ id(){return new Float32Array([1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1]);},
+ mul(a,b){const o=new Float32Array(16);for(let c=0;c<4;c++)for(let r=0;r<4;r++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+r]*b[c*4+k];o[c*4+r]=s;}return o;},
+ persp(f,asp,n,fa){const t=1/Math.tan(f/2),o=new Float32Array(16);o[0]=t/asp;o[5]=t;o[10]=(fa+n)/(n-fa);o[11]=-1;o[14]=2*fa*n/(n-fa);return o;},
+ look(e,c,u){let z=[e[0]-c[0],e[1]-c[1],e[2]-c[2]];let l=Math.hypot(...z);z=z.map(v=>v/l);let x=[u[1]*z[2]-u[2]*z[1],u[2]*z[0]-u[0]*z[2],u[0]*z[1]-u[1]*z[0]];l=Math.hypot(...x);x=x.map(v=>v/l);const y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+   return new Float32Array([x[0],y[0],z[0],0,x[1],y[1],z[1],0,x[2],y[2],z[2],0,-(x[0]*e[0]+x[1]*e[1]+x[2]*e[2]),-(y[0]*e[0]+y[1]*e[1]+y[2]*e[2]),-(z[0]*e[0]+z[1]*e[1]+z[2]*e[2]),1]);},
+ T(x,y,z){const m=M4.id();m[12]=x;m[13]=y;m[14]=z;return m;},
+ S(s){const m=M4.id();m[0]=m[5]=m[10]=s;return m;},
+ Ry(a){const c=Math.cos(a),s=Math.sin(a),m=M4.id();m[0]=c;m[2]=-s;m[8]=s;m[10]=c;return m;},
+ inv(m){const a=m,o=new Float32Array(16);
+  const a00=a[0],a01=a[1],a02=a[2],a03=a[3],a10=a[4],a11=a[5],a12=a[6],a13=a[7],a20=a[8],a21=a[9],a22=a[10],a23=a[11],a30=a[12],a31=a[13],a32=a[14],a33=a[15];
+  const b00=a00*a11-a01*a10,b01=a00*a12-a02*a10,b02=a00*a13-a03*a10,b03=a01*a12-a02*a11,b04=a01*a13-a03*a11,b05=a02*a13-a03*a12,b06=a20*a31-a21*a30,b07=a20*a32-a22*a30,b08=a20*a33-a23*a30,b09=a21*a32-a22*a31,b10=a21*a33-a23*a31,b11=a22*a33-a23*a32;
+  let d=b00*b11-b01*b10+b02*b09+b03*b08-b04*b07+b05*b06;d=1/d;
+  o[0]=(a11*b11-a12*b10+a13*b09)*d;o[1]=(a02*b10-a01*b11-a03*b09)*d;o[2]=(a31*b05-a32*b04+a33*b03)*d;o[3]=(a22*b04-a21*b05-a23*b03)*d;
+  o[4]=(a12*b08-a10*b11-a13*b07)*d;o[5]=(a00*b11-a02*b08+a03*b07)*d;o[6]=(a32*b02-a30*b05-a33*b01)*d;o[7]=(a20*b05-a22*b02+a23*b01)*d;
+  o[8]=(a10*b10-a11*b08+a13*b06)*d;o[9]=(a01*b08-a00*b10-a03*b06)*d;o[10]=(a30*b04-a31*b02+a33*b00)*d;o[11]=(a21*b02-a20*b04-a23*b00)*d;
+  o[12]=(a11*b07-a10*b09-a12*b06)*d;o[13]=(a00*b09-a01*b07+a02*b06)*d;o[14]=(a31*b01-a30*b03-a32*b00)*d;o[15]=(a20*b03-a21*b01+a22*b00)*d;return o;}
+};
+const cv=$('gl'),gl=cv.getContext('webgl',{antialias:true});
+if(!gl){document.body.innerHTML='<div style="padding:20px;color:#ff8a80">WebGL is not available.</div>';throw new Error('no webgl');}
+function prog(vs,fs){const p=gl.createProgram();for(const [t,s] of [[gl.VERTEX_SHADER,vs],[gl.FRAGMENT_SHADER,fs]]){const sh=gl.createShader(t);gl.shaderSource(sh,s);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(sh));gl.attachShader(p,sh);}gl.linkProgram(p);return p;}
+const pMesh=prog(`attribute vec3 aP;attribute vec2 aU;attribute vec3 aN;uniform mat4 uVP,uM;varying vec2 vU;varying vec3 vN;void main(){vU=aU;vN=mat3(uM)*aN;gl_Position=uVP*uM*vec4(aP,1.0);}`,
+ `precision mediump float;varying vec2 vU;varying vec3 vN;uniform sampler2D uT;uniform float uLit;uniform vec3 uTint;void main(){vec4 c=texture2D(uT,vU);if(c.a<0.5)discard;vec3 n=normalize(vN);float l=max(dot(n,normalize(vec3(.4,.8,.5))),0.0)*.55+.55;gl_FragColor=vec4(c.rgb*uTint*mix(1.0,l,uLit),1.0);}`);
+const pFlat=prog(`attribute vec3 aP;attribute vec3 aC;uniform mat4 uVP;varying vec3 vC;void main(){vC=aC;gl_Position=uVP*vec4(aP,1.0);}`,`precision mediump float;varying vec3 vC;void main(){gl_FragColor=vec4(vC,1.0);}`);
+const pLine=prog(`attribute vec3 aP;uniform mat4 uVP;void main(){gl_Position=uVP*vec4(aP,1.0);}`,`precision mediump float;uniform vec4 uC;void main(){gl_FragColor=uC;}`);
+const L={mesh:{p:gl.getAttribLocation(pMesh,'aP'),u:gl.getAttribLocation(pMesh,'aU'),n:gl.getAttribLocation(pMesh,'aN'),vp:gl.getUniformLocation(pMesh,'uVP'),m:gl.getUniformLocation(pMesh,'uM'),t:gl.getUniformLocation(pMesh,'uT'),lit:gl.getUniformLocation(pMesh,'uLit'),tint:gl.getUniformLocation(pMesh,'uTint')},
+ flat:{p:gl.getAttribLocation(pFlat,'aP'),c:gl.getAttribLocation(pFlat,'aC'),vp:gl.getUniformLocation(pFlat,'uVP')},
+ line:{p:gl.getAttribLocation(pLine,'aP'),vp:gl.getUniformLocation(pLine,'uVP'),c:gl.getUniformLocation(pLine,'uC')}};
+const bytes=b=>{const s=atob(b),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a;};
+function pot(n){let p=1;while(p<n)p<<=1;return p;}
+function texFromImage(img){const c=document.createElement('canvas');c.width=pot(img.naturalWidth||img.width);c.height=pot(img.naturalHeight||img.height);c.getContext('2d').drawImage(img,0,0,c.width,c.height);const t=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,t);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,c);gl.generateMipmap(gl.TEXTURE_2D);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR_MIPMAP_LINEAR);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.REPEAT);return t;}
+const texCache={};
+function ensureTex(i){if(texCache[i]!==undefined)return;texCache[i]=null;const im=new Image();im.onload=()=>{texCache[i]=texFromImage(im);draw();};im.src=D.textures[i];}
+const gpu={};
+function gpuModel(name){
+  if(gpu[name])return gpu[name];const m=D.models[name],out=[];
+  for(const me of m.meshes){
+    const q=new Uint16Array(bytes(me.pos).buffer),n3=q.length,pos=new Float32Array(n3);
+    for(let i=0;i<n3;i++){const a=i%3;pos[i]=m.min[a]+q[i]/65535*(m.max[a]-m.min[a]);}
+    const uq=new Int16Array(bytes(me.uv).buffer),uv=new Float32Array(uq.length);for(let i=0;i<uq.length;i++)uv[i]=uq[i]/2048;
+    const idx=new Uint16Array(bytes(me.idx).buffer),n=new Float32Array(n3);
+    for(let i=0;i<idx.length;i+=3){const a=idx[i]*3,b=idx[i+1]*3,c=idx[i+2]*3;const ux=pos[b]-pos[a],uy=pos[b+1]-pos[a+1],uz=pos[b+2]-pos[a+2],vx=pos[c]-pos[a],vy=pos[c+1]-pos[a+1],vz=pos[c+2]-pos[a+2];
+      const nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx;for(const k of [a,b,c]){n[k]+=nx;n[k+1]+=ny;n[k+2]+=nz;}}
+    for(let i=0;i<n.length;i+=3){const l=Math.hypot(n[i],n[i+1],n[i+2])||1;n[i]/=l;n[i+1]/=l;n[i+2]/=l;}
+    const mk=(arr,t)=>{const b=gl.createBuffer();gl.bindBuffer(t,b);gl.bufferData(t,arr,gl.STATIC_DRAW);return b;};
+    out.push({p:mk(pos,gl.ARRAY_BUFFER),u:mk(uv,gl.ARRAY_BUFFER),n:mk(n,gl.ARRAY_BUFFER),i:mk(idx,gl.ELEMENT_ARRAY_BUFFER),cnt:idx.length,tex:me.tex});
+  }
+  return gpu[name]=out;
+}
+// ground: one flat coloured quad per acre
+const SEA=[.16,.32,.55],GRASS=[.36,.62,.24],RIVER=[.25,.5,.8],CLIFF=[.55,.5,.42],SAND=[.82,.76,.52],RAILC=[.5,.45,.4];
+function acreColor(k){
+  if(k&(K.OCEAN|K.MARINE|K.BORDER|K.OFFING))return SEA;
+  if(k&(K.RIVER|K.WATERFALL|K.POOL))return RIVER;
+  if(k&K.CLIFF)return CLIFF;
+  if(k&K.RAILROAD)return RAILC;
+  return GRASS;
+}
+const BN={};for(const [n,v] of Object.entries(K))BN[v]=n;
+function acreLabel(k){const l=[];for(const [n,v] of [['Shop',K.SHOP],['Player houses',K.PLAYER],['Shrine',K.SHRINE],['Police box',K.POLICE],['Post office',K.POST],['Station',K.STATION],['Museum',K.MUSEUM],['Dump',K.DUMP],["Able Sisters",K.TAILORS],['River',K.RIVER],['Cliff',K.CLIFF],['Rail',K.RAILROAD],['Bridge',K.BRIDGE],['Ocean',K.OCEAN|K.MARINE],['Slope',K.SLOPE],['Tunnel',K.TUNNEL],['Pool',K.POOL],['Waterfall',K.WATERFALL],['Dock',K.DOCK]])if(k&v)l.push(n);return l.join(', ')||'Grass';}
+const buildingsOf=k=>{const out=[];if(k&K.SHOP)out.push('Shop');if(k&K.STATION)out.push('Station');if(k&K.POLICE)out.push('Police box');if(k&K.POST)out.push('Post office');if(k&K.MUSEUM)out.push('Museum');if(k&K.DUMP)out.push('Dump');if(k&K.SHRINE)out.push('Shrine');if(k&K.TAILORS)out.push('Able Sisters');if(k&K.PLAYER)out.push('Player house');return out;};
+const SIZE={'Shop':'Shop 1 (Nook’s Cranny)','Station':'Train station - model 1','Police box':'Police Box','Post office':'Post office','Museum':'Museum','Dump':'Dump','Shrine':'Town statue','Able Sisters':'Able Sisters (tailor)','Player house':'Your house - stage 1'};
+const TW=D.town.bx*ACRE,TH=D.town.bz*ACRE;
+let flatBuf=null,flatCount=0;
+function buildGround(){const v=[];
+  for(const b of D.town.blocks){const c=acreColor(b.kind),x0=b.x*ACRE,z0=b.z*ACRE,x1=x0+ACRE,z1=z0+ACRE,y=(b.kind&(K.OCEAN|K.MARINE|K.BORDER|K.OFFING))?-4:0;
+    const q=[[x0,y,z0],[x1,y,z0],[x1,y,z1],[x0,y,z0],[x1,y,z1],[x0,y,z1]];
+    for(const p of q){v.push(...p,...c);}
+    // checker tint to see cells of 4x4 sub-acres
+  }
+  flatBuf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,flatBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(v),gl.STATIC_DRAW);flatCount=v.length/6;}
+const cam={ay:0.0,pitch:1.5,dist:8600,tx:TW/2,tz:TH/2,top:true};
+let vpM=null,ivp=null;
+function eye(){const p=cam.pitch;return [cam.tx+cam.dist*Math.cos(p)*Math.sin(cam.ay),cam.dist*Math.sin(p),cam.tz+cam.dist*Math.cos(p)*Math.cos(cam.ay)];}
+function lines(vp,pts,color){const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pts),gl.STREAM_DRAW);gl.useProgram(pLine);gl.uniformMatrix4fv(L.line.vp,false,vp);gl.uniform4fv(L.line.c,color);gl.enableVertexAttribArray(L.line.p);gl.vertexAttribPointer(L.line.p,3,gl.FLOAT,false,0,0);gl.drawArrays(gl.LINES,0,pts.length/3);gl.deleteBuffer(b);}
+function boxLines(x,z,w,d,h,rot){const hw=w/2,hd=d/2,c=[[-hw,0,-hd],[hw,0,-hd],[hw,0,hd],[-hw,0,hd],[-hw,h,-hd],[hw,h,-hd],[hw,h,hd],[-hw,h,hd]].map(p=>[x+p[0]*Math.cos(rot)+p[2]*Math.sin(rot),p[1],z-p[0]*Math.sin(rot)+p[2]*Math.cos(rot)]);
+  const ed=[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]],pts=[];ed.forEach(([i,j])=>pts.push(...c[i],...c[j]));return pts;}
+function modelBox(t){const m=D.models[t.model];return {w:(m.max[0]-m.min[0])*t.s,d:(m.max[2]-m.min[2])*t.s,h:(m.max[1]-m.min[1])*t.s};}
+function draw(){
+  const w=cv.clientWidth,h=cv.clientHeight;if(!w||!h)return;const dpr=Math.min(2,devicePixelRatio||1);
+  if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr);}
+  gl.viewport(0,0,cv.width,cv.height);gl.clearColor(.09,.1,.16,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
+  const e=eye();const up=cam.top&&cam.pitch>1.45?[Math.sin(cam.ay)*-1,0,Math.cos(cam.ay)*-1]:[0,1,0];
+  const proj=M4.persp(40*Math.PI/180,cv.width/cv.height,50,60000),view=M4.look(e,[cam.tx,0,cam.tz],up);vpM=M4.mul(proj,view);ivp=M4.inv(vpM);const vp=vpM;
+  gl.useProgram(pFlat);gl.uniformMatrix4fv(L.flat.vp,false,vp);gl.bindBuffer(gl.ARRAY_BUFFER,flatBuf);
+  gl.enableVertexAttribArray(L.flat.p);gl.vertexAttribPointer(L.flat.p,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(L.flat.c);gl.vertexAttribPointer(L.flat.c,3,gl.FLOAT,false,24,12);gl.drawArrays(gl.TRIANGLES,0,flatCount);
+  // grids: acres (bright), cells (dim, only when close)
+  const g=[];for(let i=0;i<=D.town.bx;i++)g.push(i*ACRE,1,0,i*ACRE,1,TH);for(let j=0;j<=D.town.bz;j++)g.push(0,1,j*ACRE,TW,1,j*ACRE);
+  lines(vp,g,[0,0,0,.55]);
+  if(cam.dist<3200){const c=[],x0=Math.max(0,Math.floor((cam.tx-cam.dist)/CELL)*CELL),x1=Math.min(TW,x0+cam.dist*2),z0=Math.max(0,Math.floor((cam.tz-cam.dist)/CELL)*CELL),z1=Math.min(TH,z0+cam.dist*2);
+    for(let x=x0;x<=x1;x+=CELL)c.push(x,1.5,z0,x,1.5,z1);for(let z=z0;z<=z1;z+=CELL)c.push(x0,1.5,z,x1,1.5,z);lines(vp,c,[0,0,0,.18]);}
+  // original building markers
+  if($('ghosts').checked){const p=[];for(const b of D.town.blocks){for(const n of buildingsOf(b.kind)){const s=D.slots[SIZE[n]];if(!s)continue;p.push(...boxLines(b.x*ACRE+ACRE/2,b.z*ACRE+ACRE/2,s.w*1,s.d*1,s.h*1,0));}}
+    gl.disable(gl.DEPTH_TEST);if(p.length)lines(vp,p,[1,.62,.15,.9]);gl.enable(gl.DEPTH_TEST);}
+  // placed models
+  const its=items();
+  its.forEach((t,i)=>{const m=D.models[t.model];if(!m)return;const cxm=(m.min[0]+m.max[0])/2,czm=(m.min[2]+m.max[2])/2;
+    const M=M4.mul(M4.T(t.x,t.oy,t.z),M4.mul(M4.Ry(t.yaw*Math.PI/180),M4.mul(M4.S(t.s),M4.T(-cxm,-m.min[1],-czm))));
+    gl.useProgram(pMesh);gl.uniformMatrix4fv(L.mesh.vp,false,vp);gl.uniformMatrix4fv(L.mesh.m,false,M);gl.uniform1f(L.mesh.lit,1.0);gl.uniform3f(L.mesh.tint,1,1,1);gl.activeTexture(gl.TEXTURE0);gl.uniform1i(L.mesh.t,0);
+    for(const me of gpuModel(t.model)){ensureTex(me.tex);if(!texCache[me.tex])continue;gl.bindTexture(gl.TEXTURE_2D,texCache[me.tex]);
+      gl.bindBuffer(gl.ARRAY_BUFFER,me.p);gl.enableVertexAttribArray(L.mesh.p);gl.vertexAttribPointer(L.mesh.p,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,me.u);gl.enableVertexAttribArray(L.mesh.u);gl.vertexAttribPointer(L.mesh.u,2,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ARRAY_BUFFER,me.n);gl.enableVertexAttribArray(L.mesh.n);gl.vertexAttribPointer(L.mesh.n,3,gl.FLOAT,false,0,0);
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,me.i);gl.drawElements(gl.TRIANGLES,me.cnt,gl.UNSIGNED_SHORT,0);}
+    if(i===sel){const b=modelBox(t);gl.disable(gl.DEPTH_TEST);lines(vp,boxLines(t.x,t.z,b.w,b.d,b.h,t.yaw*Math.PI/180),[1,1,1,1]);gl.enable(gl.DEPTH_TEST);}});
+  hud();
+}
+function hud(){$('hud').textContent=`Town ${TW} × ${TH} units (${D.town.bx} × ${D.town.bz} acres of ${ACRE}; one cell = ${CELL})`;}
+// picking
+function groundHit(px,py){const r=cv.getBoundingClientRect(),nx=(px-r.left)/r.width*2-1,ny=1-(py-r.top)/r.height*2;
+  const f=(z)=>{const v=[nx,ny,z,1],o=[0,0,0,0];for(let i=0;i<4;i++)o[i]=ivp[i]*v[0]+ivp[4+i]*v[1]+ivp[8+i]*v[2]+ivp[12+i]*v[3];return [o[0]/o[3],o[1]/o[3],o[2]/o[3]];};
+  const a=f(-1),b=f(1),t=(0-a[1])/(b[1]-a[1]);if(!isFinite(t))return null;return [a[0]+(b[0]-a[0])*t,a[2]+(b[2]-a[2])*t];}
+function pickItem(g){let best=-1,bd=1e9;items().forEach((t,i)=>{const b=modelBox(t),r=Math.max(b.w,b.d)/2*0.75,d=Math.hypot(g[0]-t.x,g[1]-t.z);if(d<r&&d<bd){bd=d;best=i;}});return best;}
+const snapV=v=>$('snap').checked?Math.round(v/CELL)*CELL:v;
+function defaultS(name){const m=D.models[name];const mw=m.max[0]-m.min[0],md=m.max[2]-m.min[2];return 160/Math.max(mw,md)*1.0;}
+function place(g){if(!armed)return false;const t={model:armed,x:snapV(g[0]),z:snapV(g[1]),yaw:0,s:defaultS(armed),oy:0,acre:null};items().push(t);sel=items().length-1;save();refreshAll();return true;}
+// interaction
+(function(){const b=$('center');let mode=null,lx=0,ly=0,sx=0,sy=0,moved=false,dragItem=false;const pts=new Map();let pinch=0;
+ b.addEventListener('pointerdown',e=>{pts.set(e.pointerId,[e.clientX,e.clientY]);b.setPointerCapture(e.pointerId);lx=sx=e.clientX;ly=sy=e.clientY;moved=false;
+   if(pts.size===2){const [p,q]=[...pts.values()];pinch=Math.hypot(p[0]-q[0],p[1]-q[1]);mode='pinch';return;}
+   const g=groundHit(e.clientX,e.clientY);const hit=g?pickItem(g):-1;
+   if(hit>=0){sel=hit;dragItem=true;mode='item';refreshAll();}else{dragItem=false;mode=(e.button===2||e.shiftKey||!cam.top&&false)?'orbit':'pan';}});
+ b.addEventListener('pointermove',e=>{if(!pts.has(e.pointerId))return;pts.set(e.pointerId,[e.clientX,e.clientY]);
+   if(mode==='pinch'&&pts.size===2){const [p,q]=[...pts.values()],d=Math.hypot(p[0]-q[0],p[1]-q[1]);cam.dist=Math.max(300,Math.min(20000,cam.dist*pinch/d));pinch=d;draw();return;}
+   const dx=e.clientX-lx,dy=e.clientY-ly;if(Math.hypot(e.clientX-sx,e.clientY-sy)>4)moved=true;lx=e.clientX;ly=e.clientY;
+   if(mode==='item'&&sel>=0){const g=groundHit(e.clientX,e.clientY);if(g){const t=items()[sel];t.x=snapV(g[0]);t.z=snapV(g[1]);draw();updateSel();}}
+   else if(mode==='orbit'){cam.ay-=dx*0.006;cam.pitch=Math.max(0.15,Math.min(1.5,cam.pitch+dy*0.006));cam.top=false;setViewButtons();draw();}
+   else if(mode==='pan'){const k=cam.dist*0.0011;const sa=Math.sin(cam.ay),ca=Math.cos(cam.ay);cam.tx-=(dx*ca+dy*sa*(cam.pitch>1.2?1:0.6))*k;cam.tz-=(-dx*sa+dy*ca*(cam.pitch>1.2?1:0.6))*k;draw();}});
+ const up=e=>{if(mode==='pan'&&!moved&&pts.size===1){const g=groundHit(e.clientX,e.clientY);if(g){if(!place(g)){sel=-1;refreshAll();}}}
+   if(mode==='item')save();pts.delete(e.pointerId);if(!pts.size)mode=null;};
+ b.addEventListener('pointerup',up);b.addEventListener('pointercancel',e=>{pts.delete(e.pointerId);if(!pts.size)mode=null;});
+ b.addEventListener('wheel',e=>{e.preventDefault();cam.dist=Math.max(300,Math.min(20000,cam.dist*(1+Math.sign(e.deltaY)*0.1)));draw();},{passive:false});
+ b.addEventListener('contextmenu',e=>e.preventDefault());})();
+function setViewButtons(){$('vTop').classList.toggle('on',cam.top);$('vIso').classList.toggle('on',!cam.top);}
+$('vTop').onclick=()=>{cam.top=true;cam.pitch=1.5;cam.ay=0;setViewButtons();draw();};
+$('vIso').onclick=()=>{cam.top=false;cam.pitch=0.7;cam.ay=0.6;setViewButtons();draw();};
+$('snap').onchange=()=>{};$('ghosts').onchange=draw;
+function setFaction(f){faction=f;st.faction=f;sel=-1;save();$('tabA').classList.toggle('on',f==='Alliance');$('tabH').classList.toggle('on',f==='Horde');buildLibrary();refreshAll();}
+$('tabA').onclick=()=>setFaction('Alliance');$('tabH').onclick=()=>setFaction('Horde');
+// panel
+function updateSel(){const t=items()[sel];
+  if(!t){$('selInfo').textContent='Nothing selected.';return;}
+  const b=modelBox(t),bx=Math.floor(t.x/ACRE),bz=Math.floor(t.z/ACRE),d0=defaultS(t.model);
+  $('selInfo').innerHTML=`<b>${t.model}</b><br>x ${t.x.toFixed(0)}  z ${t.z.toFixed(0)}  (cell ${(t.x/CELL).toFixed(1)}, ${(t.z/CELL).toFixed(1)}, acre ${bx},${bz})<br>size ${b.w.toFixed(0)} × ${b.d.toFixed(0)} × ${b.h.toFixed(0)}`;
+  $('sScale').value=Math.log10(t.s/d0)||0;$('sYaw').value=t.yaw;$('sOy').value=t.oy;$('oScale').textContent=t.s.toFixed(3)+'×';$('oYaw').textContent=Math.round(t.yaw)+'°';$('oOy').textContent=t.oy.toFixed(1);}
+function refreshAll(){
+  const box=$('list');box.innerHTML='';items().forEach((t,i)=>{const d=document.createElement('div');d.className='item'+(i===sel?' sel':'');d.innerHTML=`<span>${i+1}. ${t.model}</span><small>${(t.x/CELL).toFixed(0)},${(t.z/CELL).toFixed(0)}</small>`;d.onclick=()=>{sel=i;cam.tx=t.x;cam.tz=t.z;refreshAll();};box.appendChild(d);});
+  $('placedCount').textContent=items().length?`(${items().length})`:'';$('prog').textContent=`${faction}: ${items().length} placed`;
+  $('armed').textContent=armed?`Placing: ${armed}. Click the town to drop it (click an empty spot again for another, Esc to stop).`:'Pick a model in the library, then click the town to place it. Click a placed model to select it; drag to move it.';
+  document.querySelectorAll('.card').forEach(c=>c.classList.toggle('sel',c.dataset.n===armed));
+  updateSel();draw();}
+function setTf(fn){const t=items()[sel];if(!t)return;fn(t);save();updateSel();draw();}
+$('sScale').oninput=e=>setTf(t=>{t.s=defaultS(t.model)*Math.pow(10,+e.target.value);});
+$('sYaw').oninput=e=>setTf(t=>{t.yaw=+e.target.value;});
+$('sOy').oninput=e=>setTf(t=>{t.oy=+e.target.value;});
+$('rot90').onclick=()=>setTf(t=>{t.yaw=((t.yaw+90+180)%360)-180;});
+$('dup').onclick=()=>{const t=items()[sel];if(!t)return;items().push({...t,x:t.x+CELL*2,z:t.z+CELL*2});sel=items().length-1;save();refreshAll();};
+$('del').onclick=()=>{if(sel<0)return;items().splice(sel,1);sel=-1;save();refreshAll();};
+$('clearAll').onclick=()=>{if(items().length&&confirm('Remove everything placed for '+faction+'?')){items().length=0;sel=-1;save();refreshAll();}};
+addEventListener('keydown',e=>{if(e.key==='Escape'){armed=null;refreshAll();}if((e.key==='Delete'||e.key==='Backspace')&&sel>=0&&document.activeElement.tagName!=='INPUT'){$('del').click();}});
+addEventListener('resize',draw);
+function buildLibrary(){const q=$('q').value.trim().toLowerCase(),box=$('folders');box.innerHTML='';let total=0;
+  const cats=Object.keys(D.folders).sort((a,b)=>{const fa=a.startsWith(faction)?0:1,fb=b.startsWith(faction)?0:1;return fa-fb||a.localeCompare(b);});
+  for(const cat of cats){const names=D.folders[cat].filter(n=>!q||n.toLowerCase().includes(q)).sort();if(!names.length)continue;total+=names.length;
+    const d=document.createElement('details');d.open=!!q||(cat.startsWith(faction)&&cats.indexOf(cat)<3);
+    const s=document.createElement('summary');s.innerHTML=`${cat} <small>(${names.length})</small>`;d.appendChild(s);
+    const g=document.createElement('div');g.className='grid';
+    for(const n of names){const c=document.createElement('button');c.className='card';c.dataset.n=n;c.title=D.models[n].path;c.innerHTML=`<img loading="lazy" alt="" src="${D.thumbs[n]||''}"><div>${n}</div>`;c.onclick=()=>{armed=n;refreshAll();};g.appendChild(c);}
+    d.appendChild(g);box.appendChild(d);}
+  $('libCount').textContent=total+' models';}
+$('q').oninput=buildLibrary;
+// replacing original buildings: the selected model is assigned to the nearest original building of the town
+function nearestMarker(t){let best=null,bd=1e12;for(const b of D.town.blocks){for(const n of buildingsOf(b.kind)){const info=D.repl[n];if(!info)continue;const cx=b.x*ACRE+ACRE/2,cz=b.z*ACRE+ACRE/2,d=Math.hypot(cx-t.x,cz-t.z);if(d<bd){bd=d;best={n,cx,cz,b};}}}return bd<ACRE*0.9?best:null;}
+$('replBtn').onclick=()=>{const t=items()[sel];if(!t){alert('Place or select a model first.');return;}const m=nearestMarker(t);if(!m){alert('No replaceable original building near this model. Move it onto an original building (orange box).');return;}
+  st.repl[faction][m.n]={model:t.model,dx:t.x-m.cx,dz:t.z-m.cz,oy:t.oy,yaw:t.yaw,s:t.s,slots:D.repl[m.n].slots};
+  items().splice(sel,1);sel=-1;save();refreshAll();alert('Replacing the original '+m.n+' with '+t.model+'.');};
+function gameText(){const L=['# Warcrafting build placements. World units: AC units (1 cell = 40). yaw in degrees, scale = AC units per native Warcraft unit'];
+  const its=st.items[faction]||[];its.forEach(t=>L.push(`P ${t.model} ${t.x.toFixed(1)} ${(160+t.oy).toFixed(1)} ${t.z.toFixed(1)} ${t.yaw.toFixed(1)} ${t.s.toFixed(4)}`));
+  const rp=st.repl[faction]||{};for(const k of Object.keys(rp)){const r=rp[k];for(const sl of r.slots)L.push(`R ${sl.id} ${r.model} ${(r.dx+sl.cx).toFixed(1)} ${(r.dz+sl.cz).toFixed(1)} ${r.oy.toFixed(1)} ${r.yaw.toFixed(1)} ${r.s.toFixed(4)}`);}
+  return L.join('\n')+'\n';}
+// report
+function report(){
+  const lines=['WARCRAFTING TOWN BUILDER REPORT','Generated: '+new Date().toISOString(),`Town: ${D.town.bx} x ${D.town.bz} acres of ${ACRE} units (cell = ${CELL}); x grows east, z grows south. Positions are the centre of the model's footprint on the ground. Scale converts native Warcraft units to AC units; raise is height above ground (negative = sunk).`,''];
+  const json={town:{acres_x:D.town.bx,acres_z:D.town.bz,acre:ACRE,cell:CELL}};
+  for(const f of ['Alliance','Horde']){const its=st.items[f]||[];lines.push(`=== ${f.toUpperCase()} (${its.length}) ===`);json[f]=[];
+    its.forEach((t,i)=>{const m=D.models[t.model],sz=[(m.max[0]-m.min[0])*t.s,(m.max[2]-m.min[2])*t.s,(m.max[1]-m.min[1])*t.s],bx=Math.floor(t.x/ACRE),bz=Math.floor(t.z/ACRE),k=(D.town.blocks.find(b=>b.x===bx&&b.z===bz)||{kind:0}).kind;
+      lines.push(`${i+1}. ${t.model}  [${m.path}]  x ${t.x.toFixed(0)} z ${t.z.toFixed(0)} (cell ${(t.x/CELL).toFixed(1)}, ${(t.z/CELL).toFixed(1)}; acre ${bx},${bz}: ${acreLabel(k)})  rotate ${t.yaw.toFixed(0)} deg  scale ${t.s.toFixed(4)}  raise ${t.oy.toFixed(1)}  size ${sz[0].toFixed(0)} x ${sz[1].toFixed(0)} x ${sz[2].toFixed(0)}`);
+      json[f].push({model:t.model,path:m.path,x:t.x,z:t.z,cell_x:t.x/CELL,cell_z:t.z/CELL,acre:[bx,bz],yaw_deg:t.yaw,scale:t.s,raise:t.oy,size:{w:sz[0],d:sz[1],h:sz[2]}});});
+    const rp=st.repl[f]||{};const rk=Object.keys(rp);if(rk.length){lines.push('Replacements of original buildings:');json[f+'_replacements']=[];rk.forEach(k=>{const r=rp[k];lines.push(`  ${k} -> ${r.model}  offset ${r.dx.toFixed(1)}, ${r.dz.toFixed(1)}  rotate ${r.yaw.toFixed(0)}  scale ${r.s.toFixed(4)}  raise ${r.oy.toFixed(1)}`);json[f+'_replacements'].push({original:k,model:r.model,dx:r.dx,dz:r.dz,yaw_deg:r.yaw,scale:r.s,raise:r.oy});});}
+    lines.push('');}
+  return {txt:lines.join('\n'),json:JSON.stringify(json,null,2)};}
+let last=null;
+$('export').onclick=()=>{last=report();$('out').value=last.txt;try{if(window.Android&&Android.save)Android.save(faction,gameText());}catch(e){}$('dlg').showModal();};
+function dl(name,text,mime){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type:mime}));a.download=name;document.body.appendChild(a);a.click();a.remove();}
+$('dlTxt').onclick=()=>dl('town-report.txt',last.txt,'text/plain');$('dlJson').onclick=()=>dl('town-report.json',last.json,'application/json');
+$('cp').onclick=async()=>{try{await navigator.clipboard.writeText(last.txt);$('cp').textContent='Copied';setTimeout(()=>$('cp').textContent='Copy',1200);}catch(e){$('out').select();document.execCommand('copy');}};$('close').onclick=()=>$('dlg').close();
+buildGround();setViewButtons();setFaction(faction);
+</script>
+</body>
+</html>

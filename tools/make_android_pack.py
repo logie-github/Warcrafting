@@ -43,9 +43,14 @@ def main(root, assets):
     for town in ('alliance', 'horde'):
         for fn in convert_dir(os.path.join(root, 'mod/pack', town), os.path.join(out, town)):
             manifest.append(f'{town}/{fn}')
-    for sub in ('mod/logo', 'mod/players', 'mod/buildings'):
+    for sub in ('mod/logo', 'mod/players', 'mod/buildings', 'mod/lib2'):
         for fn in convert_dir(os.path.join(root, sub), os.path.join(out, 'common')):
             manifest.append(f'common/{fn}')
+    mb = os.path.join(root, 'mod/lib2/models.bin')
+    if os.path.exists(mb):
+        with open(mb, 'rb') as a, open(os.path.join(out, 'models.bin'), 'wb') as b:
+            b.write(a.read())
+        manifest.append('models.bin')
     mdir = os.path.join(root, 'mod/music')
     if os.path.isdir(mdir):
         os.makedirs(os.path.join(out, 'music'), exist_ok=True)

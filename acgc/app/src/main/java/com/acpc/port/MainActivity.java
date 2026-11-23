@@ -120,7 +120,7 @@ public class MainActivity extends Activity {
         root.addView(hint);
 
         // cards, two columns on wide screens
-        View[] cards = {discCard(rom), characterCard(), hdCard(), languageCard(), controlsCard(), multiplayerCard(), deluxeCard()};
+        View[] cards = {discCard(rom), characterCard(), builderCard(), hdCard(), languageCard(), controlsCard(), multiplayerCard(), deluxeCard()};
         if (getResources().getConfiguration().screenWidthDp >= 700) {
             for (int i = 0; i < cards.length; i += 2) {
                 if (i + 1 < cards.length) root.addView(pair(cards[i], cards[i + 1]));
@@ -201,6 +201,13 @@ public class MainActivity extends Activity {
     /* ---------- Warcrafting: player character and town ---------- */
 
     static final String[] CHARACTERS = { "Peasant", "Peon", "Sorceress", "Dark Ranger" };
+
+    private View builderCard() {
+        LinearLayout c = card("🏰", "Town Builder");
+        desc(c, "Place Warcraft III buildings and props anywhere in the town, or replace the original buildings. Your layout is saved and loads the next time you press Play.");
+        actions(c, pill("Open Town Builder", GREEN, ON_ACCENT, () -> startActivity(new android.content.Intent(this, BuilderActivity.class))));
+        return c;
+    }
 
     private View characterCard() {
         android.content.SharedPreferences sp = getSharedPreferences("warcrafting", MODE_PRIVATE);

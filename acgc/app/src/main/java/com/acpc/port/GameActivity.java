@@ -42,6 +42,8 @@ public class GameActivity extends SDLActivity {
             String town = getSharedPreferences("warcrafting", MODE_PRIVATE).getString("town", "alliance");
             android.system.Os.setenv("AC_TOWN", "horde".equals(town) ? "horde" : "alliance", true);
             android.system.Os.setenv("AC_MUSIC", "horde".equals(town) ? "orgrimmar" : "off", true);
+            android.system.Os.setenv("AC_MODELS_BIN", new File(getFilesDir(), "models.bin").getAbsolutePath(), true);
+            android.system.Os.setenv("AC_BUILD_FILE", BuilderActivity.placementsFile(this, "horde".equals(town) ? "Horde" : "Alliance").getAbsolutePath(), true);
         } catch (Exception ignored) {
         }
         super.onCreate(savedInstanceState);
@@ -148,6 +150,14 @@ public class GameActivity extends SDLActivity {
                         while ((c = in.read(buf)) > 0) os.write(buf, 0, c);
                     }
                 }
+            }
+            // Warcraft III model library for the build mode
+            try (InputStream in = getAssets().open("mod/models.bin");
+                 OutputStream os = new FileOutputStream(new File(filesDir, "models.bin"))) {
+                byte[] buf = new byte[1 << 16];
+                int c;
+                while ((c = in.read(buf)) > 0) os.write(buf, 0, c);
+            } catch (java.io.IOException ignored) {
             }
             // replacement town music (OGG) next to the working directory: music/
             String[] tracks = getAssets().list("mod/music");

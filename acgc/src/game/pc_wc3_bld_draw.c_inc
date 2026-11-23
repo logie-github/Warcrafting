@@ -15,7 +15,7 @@ extern cKF_Skeleton_R_c cKF_bs_r_obj_s_shop1, cKF_bs_r_obj_w_shop1, cKF_bs_r_obj
     cKF_bs_r_obj_w_tailor, cKF_bs_r_obj_s_yamishop, cKF_bs_r_obj_w_yamishop, cKF_bs_r_obj_s_uranai,
     cKF_bs_r_obj_w_uranai, cKF_bs_r_obj_s_douzou, cKF_bs_r_obj_w_douzou, cKF_bs_r_obj_s_toudai, cKF_bs_r_obj_w_toudai;
 extern char* getenv(const char*);
-extern Gfx* pc_lib_dls[];
+extern Gfx* pc_build_dl(int m);
 extern void pc_build_seen(int slot, f32 x, f32 z);
 extern int pc_build_override(int slot, int* m, f32* dx, f32* dz, f32* oy, f32* yaw, f32* s);
 
@@ -74,7 +74,7 @@ static int pc_bld_try_draw(GAME* game, cKF_SkeletonInfo_R_c* keyframe) {
             Matrix_scale(os * 100.0f, os * 100.0f, os * 100.0f, MTX_MULT);
             OPEN_POLY_OPA_DISP(graph);
             gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-            gSPDisplayList(POLY_OPA_DISP++, pc_lib_dls[om]);
+            { Gfx* d = pc_build_dl(om); if (d) gSPDisplayList(POLY_OPA_DISP++, d); }
             CLOSE_POLY_OPA_DISP(graph);
             Matrix_pull();
             return 1;

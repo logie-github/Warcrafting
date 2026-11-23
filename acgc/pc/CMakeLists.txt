@@ -291,7 +291,6 @@ set(PC_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_wc3_meshes.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_wc3_buildings.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_wc3_buildings_horde.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_wc3_lib.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_music.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_settings.c
     ${CMAKE_CURRENT_SOURCE_DIR}/src/pc_profiler.c
