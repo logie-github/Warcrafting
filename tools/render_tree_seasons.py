@@ -26,15 +26,20 @@ def hsv2rgb(hsv):
 def hueshift(t,mapfn):
     out=t.copy();hsv=rgb2hsv(np.clip(t[...,:3],0,1));out[...,:3]=hsv2rgb(mapfn(hsv));return out
 barrens=tex('replaceabletextures/barrenstree/barrenstree.dds')
+def leafmask(shape):
+    H,W=shape[:2]; yy,xx=np.mgrid[0:H,0:W]
+    sx=W/1024.0; sy=H/512.0
+    return ((xx>=668*sx)&(yy<310*sy))|((yy>=310*sy)&(xx>=323*sx))
 def to_green(hsv):
-    h=hsv[...,0].copy();s=hsv[...,1];leaf=(s>0.35)&(h<0.30)   # orange/yellow/green leaf pixels
-    h[leaf]=0.24+(h[leaf]*0.15); hsv[...,0]=h; return hsv
+    h=hsv[...,0].copy();s=hsv[...,1];leaf=LM&(s>0.3)
+    h[leaf]=0.22+((h[leaf]+0.0)%0.30)*0.2; hsv[...,0]=h; return hsv
 def to_autumn(hsv):
-    h=hsv[...,0].copy();s=hsv[...,1];leaf=(s>0.35)&(h<0.30)&(h>0.08)
+    h=hsv[...,0].copy();s=hsv[...,1];leaf=LM&(s>0.3)&(h>0.06)&(h<0.30)
     h[leaf]=0.02+h[leaf]*0.35; hsv[...,0]=h; return hsv
 def to_spring(hsv):
-    h=hsv[...,0].copy();s=hsv[...,1].copy();leaf=(s>0.35)&(h<0.30)&(h>0.08)
-    h[leaf]=0.20+h[leaf]*0.2; s[leaf]=s[leaf]*0.85; hsv[...,0]=h; hsv[...,1]=s; return hsv
+    h=hsv[...,0].copy();s=hsv[...,1].copy();leaf=LM&(s>0.3)
+    h[leaf]=0.18+((h[leaf])%0.30)*0.25; s[leaf]=s[leaf]*0.85; hsv[...,0]=h; hsv[...,1]=s; return hsv
+LM=leafmask(barrens.shape)
 towns={
  'Alliance':[('Spring','lordaerontree','replaceabletextures/lordaerontree/lordaeronsummertree.dds',None),
              ('Summer','lordaerontree','replaceabletextures/lordaerontree/lordaeronsummertree.dds',None),
