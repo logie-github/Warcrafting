@@ -1647,6 +1647,15 @@ static void mEnv_ChangeFogLight(BaseLight* dst, BaseLight* src_nxt_w0, BaseLight
             ((f32)src_now_w0->fog_far + f0 * ((f32)src_now_w1->fog_far - (f32)src_now_w0->fog_far));
 
     dst->fog_far = fog_far;
+#ifdef TARGET_PC
+    {
+        extern char* getenv(const char*);
+        if (getenv("AC_NOFOG") != NULL) {
+            dst->fog_near = 990.0f;
+            dst->fog_far = 1000.0f;
+        }
+    }
+#endif
 }
 
 static void mEnv_CalcSetLight_train(BaseLight* light) {
