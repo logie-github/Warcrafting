@@ -46,13 +46,17 @@ public class MainActivity extends Activity {
     private enum Purpose { US_DISC, EU_DISC, HD_ZIP, ACDX_SOURCE }
 
     // palette
-    private static final int BG_TOP = 0xFF0E2A22, BG_BOTTOM = 0xFF1B4334;
-    private static final int CARD = 0xFF1C3A2E, CARD_STROKE = 0xFF2F5A47;
-    private static final int TEXT = 0xFFF4F0E2, TEXT_DIM = 0xFFA9C2B2, ON_ACCENT = 0xFF16261E;
-    private static final int GREEN = 0xFF8CCB6E, YELLOW = 0xFFF5D76E, RED = 0xFFE88080, GREY = 0xFF7C9086;
-    private static final int GHOST = 0x22FFFFFF;
+    // Warcraft III look: parchment campaign backdrops, dark stone panels, bronze/gold trim and serif type
+    private static final int BG_TOP = 0xFF120C06, BG_BOTTOM = 0xFF120C06;
+    private static final int CARD = 0xC4140D06, CARD_STROKE = 0xFFB8892B;
+    private static final int TEXT = 0xFFF6E7B4, TEXT_DIM = 0xFFC9B27A, ON_ACCENT = 0xFF241606;
+    private static final int GREEN = 0xFFE3B53F, YELLOW = 0xFFFFD35A, RED = 0xFFE87A62, GREY = 0xFF9A8A66;
+    private static final int GHOST = 0x40000000;
+    private static final Typeface SERIF = Typeface.create(Typeface.SERIF, Typeface.NORMAL);
+    private static final Typeface SERIF_BOLD = Typeface.create(Typeface.SERIF, Typeface.BOLD);
 
     private LinearLayout root;
+    private android.widget.ImageView bgView;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -62,14 +66,21 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        android.widget.FrameLayout frame = new android.widget.FrameLayout(this);
+        bgView = new android.widget.ImageView(this);
+        bgView.setScaleType(android.widget.ImageView.ScaleType.CENTER_CROP);
+        frame.addView(bgView, new android.widget.FrameLayout.LayoutParams(-1, -1));
+        View scrim = new View(this);
+        scrim.setBackgroundColor(0x66000000);
+        frame.addView(scrim, new android.widget.FrameLayout.LayoutParams(-1, -1));
         ScrollView scroll = new ScrollView(this);
         scroll.setFillViewport(true);
-        scroll.setBackground(new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, new int[]{BG_TOP, BG_BOTTOM}));
+        frame.addView(scroll, new android.widget.FrameLayout.LayoutParams(-1, -1));
         root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(dp(28), dp(26), dp(28), dp(28));
         scroll.addView(root);
-        setContentView(scroll);
+        setContentView(frame);
         getWindow().setStatusBarColor(BG_TOP);
         getWindow().setNavigationBarColor(BG_BOTTOM);
         Updater.check(this);
@@ -90,9 +101,21 @@ public class MainActivity extends Activity {
         header.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout titles = new LinearLayout(this);
         titles.setOrientation(LinearLayout.VERTICAL);
-        titles.addView(text(getString(R.string.app_name), 34, TEXT, true));
+        boolean horde = "horde".equals(getSharedPreferences("warcrafting", MODE_PRIVATE).getString("town", "alliance"));
+        bgView.setImageResource(horde ? R.drawable.wc3_bg_horde : R.drawable.wc3_bg_alliance);
+        android.widget.ImageView logo = new android.widget.ImageView(this);
+        logo.setImageResource(R.drawable.wc3_logo);
+        logo.setAdjustViewBounds(true);
+        logo.setScaleType(android.widget.ImageView.ScaleType.FIT_START);
+        titles.addView(logo, new LinearLayout.LayoutParams(dp(230), -2));
         titles.addView(text(getString(R.string.tagline), 14, TEXT_DIM, false));
         header.addView(titles, new LinearLayout.LayoutParams(0, -2, 1f));
+        android.widget.ImageView crest = new android.widget.ImageView(this);
+        crest.setImageResource(horde ? R.drawable.wc3_crest_orc : R.drawable.wc3_crest_human);
+        crest.setScaleType(android.widget.ImageView.ScaleType.FIT_CENTER);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(dp(64), dp(64));
+        clp.rightMargin = dp(10);
+        header.addView(crest, clp);
         header.addView(pill("🌐  " + Tools.displayName(Tools.uiLanguage(this)) + "  ▾", GHOST, TEXT, this::chooseLanguage));
         root.addView(header);
 
@@ -103,10 +126,10 @@ public class MainActivity extends Activity {
         play.setText("▶  " + getString(R.string.play));
         play.setTextSize(22);
         play.setAllCaps(false);
-        play.setTypeface(Typeface.DEFAULT_BOLD);
-        play.setTextColor(ready ? 0xFF2B2A1E : 0xFF6E7C74);
+        play.setTypeface(SERIF_BOLD);
+        play.setTextColor(ready ? 0xFF241606 : 0xFF8A7A58);
         play.setStateListAnimator(null);
-        play.setBackground(rounded(ready ? YELLOW : 0xFF2E4238, dp(18), 0));
+        play.setBackground(rounded(ready ? YELLOW : 0xFF3A2C14, dp(6), 0xFF7A5410));
         play.setPadding(0, dp(18), 0, dp(18));
         play.setOnClickListener(v -> play());
         LinearLayout.LayoutParams plp = new LinearLayout.LayoutParams(-1, -2);
@@ -789,9 +812,12 @@ public class MainActivity extends Activity {
         c.setPadding(dp(20), dp(18), dp(20), dp(18));
         GradientDrawable g = new GradientDrawable();
         g.setColor(CARD);
-        g.setCornerRadius(dp(20));
-        g.setStroke(dp(1), CARD_STROKE);
-        c.setBackground(g);
+        g.setCornerRadius(dp(6));
+        g.setStroke(dp(2), CARD_STROKE);
+        android.graphics.drawable.BitmapDrawable stone = new android.graphics.drawable.BitmapDrawable(getResources(),
+                android.graphics.BitmapFactory.decodeResource(getResources(), R.drawable.wc3_stone));
+        stone.setTileModeXY(android.graphics.Shader.TileMode.REPEAT, android.graphics.Shader.TileMode.REPEAT);
+        c.setBackground(new android.graphics.drawable.LayerDrawable(new Drawable[]{stone, g}));
         LinearLayout head = new LinearLayout(this);
         head.setGravity(Gravity.CENTER_VERTICAL);
         TextView ic = text(icon, 19, TEXT, false);
@@ -801,7 +827,7 @@ public class MainActivity extends Activity {
         circle.setShape(GradientDrawable.OVAL);
         ic.setBackground(circle);
         head.addView(ic, new LinearLayout.LayoutParams(dp(40), dp(40)));
-        TextView t = text(title, 19, TEXT, true);
+        TextView t = text(title, 19, YELLOW, true);
         t.setPadding(dp(12), 0, 0, 0);
         head.addView(t);
         c.addView(head);
@@ -857,11 +883,11 @@ public class MainActivity extends Activity {
         b.setMaxLines(1);
         // long translations shrink instead of wrapping inside the pill
         b.setAutoSizeTextTypeUniformWithConfiguration(10, 14, 1, TypedValue.COMPLEX_UNIT_SP);
-        b.setTypeface(Typeface.DEFAULT_BOLD);
+        b.setTypeface(SERIF_BOLD);
         b.setTextColor(textColor);
         b.setStateListAnimator(null);
         b.setPadding(dp(14), dp(10), dp(14), dp(10));
-        b.setBackground(rounded(fill, dp(22), fill == GHOST ? 0x55FFFFFF : 0));
+        b.setBackground(rounded(fill, dp(5), fill == GHOST ? 0xFF8A6A25 : 0xFF5A3C0A));
         b.setOnClickListener(v -> action.run());
         return b;
     }
@@ -870,7 +896,7 @@ public class MainActivity extends Activity {
         GradientDrawable g = new GradientDrawable();
         g.setColor(fill);
         g.setCornerRadius(radius);
-        if (stroke != 0) g.setStroke(dp(1), stroke);
+        if (stroke != 0) g.setStroke(dp(2), stroke);
         GradientDrawable mask = new GradientDrawable();
         mask.setColor(Color.WHITE);
         mask.setCornerRadius(radius);
@@ -882,7 +908,7 @@ public class MainActivity extends Activity {
         t.setText(s);
         t.setTextSize(size);
         t.setTextColor(color);
-        if (bold) t.setTypeface(Typeface.DEFAULT_BOLD);
+        t.setTypeface(bold ? SERIF_BOLD : SERIF);
         return t;
     }
 
