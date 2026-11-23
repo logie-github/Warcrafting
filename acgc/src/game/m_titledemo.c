@@ -1,4 +1,6 @@
 #include "m_titledemo.h"
+#include "m_field_info.h"
+#include <stdio.h>
 
 #include "m_player.h"
 #include "m_player_lib.h"
@@ -241,7 +243,43 @@ static void mTD_game_end_init(GAME_PLAY* play) {
     mBGMPsComp_make_ps_wipe(0x521C); // TODO: enum/define
 }
 
+#ifdef TARGET_PC
+/* AC_TOWN_DUMP=<file>: write the acre block kinds and all structure/background/npc actors of the demo town. */
+extern char* getenv(const char*);
+static void pc_town_dump(GAME_PLAY* play) {
+    static int done = 0;
+    const char* path;
+    FILE* f;
+    int part, bx, bz;
+    if (done || S_tdemo_time < 4.0f) return;
+    path = getenv("AC_TOWN_DUMP");
+    if (path == NULL) return;
+    done = 1;
+    f = fopen(path, "w");
+    if (f == NULL) return;
+    fprintf(f, "blocks %d %d\n", (int)mFI_GetBlockXMax(), (int)mFI_GetBlockZMax());
+    for (bz = 0; bz < (int)mFI_GetBlockZMax(); bz++) {
+        for (bx = 0; bx < (int)mFI_GetBlockXMax(); bx++) {
+            fprintf(f, "block %d %d kind %u type %d\n", bx, bz, (unsigned)mFI_BkNum2BlockKind(bx, bz), (int)mFI_BkNum2BlockType(bx, bz));
+        }
+    }
+    for (part = 0; part < ACTOR_PART_NUM; part++) {
+        ACTOR* a = play->actor_info.list[part].actor;
+        while (a != NULL) {
+            fprintf(f, "actor part %d id %d npc %d block %d %d pos %.1f %.1f %.1f rot %d\n", part, (int)a->id, (int)a->npc_id,
+                    (int)a->block_x, (int)a->block_z, a->world.position.x, a->world.position.y, a->world.position.z,
+                    (int)a->shape_info.rotation.y);
+            a = a->next_actor;
+        }
+    }
+    fclose(f);
+}
+#endif
+
 extern void title_demo_move(GAME_PLAY* play) {
+#ifdef TARGET_PC
+    pc_town_dump(play);
+#endif
     if (mEv_IsTitleDemo()) {
 #ifdef TARGET_PC
         /* Hold the demo while the Options overlay owns the screen: neither

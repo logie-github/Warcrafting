@@ -95,6 +95,22 @@ static void event_title_flag_off() {
 static void Game_play_camera_proc(GAME_PLAY* play) {
     Camera2_ClearActorTalking_Cull(play);
     Camera2_process(play);
+#ifdef TARGET_PC
+    {
+        /* AC_CAM="ex ey ez cx cy cz fov far": fixed camera for map captures */
+        extern char* getenv(const char*);
+        extern int sscanf(const char*, const char*, ...);
+        const char* e = getenv("AC_CAM");
+        float v[8];
+        if (e != NULL && sscanf(e, "%f %f %f %f %f %f %f %f", &v[0], &v[1], &v[2], &v[3], &v[4], &v[5], &v[6], &v[7]) == 8) {
+            play->camera.lookat.eye.x = v[0]; play->camera.lookat.eye.y = v[1]; play->camera.lookat.eye.z = v[2];
+            play->camera.lookat.center.x = v[3]; play->camera.lookat.center.y = v[4]; play->camera.lookat.center.z = v[5];
+            play->camera.lookat.up.x = 0.0f; play->camera.lookat.up.y = 0.0f; play->camera.lookat.up.z = -1.0f;
+            play->camera.perspective.fov_y = v[6];
+            play->camera.perspective.far = v[7];
+        }
+    }
+#endif
 }
 
 static void Game_play_fbdemo_wipe_destroy(GAME_PLAY* play) {
