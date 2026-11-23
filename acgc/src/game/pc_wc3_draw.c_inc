@@ -1,0 +1,109 @@
+/* Warcraft III models in place of the villagers (PC/Android only).
+ * Models: 0 Peasant, 1 Peon, 2 Sorceress, 3 Dark Ranger (player options), 4 Thrall (Tom Nook), 5 Grom (Rover).
+ * Each model is a static triangle list whose vertex positions are overwritten per frame from baked
+ * Stand / Walk / Action poses (see tools/make_wc3_meshes.py). */
+#ifdef TARGET_PC
+#ifndef PC_WC3_DRAW_INC
+#define PC_WC3_DRAW_INC
+
+extern Vtx* pc_wc3_vtx[];
+extern Gfx* pc_wc3_dls[];
+extern int pc_wc3_nverts[];
+extern const s16* pc_wc3_frames[][3];
+extern int pc_wc3_nframes[];
+extern float pc_wc3_scale[];
+extern char* getenv(const char*);
+extern int atoi(const char*);
+extern double atof(const char*);
+
+enum { PC_WC3_STAND = 0, PC_WC3_WALK = 1, PC_WC3_ACT = 2 };
+
+static int pc_wc3_player_model(void) {
+    static int idx = -2;
+    if (idx == -2) {
+        const char* e = getenv("AC_PLAYER_MODEL");
+        idx = e ? atoi(e) : (getenv("AC_PEON") ? 1 : -1);
+        if (idx < -1 || idx > 5) idx = -1;
+    }
+    return idx;
+}
+
+static int pc_wc3_horde(void) {
+    static int h = -1;
+    if (h < 0) {
+        const char* e = getenv("AC_TOWN");
+        h = (e && e[0] == 'h') ? 1 : 0;
+    }
+    return h;
+}
+
+/* Which baked animation to play for a player state: regular movement uses Stand/Walk, the tool and
+ * special actions (net, axe, rod, shovel, shaking trees, ...) use the Warcraft action animation. */
+static int pc_wc3_seq_for_player(int idx) {
+    switch (idx) {
+        case mPlayer_INDEX_WALK:
+        case mPlayer_INDEX_RUN:
+        case mPlayer_INDEX_DASH:
+        case mPlayer_INDEX_TURN_DASH:
+        case mPlayer_INDEX_WADE:
+        case mPlayer_INDEX_DEMO_WALK:
+        case mPlayer_INDEX_DEMO_WADE:
+        case mPlayer_INDEX_READY_WALK_NET:
+        case mPlayer_INDEX_PUSH:
+        case mPlayer_INDEX_PULL:
+            return PC_WC3_WALK;
+        case mPlayer_INDEX_SWING_AXE:
+        case mPlayer_INDEX_AIR_AXE:
+        case mPlayer_INDEX_REFLECT_AXE:
+        case mPlayer_INDEX_SWING_NET:
+        case mPlayer_INDEX_PULL_NET:
+        case mPlayer_INDEX_SLIP_NET:
+        case mPlayer_INDEX_CAST_ROD:
+        case mPlayer_INDEX_AIR_ROD:
+        case mPlayer_INDEX_COLLECT_ROD:
+        case mPlayer_INDEX_FLY_ROD:
+        case mPlayer_INDEX_DIG_SCOOP:
+        case mPlayer_INDEX_FILL_SCOOP:
+        case mPlayer_INDEX_AIR_SCOOP:
+        case mPlayer_INDEX_GET_SCOOP:
+        case mPlayer_INDEX_REFLECT_SCOOP:
+        case mPlayer_INDEX_SHAKE_TREE:
+        case mPlayer_INDEX_THROW_MONEY:
+        case mPlayer_INDEX_PICKUP:
+        case mPlayer_INDEX_PICKUP_JUMP:
+        case mPlayer_INDEX_WASH_CAR:
+        case mPlayer_INDEX_PRAY:
+            return PC_WC3_ACT;
+        default:
+            return PC_WC3_STAND;
+    }
+}
+
+static void pc_wc3_draw(GAME* game, int k, int seq, int frame_counter) {
+    GRAPH* graph = game->graph;
+    int nv = pc_wc3_nverts[k];
+    int nf = pc_wc3_nframes[seq];
+    int div = (seq == PC_WC3_STAND) ? 8 : 3;
+    int fi = (frame_counter / div) % nf;
+    const s16* f = pc_wc3_frames[k][seq] + (size_t)fi * nv * 3;
+    Vtx* v = pc_wc3_vtx[k];
+    float sc = pc_wc3_scale[k];
+    const char* e;
+    int i;
+    for (i = 0; i < nv; i++) {
+        v[i].v.ob[0] = f[i * 3];
+        v[i].v.ob[1] = f[i * 3 + 1];
+        v[i].v.ob[2] = f[i * 3 + 2];
+    }
+    if ((e = getenv("AC_WC3_SCALE"))) sc *= (float)atof(e);
+    Matrix_push();
+    Matrix_scale(sc, sc, sc, MTX_MULT);
+    OPEN_POLY_OPA_DISP(graph);
+    gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPDisplayList(POLY_OPA_DISP++, pc_wc3_dls[k]);
+    CLOSE_POLY_OPA_DISP(graph);
+    Matrix_pull();
+}
+
+#endif
+#endif

@@ -1,3 +1,6 @@
+#ifdef TARGET_PC
+#include "../src/game/pc_wc3_draw.c_inc"
+#endif
 //
 
 static int aNPC_check_mask_cat_type(ACTOR* actorx) {
@@ -312,7 +315,25 @@ static void aNPC_actor_draw_sub(ACTOR* actorx, GAME* game) {
 
         CLOSE_DISP(graph);
 
+#ifdef TARGET_PC
+        {
+            int pc_k = -1;
+            if (pc_wc3_horde()) {
+                if (actorx->npc_id == SP_NPC_SHOP_MASTER || actorx->npc_id == SP_NPC_SHOP_MASTERSP ||
+                    actorx->npc_id == SP_NPC_SHOP_MASTERSP_2 || actorx->npc_id == SP_NPC_SHOP_MASTERSP_3) {
+                    pc_k = 4; /* Thrall */
+                } else if (actorx->npc_id == SP_NPC_GUIDE || actorx->npc_id == SP_NPC_GUIDE2) {
+                    pc_k = 5; /* Grom Hellscream */
+                }
+            }
+            if (pc_k >= 0) {
+                pc_wc3_draw(game, pc_k, (actorx->speed > 0.3f) ? PC_WC3_WALK : PC_WC3_STAND, game->frame_counter);
+            } else
+#endif
         cKF_Si3_draw_R_SV(game, kf_p, mtx, &aNPC_actor_draw_before, &aNPC_actor_draw_after, actorx);
+#ifdef TARGET_PC
+        }
+#endif
 
         OPEN_DISP(graph);
 
