@@ -119,9 +119,12 @@ public class MainActivity extends Activity {
         root.addView(hint);
 
         // cards, two columns on wide screens
-        View[] cards = {discCard(rom), hdCard(), languageCard(), controlsCard(), multiplayerCard(), deluxeCard()};
+        View[] cards = {discCard(rom), characterCard(), hdCard(), languageCard(), controlsCard(), multiplayerCard(), deluxeCard()};
         if (getResources().getConfiguration().screenWidthDp >= 700) {
-            for (int i = 0; i < cards.length; i += 2) root.addView(pair(cards[i], cards[i + 1]));
+            for (int i = 0; i < cards.length; i += 2) {
+                if (i + 1 < cards.length) root.addView(pair(cards[i], cards[i + 1]));
+                else root.addView(cards[i], cardParams(false));
+            }
         } else {
             for (View c : cards) root.addView(c, cardParams(false));
         }
@@ -191,6 +194,37 @@ public class MainActivity extends Activity {
             actions(c, pill(getString(R.string.lang_create), have ? GHOST : GREEN, have ? TEXT : ON_ACCENT,
                     this::createTranslation), chooser);
         }
+        return c;
+    }
+
+    /* ---------- Warcrafting: player character and town ---------- */
+
+    static final String[] CHARACTERS = { "Peasant", "Peon", "Sorceress", "Dark Ranger" };
+
+    private View characterCard() {
+        android.content.SharedPreferences sp = getSharedPreferences("warcrafting", MODE_PRIVATE);
+        int ch = Math.max(0, Math.min(3, sp.getInt("character", 0)));
+        String town = "horde".equals(sp.getString("town", "alliance")) ? "horde" : "alliance";
+        LinearLayout c = card("⚔", "Character & town");
+        status(c, GREEN, "Player: " + CHARACTERS[ch] + "  ·  Town: " + (town.equals("horde") ? "Horde" : "Alliance"));
+        desc(c, "Pick one of four Warcraft III characters for the player and the Alliance or Horde ground set. Takes effect the next time you press Play.");
+        for (int half = 0; half < 2; half++) {
+            Button[] row = new Button[2];
+            for (int j = 0; j < 2; j++) {
+                final int idx = half * 2 + j;
+                boolean on = idx == ch;
+                row[j] = pill((on ? "✓ " : "") + CHARACTERS[idx], on ? GREEN : GHOST, on ? ON_ACCENT : TEXT, () -> {
+                    sp.edit().putInt("character", idx).apply();
+                    build();
+                });
+            }
+            actions(c, row[0], row[1]);
+        }
+        Button al = pill((town.equals("alliance") ? "✓ " : "") + "Alliance town", town.equals("alliance") ? GREEN : GHOST,
+                town.equals("alliance") ? ON_ACCENT : TEXT, () -> { sp.edit().putString("town", "alliance").apply(); build(); });
+        Button ho = pill((town.equals("horde") ? "✓ " : "") + "Horde town", town.equals("horde") ? GREEN : GHOST,
+                town.equals("horde") ? ON_ACCENT : TEXT, () -> { sp.edit().putString("town", "horde").apply(); build(); });
+        actions(c, al, ho);
         return c;
     }
 

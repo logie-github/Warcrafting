@@ -36,6 +36,11 @@ public class GameActivity extends SDLActivity {
     protected void onCreate(Bundle savedInstanceState) {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         extractAssetsOnce();
+        try {
+            int ch = getSharedPreferences("warcrafting", MODE_PRIVATE).getInt("character", 0);
+            android.system.Os.setenv("AC_PLAYER_MODEL", String.valueOf(Math.max(0, Math.min(3, ch))), true);
+        } catch (Exception ignored) {
+        }
         super.onCreate(savedInstanceState);
         if (mLayout != null && touchOverlayEnabled(this)) {
             touchControls = new TouchControlsView(this);

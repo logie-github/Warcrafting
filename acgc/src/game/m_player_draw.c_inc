@@ -182,29 +182,41 @@ static int Player_actor_draw_After(GAME* game, cKF_SkeletonInfo_R_c* kf, int joi
 }
 
 #ifdef TARGET_PC
-extern Gfx pc_peon_dl[];
+extern Gfx* pc_player_dls[];
+extern float pc_player_scale[];
 extern char* getenv(const char*);
+extern int atoi(const char*);
 extern double atof(const char*);
 
-/* Prototype: draw the original Warcraft III Peon (bind pose, no animation) instead of the villager. */
+/* Warcraft III player models (original MDX, bind pose): 0 Peasant, 1 Peon, 2 Sorceress, 3 Dark Ranger.
+ * Selected with AC_PLAYER_MODEL (the Android launcher sets it). Unset or -1 keeps the original villager. */
+static int pc_player_custom_model_index(void) {
+    static int idx = -2;
+    if (idx == -2) {
+        const char* e = getenv("AC_PLAYER_MODEL");
+        idx = e ? atoi(e) : (getenv("AC_PEON") ? 1 : -1);
+        if (idx < -1 || idx > 3) idx = -1;
+    }
+    return idx;
+}
+
 static int pc_player_custom_model_enabled(void) {
-    static int on = -1;
-    if (on < 0) on = (getenv("AC_PEON") != NULL);
-    return on;
+    return pc_player_custom_model_index() >= 0;
 }
 
 static void pc_player_custom_model_draw(GAME* game, ACTOR* actorx) {
     GRAPH* graph = game->graph;
-    float sc = 41.0f, yaw_deg = 0.0f;
+    int k = pc_player_custom_model_index();
+    float sc = pc_player_scale[k], yaw_deg = 0.0f;
     const char* e;
-    if ((e = getenv("AC_PEON_SCALE"))) sc = (float)atof(e);
+    if ((e = getenv("AC_PLAYER_SCALE"))) sc *= (float)atof(e);
     if ((e = getenv("AC_PEON_YAW"))) yaw_deg = (float)atof(e);
     Matrix_push();
     if (yaw_deg != 0.0f) Matrix_RotateY((s16)(yaw_deg * 65536.0f / 360.0f), MTX_MULT);
     Matrix_scale(sc, sc, sc, MTX_MULT);
     OPEN_POLY_OPA_DISP(graph);
     gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPDisplayList(POLY_OPA_DISP++, pc_peon_dl);
+    gSPDisplayList(POLY_OPA_DISP++, pc_player_dls[k]);
     CLOSE_POLY_OPA_DISP(graph);
     Matrix_pull();
 }

@@ -43,8 +43,9 @@ def main(root, assets):
     for town in ('alliance', 'horde'):
         for fn in convert_dir(os.path.join(root, 'mod/pack', town), os.path.join(out, town)):
             manifest.append(f'{town}/{fn}')
-    for fn in convert_dir(os.path.join(root, 'mod/logo'), os.path.join(out, 'common')):
-        manifest.append(f'common/{fn}')
+    for sub in ('mod/logo', 'mod/players'):
+        for fn in convert_dir(os.path.join(root, sub), os.path.join(out, 'common')):
+            manifest.append(f'common/{fn}')
     with open(os.path.join(out, 'manifest.txt'), 'w') as f:
         f.write('\n'.join(manifest) + '\n')
     print(len(manifest), 'files')
