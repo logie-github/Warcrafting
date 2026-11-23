@@ -39,6 +39,8 @@ public class GameActivity extends SDLActivity {
         try {
             int ch = getSharedPreferences("warcrafting", MODE_PRIVATE).getInt("character", 0);
             android.system.Os.setenv("AC_PLAYER_MODEL", String.valueOf(Math.max(0, Math.min(3, ch))), true);
+            String town = getSharedPreferences("warcrafting", MODE_PRIVATE).getString("town", "alliance");
+            android.system.Os.setenv("AC_TOWN", "horde".equals(town) ? "horde" : "alliance", true);
         } catch (Exception ignored) {
         }
         super.onCreate(savedInstanceState);
