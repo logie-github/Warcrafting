@@ -533,7 +533,7 @@ def main():
             k = (slot, w, h, rotate)
             if k not in tiles:
                 base = Image.open(os.path.join(a.tiles, faction, slot + '.png')).convert('RGB')
-                if slot in ('wood', 'sand', 'grass', 'earth', 'cliff', 'stone', 'bush_a', 'rail'):
+                if slot in ('wood', 'brick', 'sand', 'grass', 'earth', 'cliff', 'stone', 'bush_a', 'rail'):
                     base = make_seamless(base)
                 if slot == 'grass':
                     base = flatten_lowfreq(base)
