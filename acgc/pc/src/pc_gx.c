@@ -793,6 +793,7 @@ void pc_geo_frame(void) {
         unsigned int hdr[2] = { 0xFFFFFFFFu, (unsigned int)g_geo_ntex };
         fwrite(hdr, 4, 2, g_geo_f);
         for (t = 0; t < g_geo_ntex; t++) {
+#ifndef TARGET_ANDROID
             GLint w = 0, h = 0;
             unsigned char* px;
             glBindTexture(GL_TEXTURE_2D, g_geo_tex[t]);
@@ -808,6 +809,7 @@ void pc_geo_frame(void) {
                 fwrite(px, 1, (size_t)w * h * 4, g_geo_f);
                 free(px);
             }
+#endif
         }
         fclose(g_geo_f);
         g_geo_f = NULL;

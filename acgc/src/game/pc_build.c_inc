@@ -10,7 +10,8 @@
 extern char* getenv(const char*);
 extern void* malloc(size_t);
 extern void* calloc(size_t, size_t);
-extern void* aligned_alloc(size_t, size_t);
+extern int posix_memalign(void**, size_t, size_t);
+static void* pc_build_amalloc(size_t al, size_t n) { void* p = NULL; if (posix_memalign(&p, al, n) != 0) return NULL; return p; }
 
 /* ---- model library loaded from models.bin (see tools/make_lib_assets.py) ---- */
 typedef struct { char name[48]; f32 w, d, h; int nmesh; const u8* body; Gfx* dl; } pc_lib_model;
@@ -24,7 +25,7 @@ static u8* pc_lib_placeholder(int k) {
     int i;
     if (k < 0 || k >= 1024) k = 0;
     if (s_lib_ph[k] == NULL) {
-        u8* p = (u8*)aligned_alloc(32, 0x200);
+        u8* p = (u8*)pc_build_amalloc(32, 0x200);
         st = ((u32)k * 2654435761u + 1u);
         for (i = 0; i < 0x200; i++) { st = st * 1103515245u + 12345u; p[i] = (u8)((st >> 16) & 0xFF); }
         s_lib_ph[k] = p;
@@ -96,7 +97,7 @@ static Gfx* pc_lib_build(int mi) {
         { Gfx t[] = { gsDPSetTileSize(G_TX_RENDERTILE, 0, 0, 124, 124) }; for (i = 0; i < (int)(sizeof(t) / sizeof(Gfx)); i++) dl[k++] = t[i]; }
         for (g = 0; g < ng; g++) {
             int nv = p[0], nt = p[1], v, nidx = nt * 3, off = 0;
-            Vtx* vt = (Vtx*)aligned_alloc(32, (size_t)((nv * (int)sizeof(Vtx) + 31) & ~31));
+            Vtx* vt = (Vtx*)pc_build_amalloc(32, (size_t)((nv * (int)sizeof(Vtx) + 31) & ~31));
             const u8* ip;
             u8 idx[300];
             p += 2;
