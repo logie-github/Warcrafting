@@ -61,11 +61,11 @@ textarea{width:100%;height:52vh;background:#101115;color:var(--text);border:1px 
   </div>
   <div class="chips" id="chips"></div>
   <div class="controls">
-    <div class="ctl"><label>Scale</label><input type="range" id="sScale" min="-1.2" max="1.2" step="0.005"><output id="oScale"></output></div>
+    <div class="ctl"><label>Scale</label><input type="range" id="sScale" min="-3" max="3" step="0.005"><output id="oScale"></output></div>
     <div class="ctl"><label>Rotate</label><input type="range" id="sYaw" min="-180" max="180" step="1"><output id="oYaw"></output></div>
-    <div class="ctl"><label>Offset X</label><input type="range" id="sOx" min="-1" max="1" step="0.005"><output id="oOx"></output></div>
-    <div class="ctl"><label>Offset Z</label><input type="range" id="sOz" min="-1" max="1" step="0.005"><output id="oOz"></output></div>
-    <div class="ctl"><label>Raise / sink</label><input type="range" id="sOy" min="-40" max="40" step="0.25"><output id="oOy"></output></div>
+    <div class="ctl"><label>Offset X</label><input type="range" id="sOx" min="-5" max="5" step="0.005"><output id="oOx"></output></div>
+    <div class="ctl"><label>Offset Z</label><input type="range" id="sOz" min="-5" max="5" step="0.005"><output id="oOz"></output></div>
+    <div class="ctl"><label>Raise / sink</label><input type="range" id="sOy" min="-500" max="500" step="0.25"><output id="oOy"></output></div>
   </div>
   <div class="row">
     <button class="btn" id="fitW">Fit footprint</button>
@@ -152,7 +152,7 @@ function buildChips(){const a=ac(),box=$('chips');box.innerHTML='';
 function syncUI(){ if(!cand){return;} const t=tf(),a=acInfo(),m=D.models[cand];
   const mw=m.max[0]-m.min[0],md=m.max[2]-m.min[2],mh=m.max[1]-m.min[1];
   $('sScale').value=Math.log10(t.s/defaultTf().s)||0; $('sYaw').value=t.yaw;
-  const R=Math.max(a.w,a.d)/2; $('sOx').min=-1;$('sOx').max=1;$('sOz').min=-1;$('sOz').max=1; $('sOx').value=t.ox/R;$('sOz').value=t.oz/R;$('sOy').value=t.oy;
+  const R=Math.max(a.w,a.d)/2; $('sOx').value=t.ox/R;$('sOz').value=t.oz/R;$('sOy').value=t.oy;
   $('oScale').textContent=t.s.toFixed(3)+'×'; $('oYaw').textContent=Math.round(t.yaw)+'°'; $('oOx').textContent=t.ox.toFixed(1); $('oOz').textContent=t.oz.toFixed(1); $('oOy').textContent=t.oy.toFixed(1);
   $('w3Dim').textContent=`${(mw*t.s).toFixed(0)} × ${(md*t.s).toFixed(0)} × ${(mh*t.s).toFixed(0)}`; $('w3Title').textContent=cand+' on the plot';
   $('useBtn').classList.toggle('on',!!(st.sel&&st.sel[cur]===cand)); $('useBtn').textContent=(st.sel&&st.sel[cur]===cand)?'★ Chosen':'★ Use this one';
