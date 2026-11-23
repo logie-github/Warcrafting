@@ -744,6 +744,75 @@ static void aAL_skl_draw(GAME* game, cKF_SkeletonInfo_R_c* skl_keyframe) {
   CLOSE_DISP(game->graph);
 }
 
+#ifdef TARGET_PC
+/* Custom title logo: one textured quad. It reuses the "TM" I4 32x32 texture slot, whose
+ * data is replaced by the texture pack (tex1_32x32_e8e96f9106144714_0.dds), and the quad
+ * is sized to the replacement image's aspect ratio. Set AC_ORIG_LOGO to draw the stock logo. */
+extern u8 logo_us_tm_tex_4i4_txt[];
+#define PC_LOGO_ASPECT_NUM 2172
+#define PC_LOGO_ASPECT_DEN 724
+static Vtx pc_logo_v[4] = {
+  {{{ -750, -750, 0 }, 1, { 0, 1024 }, { 255, 255, 255, 255 }}},
+  {{{  750, -750, 0 }, 1, { 1024, 1024 }, { 255, 255, 255, 255 }}},
+  {{{  750,  750, 0 }, 1, { 1024, 0 }, { 255, 255, 255, 255 }}},
+  {{{ -750,  750, 0 }, 1, { 0, 0 }, { 255, 255, 255, 255 }}},
+};
+static Gfx pc_logo_dl[] = {
+  gsSPTexture(0, 0, 0, G_TX_RENDERTILE, G_ON),
+  gsDPSetPrimColor(0, 255, 255, 255, 255, 255),
+  gsDPSetTextureImage_Dolphin(G_IM_FMT_I, G_IM_SIZ_4b, 32, 32, logo_us_tm_tex_4i4_txt),
+  gsDPSetTile_Dolphin(G_DOLPHIN_TLUT_DEFAULT_MODE, 0, 15, GX_CLAMP, GX_CLAMP, 0, 0),
+  gsSPVertex(pc_logo_v, 4, 0),
+  gsSPNTrianglesInit_5b(2, 0, 1, 2, 0, 2, 3, 0, 0, 0),
+  gsSPEndDisplayList(),
+};
+
+static void aAL_pc_logo_draw(GAME* game, ANIMAL_LOGO_ACTOR* actor) {
+  extern char* getenv(const char*);
+  extern double atof(const char*);
+  static int inited = 0;
+  GRAPH* graph = game->graph;
+  float cx = 1000.0f, cy = 640.0f, w = 1500.0f;
+  const char* e;
+  if (!inited) {
+    inited = 1;
+    pc_logo_v[0].v.ob[0] = pc_logo_v[3].v.ob[0] = -750;
+  }
+  if ((e = getenv("AC_LOGO_X"))) cx = (float)atof(e);
+  if ((e = getenv("AC_LOGO_Y"))) cy = (float)atof(e);
+  if ((e = getenv("AC_LOGO_W"))) w = (float)atof(e);
+  {
+    /* entrance: scale up with a small overshoot while the stock animation would play */
+    f32 cur = actor->animal.skeleton.frame_control.current_frame;
+    f32 end = actor->animal.skeleton.frame_control.end_frame;
+    f32 t = (end > 0.0f) ? cur / end : 1.0f;
+    float sc;
+    if (t > 1.0f) t = 1.0f;
+    sc = (t < 0.7f) ? (t / 0.7f) * 1.08f : 1.08f - 0.08f * ((t - 0.7f) / 0.3f);
+    if (sc < 0.02f) return;
+    w *= sc;
+  }
+  {
+    float half_w = w * 0.5f;
+    float half_h = half_w * (float)PC_LOGO_ASPECT_DEN / (float)PC_LOGO_ASPECT_NUM;
+    /* model quad is +-750 around origin; scale matrix maps it to half_w x half_h in screen units */
+    Matrix_push();
+    Matrix_translate(cx, cy, 0.0f, MTX_MULT);
+    Matrix_scale(half_w / 750.0f, half_h / 750.0f, 1.0f, MTX_MULT);
+    {
+      Gfx* gfx;
+      OPEN_DISP(graph);
+      gfx = NOW_FONT_DISP;
+      gSPMatrix(gfx++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+      gSPDisplayList(gfx++, pc_logo_dl);
+      SET_FONT_DISP(gfx);
+      CLOSE_DISP(graph);
+    }
+    Matrix_pull();
+  }
+}
+#endif
+
 static void aAL_title_draw(GAME* game, ANIMAL_LOGO_ACTOR* actor) {
   static const Gfx init_disp[] = {
     gsDPSetOtherMode(G_AD_NOTPATTERN | G_CD_MAGICSQ | G_CK_NONE | G_TC_FILT | G_TF_BILERP | G_TT_RGBA16 | G_TL_TILE | G_TD_CLAMP | G_TP_PERSP | G_CYC_1CYCLE | G_PM_NPRIMITIVE, G_AC_NONE | G_ZS_PRIM | G_RM_XLU_SURF | G_RM_XLU_SURF2),
@@ -769,9 +838,20 @@ static void aAL_title_draw(GAME* game, ANIMAL_LOGO_ACTOR* actor) {
   gSPMatrix(NOW_POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
   gSPDisplayList(NOW_POLY_OPA_DISP++, init_disp);
   
+#ifdef TARGET_PC
+  {
+    extern char* getenv(const char*);
+    if (getenv("AC_ORIG_LOGO") != NULL) {
+      aAL_skl_draw(game, &actor->animal.skeleton);
+      aAL_skl_draw(game, &actor->cros.skeleton);
+    }
+    aAL_skl_draw(game, &actor->sing.skeleton);
+  }
+#else
   aAL_skl_draw(game, &actor->animal.skeleton);
   aAL_skl_draw(game, &actor->cros.skeleton);
   aAL_skl_draw(game, &actor->sing.skeleton);
+#endif
 
   SET_FONT_DISP(NOW_POLY_OPA_DISP);
   SET_POLY_OPA_DISP(poly_save);
@@ -779,6 +859,10 @@ static void aAL_title_draw(GAME* game, ANIMAL_LOGO_ACTOR* actor) {
   CLOSE_DISP(graph);
 
   Matrix_pull();
+#ifdef TARGET_PC
+  { extern char* getenv(const char*);
+    if (getenv("AC_ORIG_LOGO") == NULL) aAL_pc_logo_draw(game, actor); }
+#endif
 }
 
 #ifdef PC_ENHANCEMENTS
