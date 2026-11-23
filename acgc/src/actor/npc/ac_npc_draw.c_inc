@@ -319,11 +319,16 @@ static void aNPC_actor_draw_sub(ACTOR* actorx, GAME* game) {
         {
             int pc_k = -1;
             if (pc_wc3_horde()) {
-                if (actorx->npc_id == SP_NPC_SHOP_MASTER || actorx->npc_id == SP_NPC_SHOP_MASTERSP ||
-                    actorx->npc_id == SP_NPC_SHOP_MASTERSP_2 || actorx->npc_id == SP_NPC_SHOP_MASTERSP_3) {
-                    pc_k = 4; /* Thrall */
-                } else if (actorx->npc_id == SP_NPC_GUIDE || actorx->npc_id == SP_NPC_GUIDE2) {
-                    pc_k = 5; /* Grom Hellscream */
+                int id = actorx->npc_id;
+                if (id == SP_NPC_SHOP_MASTER || id == SP_NPC_CONV_MASTER || id == SP_NPC_SUPER_MASTER ||
+                    id == SP_NPC_DEPART_MASTER || id == SP_NPC_SHOP_MASTERSP || id == SP_NPC_SHOP_MASTERSP_2 ||
+                    id == SP_NPC_SHOP_MASTERSP_3 || id == SP_NPC_SHOP_MASTERSP_4) {
+                    pc_k = 4; /* Thrall replaces Tom Nook at every shop stage */
+                } else if (id == SP_NPC_GUIDE || id == SP_NPC_GUIDE2 || id == SP_NPC_RCN_GUIDE ||
+                           id == SP_NPC_RCN_GUIDE2 || id == SP_NPC_RCN_GUIDE_1 || id == SP_NPC_RCN_GUIDE2_1 ||
+                           id == SP_NPC_RCN_GUIDE_2 || id == SP_NPC_RCN_GUIDE2_2 || id == SP_NPC_RCN_GUIDE_3 ||
+                           id == SP_NPC_RCN_GUIDE2_3) {
+                    pc_k = 5; /* Grom Hellscream replaces Rover */
                 }
             }
             if (pc_k >= 0) {
