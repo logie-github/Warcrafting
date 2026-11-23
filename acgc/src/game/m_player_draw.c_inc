@@ -181,6 +181,35 @@ static int Player_actor_draw_After(GAME* game, cKF_SkeletonInfo_R_c* kf, int joi
     return TRUE;
 }
 
+#ifdef TARGET_PC
+extern Gfx pc_peon_dl[];
+extern char* getenv(const char*);
+extern double atof(const char*);
+
+/* Prototype: draw the original Warcraft III Peon (bind pose, no animation) instead of the villager. */
+static int pc_player_custom_model_enabled(void) {
+    static int on = -1;
+    if (on < 0) on = (getenv("AC_PEON") != NULL);
+    return on;
+}
+
+static void pc_player_custom_model_draw(GAME* game, ACTOR* actorx) {
+    GRAPH* graph = game->graph;
+    float sc = 0.45f, yaw_deg = 0.0f;
+    const char* e;
+    if ((e = getenv("AC_PEON_SCALE"))) sc = (float)atof(e);
+    if ((e = getenv("AC_PEON_YAW"))) yaw_deg = (float)atof(e);
+    Matrix_push();
+    if (yaw_deg != 0.0f) Matrix_RotateY((s16)(yaw_deg * 65536.0f / 360.0f), MTX_MULT);
+    Matrix_scale(sc, sc, sc, MTX_MULT);
+    OPEN_POLY_OPA_DISP(graph);
+    gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPDisplayList(POLY_OPA_DISP++, pc_peon_dl);
+    CLOSE_POLY_OPA_DISP(graph);
+    Matrix_pull();
+}
+#endif
+
 static void Player_actor_draw_Normal(ACTOR* actorx, GAME* game) {
     PLAYER_ACTOR* player = (PLAYER_ACTOR*)actorx;
     int buf_idx = game->frame_counter % 2;
@@ -295,6 +324,11 @@ static void Player_actor_draw_Normal(ACTOR* actorx, GAME* game) {
         CLOSE_DISP(graph);
     }
 
+#ifdef TARGET_PC
+    if (pc_player_custom_model_enabled()) {
+        pc_player_custom_model_draw(game, actorx);
+    } else
+#endif
     cKF_Si3_draw_R_SV(game, kf, mtx, &Player_actor_draw_Before, &Player_actor_draw_After, player);
 
     if (player->change_color_flag) {
