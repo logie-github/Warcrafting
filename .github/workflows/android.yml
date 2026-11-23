@@ -63,8 +63,27 @@ jobs:
               echo "keyPassword=$KEY_PASSWORD"
             } > keystore.properties
             echo "Signing with the provided release keystore"
-          else
-            echo "No keystore secrets set: the release APK is signed with the debug key"
+          fi
+
+      - name: Restore fixed sideload key
+        uses: actions/cache@v4
+        with:
+          path: acgc/warcrafting-sideload.p12
+          key: warcrafting-sideload-key-v1
+
+      - name: Fixed sideload key when no secrets are set
+        working-directory: acgc
+        run: |
+          if [ ! -f keystore.properties ]; then
+            [ -f warcrafting-sideload.p12 ] || keytool -genkeypair -keystore warcrafting-sideload.p12 -storetype PKCS12 \
+              -storepass warcrafting -keypass warcrafting -alias warcrafting -keyalg RSA -keysize 2048 -validity 36500 -dname "CN=Warcrafting"
+            {
+              echo "storeFile=warcrafting-sideload.p12"
+              echo "storePassword=warcrafting"
+              echo "keyAlias=warcrafting"
+              echo "keyPassword=warcrafting"
+            } > keystore.properties
+            echo "Signing with the cached sideload key (set KEYSTORE_* secrets for a permanent key)"
           fi
 
       - name: Build release APK

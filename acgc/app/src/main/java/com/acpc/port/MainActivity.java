@@ -72,6 +72,7 @@ public class MainActivity extends Activity {
         setContentView(scroll);
         getWindow().setStatusBarColor(BG_TOP);
         getWindow().setNavigationBarColor(BG_BOTTOM);
+        Updater.check(this);
     }
 
     @Override
