@@ -96,6 +96,7 @@ static void Game_play_camera_proc(GAME_PLAY* play) {
     Camera2_ClearActorTalking_Cull(play);
     Camera2_process(play);
 #ifdef TARGET_PC
+    { extern int pc_build_camera(GAME_PLAY*); pc_build_camera(play); }
     {
         /* AC_CAM="ex ey ez cx cy cz fov far": fixed camera for map captures */
         extern char* getenv(const char*);

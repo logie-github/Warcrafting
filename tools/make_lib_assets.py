@@ -65,6 +65,8 @@ def main(pkl, out_dir, html_json):
         w, d, h = (hi - lo)[0], (hi - lo)[2], (hi - lo)[1]
         bin_parts.append(nm.encode()[:47].ljust(48, b'\0') + struct.pack('<fffH', float(w), float(d), float(h), nmesh) + bytes(body))
         models.append(dict(name=nm, cat=ent['cat'], path=ent['path'], w=float(w), d=float(d), h=float(h), r=r))
+    with open(os.path.join(out_dir, 'library.txt'), 'w') as f:
+        for m in models: f.write(m['cat'] + ' | ' + m['name'] + '\n')
     with open(os.path.join(out_dir, 'models.bin'), 'wb') as f:
         f.write(b'WCM1' + struct.pack('<I', len(bin_parts)) + b''.join(bin_parts))
     for k, png in enumerate(texlist):

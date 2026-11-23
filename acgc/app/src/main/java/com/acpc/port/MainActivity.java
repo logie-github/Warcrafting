@@ -227,8 +227,8 @@ public class MainActivity extends Activity {
 
     private View builderCard() {
         LinearLayout c = card("🏰", "Town Builder");
-        desc(c, "Place Warcraft III buildings and props anywhere in the town, or replace the original buildings. Your layout is saved and loads the next time you press Play.");
-        actions(c, pill("Open Town Builder", GREEN, ON_ACCENT, () -> startActivity(new android.content.Intent(this, BuilderActivity.class))));
+        desc(c, "Opens your real town exactly as the game renders it, with a toolbar to place, move, rotate and scale Warcraft III buildings and props, replace the original buildings, switch to a top-down view and share your layout. Your layout loads every time you play.");
+        actions(c, pill("Open Town Builder", GREEN, ON_ACCENT, () -> play(true)));
         return c;
     }
 
@@ -334,6 +334,10 @@ public class MainActivity extends Activity {
     /* ---------- actions ---------- */
 
     private void play() {
+        play(false);
+    }
+
+    private void play(boolean builder) {
         File rom = RomManager.findRom(this);
         if (rom == null || !RomManager.readInfo(rom).isRequired()) {
             toast(getString(R.string.play_need_disc));
@@ -345,7 +349,9 @@ public class MainActivity extends Activity {
             error(e);
             return;
         }
-        startActivity(new Intent(this, GameActivity.class));
+        Intent gi = new Intent(this, GameActivity.class);
+        if (builder) gi.putExtra("builder", true);
+        startActivity(gi);
     }
 
     private void chooseLanguage() {

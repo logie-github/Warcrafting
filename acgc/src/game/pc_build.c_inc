@@ -149,6 +149,11 @@ static int s_bld_cur = 0;
 static f32 s_bld_yaw = 0.0f, s_bld_scale = 0.0f; /* scale 0 = default for the model */
 static int s_bld_loaded = 0;
 static int s_bld_msg = 0;
+static f32 s_bld_ox = 0.0f, s_bld_oz = 0.0f; /* ghost offset in the player's frame (right, forward) */
+static int s_bld_cam_top = 0;
+static f32 s_bld_cam_zoom = 1.0f;
+static int s_bld_q[64][2], s_bld_qh = 0, s_bld_qt = 0;
+static char s_bld_status_buf[160];
 static const char* s_bld_status = "";
 /* positions of the original buildings seen this frame (for Replace) */
 static int s_bld_seen_slot[32]; static f32 s_bld_seen_x[32], s_bld_seen_z[32]; static int s_bld_seen_n = 0;
@@ -218,8 +223,9 @@ static int pc_build_ghost(GAME_PLAY* play, f32* x, f32* y, f32* z) {
     if (pl == NULL) return 0;
     a = (f32)pl->actor_class.shape_info.rotation.y * (3.14159265f / 32768.0f);
     dist = 90.0f + 0.5f * (s_lib[s_bld_cur].w > s_lib[s_bld_cur].d ? s_lib[s_bld_cur].w : s_lib[s_bld_cur].d) * pc_build_cur_scale();
-    *x = pl->actor_class.world.position.x + sinf(a) * dist;
-    *z = pl->actor_class.world.position.z + cosf(a) * dist;
+    dist += s_bld_oz;
+    *x = pl->actor_class.world.position.x + sinf(a) * dist + cosf(a) * s_bld_ox;
+    *z = pl->actor_class.world.position.z + cosf(a) * dist - sinf(a) * s_bld_ox;
     *y = pl->actor_class.world.position.y;
     return 1;
 }
@@ -227,11 +233,10 @@ static int pc_build_ghost(GAME_PLAY* play, f32* x, f32* y, f32* z) {
 /* cmd: 1 toggle, 2 next, 3 prev, 4 place, 5 delete nearest, 6 rotate 45, 7 bigger, 8 smaller, 9 replace nearest building,
  * 10 restore nearest building, 11 undo last, 12 rotate -45 */
 static GAME_PLAY* s_bld_play = NULL;
-void pc_build_cmd(int cmd, int arg) {
+static void pc_build_exec(int cmd, int arg) {
     f32 gx, gy, gz;
     int i, best;
     f32 bd;
-    (void)arg;
     pc_lib_init();
     if (s_lib_n == 0) return;
     pc_build_load();
@@ -240,6 +245,36 @@ void pc_build_cmd(int cmd, int arg) {
         case 2: s_bld_cur = (s_bld_cur + 1) % pc_lib_count; s_bld_scale = 0.0f; break;
         case 3: s_bld_cur = (s_bld_cur + pc_lib_count - 1) % pc_lib_count; s_bld_scale = 0.0f; break;
         case 6: s_bld_yaw += 45.0f; if (s_bld_yaw >= 360.0f) s_bld_yaw -= 360.0f; break;
+        case 13:
+            if (s_bld_play && pc_build_ghost(s_bld_play, &gx, &gy, &gz)) {
+                best = -1; bd = 400.0f * 400.0f;
+                for (i = 0; i < s_bld_n; i++) {
+                    f32 dx = s_bld_items[i].x - gx, dz = s_bld_items[i].z - gz, d2 = dx * dx + dz * dz;
+                    if (d2 < bd) { bd = d2; best = i; }
+                }
+                if (best >= 0) {
+                    PLAYER_ACTOR* pl = GET_PLAYER_ACTOR(s_bld_play);
+                    f32 a = (f32)pl->actor_class.shape_info.rotation.y * (3.14159265f / 32768.0f);
+                    f32 ex = s_bld_items[best].x - pl->actor_class.world.position.x, ez = s_bld_items[best].z - pl->actor_class.world.position.z;
+                    s_bld_cur = s_bld_items[best].model; s_bld_scale = s_bld_items[best].s; s_bld_yaw = s_bld_items[best].yaw;
+                    s_bld_ox = 0.0f; s_bld_oz = 0.0f;
+                    { f32 fwd0; f32 gx0, gy0, gz0; pc_build_ghost(s_bld_play, &gx0, &gy0, &gz0);
+                      fwd0 = ex * sinf(a) + ez * cosf(a);
+                      s_bld_oz = fwd0 - (sqrtf((gx0 - pl->actor_class.world.position.x) * (gx0 - pl->actor_class.world.position.x) + (gz0 - pl->actor_class.world.position.z) * (gz0 - pl->actor_class.world.position.z)));
+                      s_bld_ox = ex * cosf(a) - ez * sinf(a); }
+                    memmove(&s_bld_items[best], &s_bld_items[best + 1], (size_t)(s_bld_n - best - 1) * sizeof(pc_build_item)); s_bld_n--; pc_build_save();
+                }
+            }
+            break;
+        case 14: s_bld_oz += 20.0f; break;
+        case 15: s_bld_oz -= 20.0f; break;
+        case 16: s_bld_ox += 20.0f; break;
+        case 17: s_bld_ox -= 20.0f; break;
+        case 18: s_bld_ox = 0.0f; s_bld_oz = 0.0f; break;
+        case 30: s_bld_cam_top = !s_bld_cam_top; break;
+        case 31: s_bld_cam_zoom *= 0.85f; if (s_bld_cam_zoom < 0.25f) s_bld_cam_zoom = 0.25f; break;
+        case 32: s_bld_cam_zoom *= 1.18f; if (s_bld_cam_zoom > 4.0f) s_bld_cam_zoom = 4.0f; break;
+        case 40: if (arg >= 0 && arg < pc_lib_count) { s_bld_cur = arg; s_bld_scale = 0.0f; } break;
         case 12: s_bld_yaw -= 45.0f; if (s_bld_yaw < 0.0f) s_bld_yaw += 360.0f; break;
         case 7: s_bld_scale = pc_build_cur_scale() * 1.12f; break;
         case 8: s_bld_scale = pc_build_cur_scale() / 1.12f; break;
@@ -301,7 +336,7 @@ static void pc_build_run_test_cmds(void) {
     if (++frames % 20 != 0) return;
     while (e[pos] == ' ' || e[pos] == ',') pos++;
     if (e[pos] == 0) return;
-    { int c = 0; while (e[pos] >= '0' && e[pos] <= '9') { c = c * 10 + (e[pos] - '0'); pos++; } pc_build_cmd(c, 0); }
+    { int c = 0; while (e[pos] >= '0' && e[pos] <= '9') { c = c * 10 + (e[pos] - '0'); pos++; } pc_build_exec(c, 0); }
 }
 
 void pc_build_seen(int slot, f32 x, f32 z) {
@@ -314,6 +349,31 @@ int pc_build_override(int slot, int* m, f32* dx, f32* dz, f32* oy, f32* yaw, f32
     return 1;
 }
 
+void pc_build_cmd(int cmd, int arg) {
+    int n = (s_bld_qt + 1) & 63;
+    if (n == s_bld_qh) return;
+    s_bld_q[s_bld_qt][0] = cmd; s_bld_q[s_bld_qt][1] = arg; s_bld_qt = n;
+}
+
+const char* pc_build_status(void) {
+    pc_lib_init();
+    if (s_lib_n == 0) { snprintf(s_bld_status_buf, sizeof(s_bld_status_buf), "No model library found"); return s_bld_status_buf; }
+    snprintf(s_bld_status_buf, sizeof(s_bld_status_buf), "%s  |  scale %.2f  |  rot %d  |  %d placed  |  %s view",
+             s_lib[s_bld_cur].name, (double)pc_build_cur_scale(), (int)s_bld_yaw, s_bld_n, s_bld_cam_top ? "top" : "player");
+    return s_bld_status_buf;
+}
+
+/* top-down builder camera; returns 1 when the camera was overridden */
+int pc_build_camera(GAME_PLAY* play) {
+    f32 gx, gy, gz;
+    if (!g_pc_build_mode || !s_bld_cam_top || !pc_build_ghost(play, &gx, &gy, &gz)) return 0;
+    play->camera.lookat.center.x = gx; play->camera.lookat.center.y = gy; play->camera.lookat.center.z = gz;
+    play->camera.lookat.eye.x = gx; play->camera.lookat.eye.y = gy + 900.0f * s_bld_cam_zoom; play->camera.lookat.eye.z = gz + 420.0f * s_bld_cam_zoom;
+    play->camera.lookat.up.x = 0.0f; play->camera.lookat.up.y = 0.0f; play->camera.lookat.up.z = -1.0f;
+    play->camera.perspective.fov_y = 40.0f;
+    return 1;
+}
+
 void pc_build_begin(void) { s_bld_seen_n = 0; }
 
 static void pc_build_frame(GAME_PLAY* play) {
@@ -322,6 +382,8 @@ static void pc_build_frame(GAME_PLAY* play) {
     s_bld_play = play;
     pc_lib_init();
     pc_build_load();
+    { static int builder_env = -1; if (builder_env < 0) { builder_env = getenv("AC_BUILDER") != NULL; if (builder_env) g_pc_build_mode = 1; } }
+    while (s_bld_qh != s_bld_qt) { pc_build_exec(s_bld_q[s_bld_qh][0], s_bld_q[s_bld_qh][1]); s_bld_qh = (s_bld_qh + 1) & 63; }
     pc_build_run_test_cmds();
     for (i = 0; i < s_bld_n; i++) pc_build_draw_model(play, s_bld_items[i].model, s_bld_items[i].x, s_bld_items[i].y, s_bld_items[i].z, s_bld_items[i].yaw, s_bld_items[i].s);
     if (g_pc_build_mode && pc_build_ghost(play, &gx, &gy, &gz)) pc_build_draw_model(play, s_bld_cur, gx, gy, gz, s_bld_yaw, pc_build_cur_scale());

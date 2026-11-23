@@ -51,6 +51,10 @@ def main(root, assets):
         with open(mb, 'rb') as a, open(os.path.join(out, 'models.bin'), 'wb') as b:
             b.write(a.read())
         manifest.append('models.bin')
+    lt = os.path.join(root, 'mod/lib2/library.txt')
+    if os.path.exists(lt):
+        with open(lt, 'rb') as a, open(os.path.join(out, 'library.txt'), 'wb') as b:
+            b.write(a.read())
     mdir = os.path.join(root, 'mod/music')
     if os.path.isdir(mdir):
         os.makedirs(os.path.join(out, 'music'), exist_ok=True)

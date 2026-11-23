@@ -1,0 +1,906 @@
+Buildings / Demon | CorruptedAncientofWar
+Buildings / Demon | CorruptedAncientProtector
+Buildings / Demon | CorruptedMoonWell
+Buildings / Demon | CorruptedTreeofLife
+Buildings / Demon | DemonGate
+Buildings / Human | AltarOfKings
+Buildings / Human | ArcaneSanctum
+Buildings / Human | ArcaneVault
+Buildings / Human | Blacksmith
+Buildings / Human | Farm
+Buildings / Human | GryphonAviary
+Buildings / Human | HumanBarracks
+Buildings / Human | HumanLumberMill
+Buildings / Human | HumanShipyard
+Buildings / Human | HumanTower
+Buildings / Human | TownHall
+Buildings / Human | Workshop
+Buildings / Naga | AltarOfDepths
+Buildings / Naga | CoralBed
+Buildings / Naga | ShrineOfAshjara
+Buildings / Naga | SpawningGrounds
+Buildings / Naga | TempleofTides
+Buildings / Naga | TidalGuardian
+Buildings / NightElf | AltarOfElders
+Buildings / NightElf | AncientofLore
+Buildings / NightElf | AncientofWar
+Buildings / NightElf | AncientofWind
+Buildings / NightElf | AncientOfWonder
+Buildings / NightElf | AncientProtector
+Buildings / NightElf | BearDen
+Buildings / NightElf | ChimaeraRoost
+Buildings / NightElf | EntangledGoldmine
+Buildings / NightElf | HuntersHall
+Buildings / NightElf | MoonWell
+Buildings / NightElf | NightElfShipyard
+Buildings / NightElf | TreeofLife
+Buildings / Orc | AltarofStorms
+Buildings / Orc | Beastiary
+Buildings / Orc | GreatHall
+Buildings / Orc | OrcBarracks
+Buildings / Orc | SpiritLodge
+Buildings / Orc | TaurenTotem
+Buildings / Orc | TrollBurrow
+Buildings / Orc | VoodooLounge
+Buildings / Orc | WarMill
+Buildings / Orc | WatchTower
+Buildings / Other | AmmoDump
+Buildings / Other | ArcaneObservatory
+Buildings / Other | BarrelsUnit
+Buildings / Other | BarrelsUnit0
+Buildings / Other | BarrelsUnit1
+Buildings / Other | BarrowDens
+Buildings / Other | BoxUnit
+Buildings / Other | BridgeObelisk
+Buildings / Other | CentaurTent
+Buildings / Other | CentaurTent1
+Buildings / Other | CentaurTent2
+Buildings / Other | ChieftainHut
+Buildings / Other | CircleOfPower
+Buildings / Other | CityBuildingLarge_0
+Buildings / Other | CityBuildingLarge_135
+Buildings / Other | CityBuildingLarge_45
+Buildings / Other | CityBuildingLarge_90
+Buildings / Other | CityBuildingSmall0_0
+Buildings / Other | CityBuildingSmall0_1
+Buildings / Other | CityBuildingSmall0_2
+Buildings / Other | CityBuildingSmall135_0
+Buildings / Other | CityBuildingSmall135_1
+Buildings / Other | CityBuildingSmall135_2
+Buildings / Other | CityBuildingSmall45_0
+Buildings / Other | CityBuildingSmall45_1
+Buildings / Other | CityBuildingSmall45_2
+Buildings / Other | CityBuildingSmall90_0
+Buildings / Other | CityBuildingSmall90_1
+Buildings / Other | CityBuildingSmall90_2
+Buildings / Other | CratesUnit
+Buildings / Other | DalaranGuardTower
+Buildings / Other | DarkPortal
+Buildings / Other | DarkPortal2
+Buildings / Other | DragonBuilding
+Buildings / Other | DragonBuildingBlack
+Buildings / Other | DragonBuildingBlue
+Buildings / Other | DragonBuildingGreen
+Buildings / Other | DragonRoost
+Buildings / Other | DraneiHut0
+Buildings / Other | DraneiHut1
+Buildings / Other | ElvenFarm
+Buildings / Other | ElvenFishVillageBuilding0
+Buildings / Other | ElvenFishVillageBuilding1
+Buildings / Other | ElvenFishVillageBuilding2
+Buildings / Other | ElvenFishVillageBuilding3
+Buildings / Other | ElvenFishVillageBuilding4
+Buildings / Other | ElvenGuardFireTower
+Buildings / Other | ElvenGuardMagicTower
+Buildings / Other | ElvenGuardTower
+Buildings / Other | ElvenVillageBuilding0
+Buildings / Other | ElvenVillageBuilding1
+Buildings / Other | ElvenVillageBuilding2
+Buildings / Other | ElvenVillageBuilding3
+Buildings / Other | ElvenVillageBuilding4
+Buildings / Other | ElvenVillageBuilding5
+Buildings / Other | ElvenVillageBuilding6
+Buildings / Other | ElvenVillageBuilding7
+Buildings / Other | ForestTrollHut0
+Buildings / Other | ForestTrollHut1
+Buildings / Other | FountainOfHealth
+Buildings / Other | FountainOfLifeBlood
+Buildings / Other | FountainOfLifeDefiled
+Buildings / Other | FountainOfMana
+Buildings / Other | FountainOfPower
+Buildings / Other | Frostmourne
+Buildings / Other | FruitStand
+Buildings / Other | FurbolgHut
+Buildings / Other | FurbolgHut2
+Buildings / Other | GnollHut
+Buildings / Other | GnollHut2
+Buildings / Other | GoblinShipyard
+Buildings / Other | Goldmine
+Buildings / Other | GrainWarehouse
+Buildings / Other | GranaryInfected
+Buildings / Other | HarpyNest
+Buildings / Other | HornOfCenarius
+Buildings / Other | IceCrownTreasureBox
+Buildings / Other | IceTrollHut0
+Buildings / Other | IceTrollHut1
+Buildings / Other | MageTower
+Buildings / Other | MagicVault
+Buildings / Other | MarketPlace
+Buildings / Other | Mercenary
+Buildings / Other | Merchant
+Buildings / Other | MurlocHut0
+Buildings / Other | MurlocHut1
+Buildings / Other | NerubianZiggurat
+Buildings / Other | PigFarm
+Buildings / Other | PowerGenerator
+Buildings / Other | SacrificialAltar
+Buildings / Other | TaurenTent
+Buildings / Other | TaurenTent2
+Buildings / Other | Tavern
+Buildings / Other | TempArtB
+Buildings / Other | Tent
+Buildings / Other | Tent1
+Buildings / Other | TowerDefenseTower
+Buildings / Other | Waygate
+Buildings / Other | WyvernCage
+Buildings / Other | WyvernCage2
+Buildings / Undead | AltarOfDarkness
+Buildings / Undead | BoneYard
+Buildings / Undead | Crypt
+Buildings / Undead | GargoyleSpire
+Buildings / Undead | Graveyard
+Buildings / Undead | HauntedMine
+Buildings / Undead | Necropolis
+Buildings / Undead | SacrificialPit
+Buildings / Undead | SlaughterHouse
+Buildings / Undead | TempleOfTheDamned
+Buildings / Undead | TombOfRelics
+Buildings / Undead | UndeadShipyard
+Buildings / Undead | Ziggurat
+Props / Ashenvale / Plants | AshenBush0
+Props / Ashenvale / Plants | AshenCatTail
+Props / Ashenvale / Plants | AshenShrooms0
+Props / Ashenvale / Plants | AshenShrooms1
+Props / Ashenvale / Plants | AshenShrooms2
+Props / Ashenvale / Plants | AshenShrooms3
+Props / Ashenvale / Props | AshenBrokenObilisk0
+Props / Ashenvale / Props | AshenBrokenObilisk1
+Props / Ashenvale / Props | AshenHollowStump
+Props / Ashenvale / Props | AshenLogAngled
+Props / Ashenvale / Props | AshenLogStraight
+Props / Ashenvale / Props | AshenObilisk
+Props / Ashenvale / Props | Bird
+Props / Ashenvale / Props | Brazier
+Props / Ashenvale / Props | KeeperStatue
+Props / Ashenvale / Props | obelisk0
+Props / Ashenvale / Props | obelisk1
+Props / Ashenvale / Props | obelisk2
+Props / Ashenvale / Props | ScorchedRemains0
+Props / Ashenvale / Props | ScorchedRemains1
+Props / Ashenvale / Props | ScorchedRemains2
+Props / Ashenvale / Props | SentinelStatue
+Props / Ashenvale / Props | Totem0
+Props / Ashenvale / Props | Totem1
+Props / Ashenvale / Props | Totem2
+Props / Ashenvale / Rocks | AshenRock0
+Props / Ashenvale / Rocks | AshenRock1
+Props / Ashenvale / Rocks | AshenRock2
+Props / Ashenvale / Rocks | AshenRock3
+Props / Ashenvale / Rocks | AshenRock4
+Props / Ashenvale / Rocks | AshenRock5
+Props / Ashenvale / Rocks | AshenRock6
+Props / Ashenvale / Rocks | AshenRock7
+Props / Ashenvale / Rocks | AshenRock8
+Props / Ashenvale / Rocks | AshenRock9
+Props / Ashenvale / Structures | ARockArch
+Props / Ashenvale / Structures | ARockArch45
+Props / Ashenvale / Structures | AshenBrokenColumn0
+Props / Ashenvale / Structures | AshenBrokenColumn1
+Props / Ashenvale / Structures | Pier
+Props / Ashenvale / Structures | PierTrashed
+Props / Ashenvale / Structures | Worldtree
+Props / Ashenvale / Water | AshenvaleLilyPad0
+Props / Ashenvale / Water | Fish
+Props / Barrens / Plants | Barrens_TreeDoodad0
+Props / Barrens / Plants | Barrens_TreeDoodad1
+Props / Barrens / Plants | Barrens_TreeDoodad2
+Props / Barrens / Plants | Barrens_TreeDoodad3
+Props / Barrens / Plants | Barrens_TreeDoodad4
+Props / Barrens / Plants | Barrens_TreeDoodad5
+Props / Barrens / Plants | Barrens_TreeDoodad6
+Props / Barrens / Plants | Barrens_TreeDoodad7
+Props / Barrens / Plants | Barrens_TreeDoodad8
+Props / Barrens / Plants | Barrens_TreeDoodad9
+Props / Barrens / Plants | Cactus0
+Props / Barrens / Plants | Cactus1
+Props / Barrens / Plants | Cactus2
+Props / Barrens / Plants | Cactus3
+Props / Barrens / Plants | Cactus4
+Props / Barrens / Plants | Cactus5
+Props / Barrens / Plants | Cactus6
+Props / Barrens / Plants | Cactus7
+Props / Barrens / Plants | Cactus8
+Props / Barrens / Plants | Cactus9
+Props / Barrens / Props | Barrens_Bones0
+Props / Barrens / Props | Barrens_Bones1
+Props / Barrens / Props | Barrens_Bones2
+Props / Barrens / Props | Barrens_Bones3
+Props / Barrens / Props | Barrens_Bones4
+Props / Barrens / Props | Barrens_Bones5
+Props / Barrens / Props | Barrens_Bones6
+Props / Barrens / Props | Barrens_Bones7
+Props / Barrens / Props | Barrens_Bones8
+Props / Barrens / Props | Barrens_Bones9
+Props / Barrens / Props | CentaurTotem0
+Props / Barrens / Props | CentaurTotem1
+Props / Barrens / Props | CentaurTotem2
+Props / Barrens / Props | HellScreamThrone
+Props / Barrens / Props | TaurenTotem0
+Props / Barrens / Props | TaurenTotem1
+Props / Barrens / Rocks | Barrens_Rocks0
+Props / Barrens / Rocks | Barrens_Rocks1
+Props / Barrens / Rocks | Barrens_Rocks2
+Props / Barrens / Rocks | Barrens_Rocks3
+Props / Barrens / Rocks | Barrens_Rocks4
+Props / Barrens / Rocks | Barrens_Rocks5
+Props / Barrens / Rocks | Barrens_Rocks6
+Props / Barrens / Rocks | Barrens_Rocks7
+Props / Barrens / Rocks | Barrens_Rocks8
+Props / Barrens / Rocks | Barrens_Rocks9
+Props / Barrens / Rocks | Barrens_Spires0
+Props / Barrens / Rocks | Barrens_Spires1
+Props / Barrens / Rocks | Barrens_Spires2
+Props / Barrens / Rocks | Barrens_Spires3
+Props / Barrens / Rocks | Barrens_Spires4
+Props / Barrens / Rocks | Barrens_Spires5
+Props / Barrens / Rocks | Barrens_Spires6
+Props / Barrens / Rocks | Barrens_Spires7
+Props / Barrens / Rocks | BarrensFissure0
+Props / Barrens / Rocks | BarrensFissure1
+Props / Barrens / Rocks | Crator0
+Props / Barrens / Rocks | Crator1
+Props / Barrens / Rocks | Geyser0
+Props / Barrens / Rocks | Geyser1
+Props / Barrens / Rocks | Geyser2
+Props / Barrens / Rocks | RockPillar0
+Props / Barrens / Rocks | RockPillar1
+Props / Barrens / Rocks | RockPillar2
+Props / Barrens / Structures | BRockArch
+Props / Barrens / Structures | BRockArch45
+Props / Barrens / Terrain | WyvernCage0
+Props / Barrens / Terrain | WyvernCage1
+Props / BlackCitadel / Props | BlackCitadelStatue
+Props / Cinematic / ArthasIllidanFight | ArthasIllidanFight
+Props / Cinematic / CameraProp | CameraProp
+Props / Cinematic / DungeonLever | DungeonLever
+Props / Cinematic / ElevatorPuzzle | ElevatorPuzzle
+Props / Cinematic / EyeOfSargeras | EyeOfSargeras
+Props / Cinematic / FrozenThrone | FrozenThrone
+Props / Cinematic / IcecrownObelisk | IcecrownObelisk
+Props / Cinematic / IllidanVictoryCinematic | IllidanVictoryCinematic
+Props / Cinematic / LichKing | LichKing
+Props / Cinematic / Outland_FloatingChunks | Outland_FloatingChunks0
+Props / Cinematic / Outland_FloatingChunks | Outland_FloatingChunks1
+Props / Cinematic / Outland_FloatingChunks | Outland_FloatingChunks2
+Props / Cinematic / Outland_FloatingChunks | Outland_FloatingChunks3
+Props / Cinematic / Outland_FloatingChunksCluster | Outland_FloatingChunksCluster
+Props / Cinematic / RessurectionStoneSE | RessurectionStoneSE
+Props / Cinematic / RessurectionStoneSW | RessurectionStoneSW
+Props / Cinematic / RisingWaterDoodad | RisingWaterDoodad
+Props / Cinematic / RisingWaterWIDEDoodad | RisingWaterWIDEDoodad
+Props / Cinematic / RockinArthas | RockinArthas
+Props / Cinematic / RunesOfGuldan | RunesOfGuldan0
+Props / Cinematic / RunesOfGuldan | RunesOfGuldan1
+Props / Cinematic / RunesOfGuldan | RunesOfGuldan2
+Props / Cinematic / RunesOfGuldan | RunesOfGuldan3
+Props / Cinematic / RunesOfGuldan | RunesOfGuldan4
+Props / Cinematic / RunesOfGuldan | RunesOfGuldan5
+Props / Cinematic / SargerasGate | SargerasGate
+Props / Cinematic / ShimmeringPortal | ShimmeringPortal
+Props / Cinematic / ThrallsHut | ThrallsHut
+Props / Cinematic / TyrandeWoodBridgeLarge | TyrandeWoodBridgeLarge
+Props / Cinematic / UndergroundDome | UndergroundDome
+Props / Cityscape / Plants | CityBush
+Props / Cityscape / Plants | FlowerBedAngled
+Props / Cityscape / Plants | FlowerBedStraight
+Props / Cityscape / Plants | PottedPlant
+Props / Cityscape / Props | Banner_Long
+Props / Cityscape / Props | Banner_Long2
+Props / Cityscape / Props | CrystalLamp
+Props / Cityscape / Props | CrystalShield
+Props / Cityscape / Props | EmptyCrates0
+Props / Cityscape / Props | EmptyCrates1
+Props / Cityscape / Props | EmptyCrates2
+Props / Cityscape / Props | LanternPost
+Props / Cityscape / Props | TavernSign
+Props / Cityscape / Props | TavernSignBobsGuns
+Props / Cityscape / Props | TavernSignTraceysArmory
+Props / Cityscape / Props | Throne
+Props / Cityscape / Props | WhaleStatue
+Props / Cityscape / Structures | Cathedral
+Props / Cityscape / Structures | MoreCityBuilding0
+Props / Cityscape / Structures | MoreCityBuilding1
+Props / Cityscape / Structures | MoreCityBuilding2
+Props / Cityscape / Structures | MoreCityBuilding3
+Props / Cityscape / Structures | MoreCityBuilding4
+Props / Dalaran / Props | KingThrone
+Props / Dalaran / Props | KingThrone135
+Props / Dalaran / Props | KingThrone45
+Props / Dalaran / Terrain | DalaranBuilding0
+Props / Dalaran / Terrain | DalaranBuilding1
+Props / Dalaran / Terrain | DalaranVioletCitadel
+Props / Dungeon / Props | AzsharaStatue
+Props / Dungeon / Props | Bench
+Props / Dungeon / Props | BigBookshelf
+Props / Dungeon / Props | Bookshelf
+Props / Dungeon / Props | BookshelfWall
+Props / Dungeon / Props | BookshelfWall45
+Props / Dungeon / Props | Chain0
+Props / Dungeon / Props | Chain1
+Props / Dungeon / Props | Chain2
+Props / Dungeon / Props | ChainPost
+Props / Dungeon / Props | Chair
+Props / Dungeon / Props | DungeonObilisk
+Props / Dungeon / Props | IronMaiden
+Props / Dungeon / Props | JunkPile0
+Props / Dungeon / Props | JunkPile1
+Props / Dungeon / Props | MineCart
+Props / Dungeon / Props | MineCartEmpty
+Props / Dungeon / Props | SewerVent0
+Props / Dungeon / Props | SewerVent1
+Props / Dungeon / Props | SewerVent2
+Props / Dungeon / Props | SewerVent3
+Props / Dungeon / Props | SewerWallpipes0
+Props / Dungeon / Props | SewerWallpipes1
+Props / Dungeon / Props | SewerWallpipes2
+Props / Dungeon / Props | Table
+Props / Dungeon / Props | TableNChair
+Props / Dungeon / Props | TortureTable
+Props / Dungeon / Props | TreasurePile0
+Props / Dungeon / Props | TreasurePile1
+Props / Dungeon / Rocks | Cave_FieryCrator
+Props / Dungeon / Rocks | DungeonRock0
+Props / Dungeon / Rocks | DungeonRock1
+Props / Dungeon / Rocks | DungeonRock2
+Props / Dungeon / Rocks | DungeonRock3
+Props / Dungeon / Rocks | DungeonRock4
+Props / Dungeon / Rocks | DungeonRock5
+Props / Dungeon / Rocks | DungeonRock6
+Props / Dungeon / Rocks | DungeonRock7
+Props / Dungeon / Rocks | DungeonRock8
+Props / Dungeon / Rocks | DungeonRock9
+Props / Dungeon / Rocks | DungeonStalagmite0
+Props / Dungeon / Rocks | DungeonStalagmite1
+Props / Dungeon / Rocks | DungeonStalagmite2
+Props / Dungeon / Rocks | DungeonStalagmite3
+Props / Dungeon / Structures | DRockArch
+Props / Dungeon / Structures | DRockArch45
+Props / Dungeon / Structures | DungeonArchway1
+Props / Dungeon / Structures | DungeonArchway45
+Props / Dungeon / Structures | PorticulisWall0_0
+Props / Dungeon / Structures | PorticulisWall0_1
+Props / Dungeon / Structures | PorticulisWall0_2
+Props / Dungeon / Structures | PorticulisWall45_0
+Props / Dungeon / Structures | PorticulisWall45_1
+Props / Dungeon / Structures | PorticulisWall45_2
+Props / Dungeon / Terrain | CaveGate
+Props / Dungeon / Terrain | CaveGate2
+Props / Dungeon / Terrain | DungeonPorticulisGate
+Props / Dungeon / Terrain | DungeonPorticulisGate45
+Props / Dungeon / Terrain | EggSack0
+Props / Dungeon / Terrain | EggSack1
+Props / Felwood / Plants | Felwood_Thorns0
+Props / Felwood / Plants | Felwood_Thorns1
+Props / Felwood / Plants | Felwood_Thorns2
+Props / Felwood / Plants | Felwood_Thorns3
+Props / Felwood / Plants | Felwood_Thorns4
+Props / Felwood / Plants | Felwood_Thorns5
+Props / Felwood / Plants | Felwood_Thorns6
+Props / Felwood / Plants | FelwoodBush0
+Props / Felwood / Plants | FelwoodBush1
+Props / Felwood / Plants | FelwoodCatTail
+Props / Felwood / Plants | FelwoodShrooms0
+Props / Felwood / Plants | FelwoodShrooms1
+Props / Felwood / Plants | FelwoodShrooms2
+Props / Felwood / Plants | FelwoodShrooms3
+Props / Felwood / Props | FelwoodBrokenObilisk0
+Props / Felwood / Props | FelwoodBrokenObilisk1
+Props / Felwood / Props | FelwoodHollowStump
+Props / Felwood / Props | FelwoodLogAngled
+Props / Felwood / Props | FelwoodLogStraight
+Props / Felwood / Props | FelwoodObilisk
+Props / Felwood / Rocks | Felwood_Spires0
+Props / Felwood / Rocks | Felwood_Spires1
+Props / Felwood / Rocks | Felwood_Spires2
+Props / Felwood / Rocks | Felwood_Spires3
+Props / Felwood / Rocks | Felwood_Spires4
+Props / Felwood / Rocks | Felwood_Spires5
+Props / Felwood / Rocks | Felwood_Spires6
+Props / Felwood / Rocks | Felwood_Spires7
+Props / Felwood / Rocks | FelwoodFissure0
+Props / Felwood / Rocks | FelwoodFissure1
+Props / Felwood / Rocks | FelwoodRock0
+Props / Felwood / Rocks | FelwoodRock1
+Props / Felwood / Rocks | FelwoodRock2
+Props / Felwood / Rocks | FelwoodRock3
+Props / Felwood / Rocks | FelwoodRock4
+Props / Felwood / Rocks | FelwoodRock5
+Props / Felwood / Rocks | FelwoodRock6
+Props / Felwood / Rocks | FelwoodRock7
+Props / Felwood / Rocks | FelwoodRock8
+Props / Felwood / Rocks | FelwoodRock9
+Props / Felwood / Structures | CRockArch
+Props / Felwood / Structures | CRockArch45
+Props / Felwood / Structures | FelwoodBrokenColumn0
+Props / Felwood / Structures | FelwoodBrokenColumn1
+Props / Icecrown / Props | Icecrown_IceChair
+Props / Icecrown / Props | IcecrownChair
+Props / Icecrown / Props | IceCrownObelisk0
+Props / Icecrown / Props | IceCrownObelisk1
+Props / Icecrown / Props | IceCrownObelisk2
+Props / Icecrown / Props | IceCrownPillar0
+Props / Icecrown / Props | IceCrownPillar1
+Props / Icecrown / Props | IceCrownPillar2
+Props / Icecrown / Props | IceTorch
+Props / Icecrown / Props | SnowMan
+Props / Icecrown / Props | SpiderStatue0
+Props / Icecrown / Props | SpiderStatue1
+Props / Icecrown / Rocks | Glacier0
+Props / Icecrown / Rocks | Glacier1
+Props / Icecrown / Rocks | Glacier2
+Props / Icecrown / Rocks | Glacier3
+Props / Icecrown / Rocks | Glacier4
+Props / Icecrown / Rocks | Glacier5
+Props / Icecrown / Rocks | Glacier6
+Props / Icecrown / Rocks | Glacier7
+Props / Icecrown / Rocks | Glacier8
+Props / Icecrown / Rocks | Glacier9
+Props / Icecrown / Rocks | Ice_Rock0
+Props / Icecrown / Rocks | Ice_Rock1
+Props / Icecrown / Rocks | Ice_Rock2
+Props / Icecrown / Rocks | Ice_Rock3
+Props / Icecrown / Rocks | Ice_Rock4
+Props / Icecrown / Rocks | Ice_Rock5
+Props / Icecrown / Rocks | Ice_Rock6
+Props / Icecrown / Rocks | Ice_Rock7
+Props / Icecrown / Rocks | Ice_SnowRock0
+Props / Icecrown / Rocks | Ice_SnowRock1
+Props / Icecrown / Rocks | Ice_SnowRock2
+Props / Icecrown / Rocks | Ice_SnowRock3
+Props / Icecrown / Rocks | Ice_SnowRock4
+Props / Icecrown / Rocks | Ice_SnowRock5
+Props / Icecrown / Rocks | Ice_SnowRock6
+Props / Icecrown / Rocks | Ice_SnowRock7
+Props / Icecrown / Rocks | Ice_SnowRock8
+Props / Icecrown / Rocks | Ice_SnowRock9
+Props / Icecrown / Rocks | IceBlock0
+Props / Icecrown / Rocks | IceBlock1
+Props / Icecrown / Rocks | IceBlock2
+Props / Icecrown / Rocks | IceBlock3
+Props / Icecrown / Structures | IC_IceArch
+Props / Icecrown / Structures | IC_IceArch45
+Props / Icecrown / Structures | Icecrown_StoneArch
+Props / Icecrown / Structures | Icecrown_StoneArch45
+Props / Icecrown / Structures | Igloo
+Props / Icecrown / Terrain | ClearIceRock0
+Props / Icecrown / Terrain | ClearIceRock1
+Props / Icecrown / Terrain | ClearIceRock2
+Props / Icecrown / Terrain | ClearIceRock3
+Props / Icecrown / Terrain | ClearIceRock4
+Props / Icecrown / Terrain | ClearIceRock5
+Props / Icecrown / Terrain | IceCrownGate
+Props / Icecrown / Terrain | IceCrownGate45
+Props / Icecrown / Terrain | IceCrownThrone
+Props / Icecrown / Terrain | IceCrownThrone135
+Props / Icecrown / Terrain | IceCrownThrone45
+Props / Icecrown / Terrain | IceCrownThroneGate
+Props / Icecrown / Terrain | IceCrownWall00
+Props / Icecrown / Terrain | IceCrownWall01
+Props / Icecrown / Terrain | IceCrownWall02
+Props / Icecrown / Terrain | IceCrownWall03
+Props / Icecrown / Terrain | IceCrownWall04
+Props / Icecrown / Terrain | IceCrownWall1350
+Props / Icecrown / Terrain | IceCrownWall1351
+Props / Icecrown / Terrain | IceCrownWall1352
+Props / Icecrown / Terrain | IceCrownWall1353
+Props / Icecrown / Terrain | IceCrownWall1354
+Props / Icecrown / Terrain | IceCrownWall450
+Props / Icecrown / Terrain | IceCrownWall451
+Props / Icecrown / Terrain | IceCrownWall452
+Props / Icecrown / Terrain | IceCrownWall453
+Props / Icecrown / Terrain | IceCrownWall454
+Props / Icecrown / Terrain | IceCrownWall900
+Props / Icecrown / Terrain | IceCrownWall901
+Props / Icecrown / Terrain | IceCrownWall902
+Props / Icecrown / Terrain | IceCrownWall903
+Props / Icecrown / Terrain | IceCrownWall904
+Props / Icecrown / Terrain | IceGate
+Props / Icecrown / Terrain | IceGate45
+Props / Icecrown / Water | IceEdge0
+Props / Icecrown / Water | IceEdge1
+Props / Icecrown / Water | IceEdge3
+Props / LordaeronSummer / Plants | Corn
+Props / LordaeronSummer / Plants | CornWheatScorched0
+Props / LordaeronSummer / Plants | CornWheatScorched1
+Props / LordaeronSummer / Plants | GrassTuft0
+Props / LordaeronSummer / Plants | GrassTuft1
+Props / LordaeronSummer / Plants | GrassTuft2
+Props / LordaeronSummer / Plants | GrassTuft3
+Props / LordaeronSummer / Plants | LilyPad0
+Props / LordaeronSummer / Plants | RiverRushes0
+Props / LordaeronSummer / Plants | RiverRushes1
+Props / LordaeronSummer / Plants | RiverRushes2
+Props / LordaeronSummer / Plants | RiverRushes3
+Props / LordaeronSummer / Plants | wheat
+Props / LordaeronSummer / Plants | wheatbunch
+Props / LordaeronSummer / Props | ArcheryRange
+Props / LordaeronSummer / Props | ArmorRack
+Props / LordaeronSummer / Props | BannerHuman0
+Props / LordaeronSummer / Props | BannerHuman1
+Props / LordaeronSummer / Props | BannerOrc0
+Props / LordaeronSummer / Props | BannerOrc1
+Props / LordaeronSummer / Props | brazierOmni
+Props / LordaeronSummer / Props | Cage
+Props / LordaeronSummer / Props | CageEmpty
+Props / LordaeronSummer / Props | CageTrashed
+Props / LordaeronSummer / Props | CauldronWithHeads
+Props / LordaeronSummer / Props | Flies
+Props / LordaeronSummer / Props | Grave
+Props / LordaeronSummer / Props | Hay0
+Props / LordaeronSummer / Props | Hay1
+Props / LordaeronSummer / Props | Hay2
+Props / LordaeronSummer / Props | Hay3
+Props / LordaeronSummer / Props | Hay4
+Props / LordaeronSummer / Props | HayCart
+Props / LordaeronSummer / Props | HayCartbroken
+Props / LordaeronSummer / Props | HayClump
+Props / LordaeronSummer / Props | HeadOnSpear0
+Props / LordaeronSummer / Props | HeadOnSpear1
+Props / LordaeronSummer / Props | HeadOnSpear2
+Props / LordaeronSummer / Props | HitchingPost
+Props / LordaeronSummer / Props | ImpaledBody0
+Props / LordaeronSummer / Props | ImpaledBody1
+Props / LordaeronSummer / Props | LanternPost0
+Props / LordaeronSummer / Props | LanternPost1
+Props / LordaeronSummer / Props | PeasantGrave0
+Props / LordaeronSummer / Props | PeasantGrave1
+Props / LordaeronSummer / Props | PeasantGrave2
+Props / LordaeronSummer / Props | RibBones0
+Props / LordaeronSummer / Props | RibBones1
+Props / LordaeronSummer / Props | RibBones2
+Props / LordaeronSummer / Props | RibBones3
+Props / LordaeronSummer / Props | RottenHay0
+Props / LordaeronSummer / Props | RottenHay1
+Props / LordaeronSummer / Props | RottenHay2
+Props / LordaeronSummer / Props | RottenHay3
+Props / LordaeronSummer / Props | RottenHay4
+Props / LordaeronSummer / Props | RottenHayCart
+Props / LordaeronSummer / Props | RottenHayCartbroken
+Props / LordaeronSummer / Props | SignPost
+Props / LordaeronSummer / Props | SignPost0
+Props / LordaeronSummer / Props | SittingCorpse
+Props / LordaeronSummer / Props | SkullonStick0
+Props / LordaeronSummer / Props | SkullonStick1
+Props / LordaeronSummer / Props | SkullonStick2
+Props / LordaeronSummer / Props | SkullonStick3
+Props / LordaeronSummer / Props | SkullonStick4
+Props / LordaeronSummer / Props | SkullonStick5
+Props / LordaeronSummer / Props | SkullPile0
+Props / LordaeronSummer / Props | SkullPile1
+Props / LordaeronSummer / Props | SkullPile2
+Props / LordaeronSummer / Props | SkullPile3
+Props / LordaeronSummer / Props | TorchHuman
+Props / LordaeronSummer / Props | TorchHumanOmni
+Props / LordaeronSummer / Props | Trash1
+Props / LordaeronSummer / Props | Trough0
+Props / LordaeronSummer / Props | Trough1
+Props / LordaeronSummer / Props | TutorialOrcBanner
+Props / LordaeronSummer / Props | WallFountainCliff0
+Props / LordaeronSummer / Props | WallFountainCliff1
+Props / LordaeronSummer / Props | Weapons
+Props / LordaeronSummer / Props | WheelBarrel
+Props / LordaeronSummer / Props | WheelBarrelBroken
+Props / LordaeronSummer / Rocks | Lords_Rock0
+Props / LordaeronSummer / Rocks | Lords_Rock1
+Props / LordaeronSummer / Rocks | Lords_Rock2
+Props / LordaeronSummer / Rocks | Lords_Rock3
+Props / LordaeronSummer / Rocks | Lords_Rock4
+Props / LordaeronSummer / Rocks | Lords_Rock5
+Props / LordaeronSummer / Rocks | Lords_Rock6
+Props / LordaeronSummer / Rocks | Lords_Rock7
+Props / LordaeronSummer / Rocks | Lords_Rock8
+Props / LordaeronSummer / Rocks | Lords_Rock9
+Props / LordaeronSummer / Structures | Barn
+Props / LordaeronSummer / Structures | BarnScorched
+Props / LordaeronSummer / Structures | BridgeLog
+Props / LordaeronSummer / Structures | CityBridgeSmall
+Props / LordaeronSummer / Structures | FarmScorched
+Props / LordaeronSummer / Structures | Granary
+Props / LordaeronSummer / Structures | GranaryBurned
+Props / LordaeronSummer / Structures | Inn
+Props / LordaeronSummer / Structures | InnScorched
+Props / LordaeronSummer / Structures | LordaeronBridge
+Props / LordaeronSummer / Structures | LRockArch
+Props / LordaeronSummer / Structures | LRockArch45
+Props / LordaeronSummer / Structures | TowerScorched
+Props / LordaeronSummer / Structures | well
+Props / LordaeronSummer / Structures | WindMill
+Props / LordaeronSummer / Structures | WindMillBurned
+Props / LordaeronSummer / Terrain | Barricade0
+Props / LordaeronSummer / Terrain | Barricade1
+Props / LordaeronSummer / Terrain | Barricade2
+Props / LordaeronSummer / Terrain | BigElfGate
+Props / LordaeronSummer / Terrain | BigElfGate45
+Props / LordaeronSummer / Terrain | crates0
+Props / LordaeronSummer / Terrain | crates1
+Props / LordaeronSummer / Terrain | ElfGate
+Props / LordaeronSummer / Terrain | ElfGate45
+Props / LordaeronSummer / Terrain | Gate
+Props / LordaeronSummer / Terrain | Gate45
+Props / LordaeronSummer / Terrain | IronGate
+Props / LordaeronSummer / Terrain | IronGate45
+Props / LordaeronSummer / Terrain | LoardaeronRockChunks0
+Props / LordaeronSummer / Terrain | LoardaeronRockChunks1
+Props / LordaeronSummer / Terrain | LoardaeronRockChunks2
+Props / LordaeronSummer / Terrain | LoardaeronRockChunks3
+Props / LordaeronSummer / Terrain | LoardaeronRockChunks4
+Props / LordaeronSummer / Terrain | LoardaeronRockChunks5
+Props / LordaeronSummer / Terrain | StoneWall00
+Props / LordaeronSummer / Terrain | StoneWall01
+Props / LordaeronSummer / Terrain | StoneWall02
+Props / LordaeronSummer / Terrain | StoneWall03
+Props / LordaeronSummer / Terrain | StoneWall04
+Props / LordaeronSummer / Terrain | StoneWall1350
+Props / LordaeronSummer / Terrain | StoneWall1351
+Props / LordaeronSummer / Terrain | StoneWall1352
+Props / LordaeronSummer / Terrain | StoneWall1353
+Props / LordaeronSummer / Terrain | StoneWall1354
+Props / LordaeronSummer / Terrain | StoneWall450
+Props / LordaeronSummer / Terrain | StoneWall451
+Props / LordaeronSummer / Terrain | StoneWall452
+Props / LordaeronSummer / Terrain | StoneWall453
+Props / LordaeronSummer / Terrain | StoneWall454
+Props / LordaeronSummer / Terrain | StoneWall900
+Props / LordaeronSummer / Terrain | StoneWall901
+Props / LordaeronSummer / Terrain | StoneWall902
+Props / LordaeronSummer / Terrain | StoneWall903
+Props / LordaeronSummer / Terrain | StoneWall904
+Props / Northrend / Plants | North_Thorns0
+Props / Northrend / Plants | North_Thorns1
+Props / Northrend / Plants | North_Thorns2
+Props / Northrend / Plants | North_Thorns3
+Props / Northrend / Plants | North_Thorns4
+Props / Northrend / Plants | North_Thorns5
+Props / Northrend / Plants | North_Thorns6
+Props / Northrend / Props | Bats
+Props / Northrend / Props | FirePit
+Props / Northrend / Props | FirePitPig
+Props / Northrend / Props | FirePitTrashed
+Props / Northrend / Props | North_Bones0
+Props / Northrend / Props | North_Bones1
+Props / Northrend / Props | North_Bones2
+Props / Northrend / Props | North_Bones3
+Props / Northrend / Props | North_Bones4
+Props / Northrend / Props | North_Bones5
+Props / Northrend / Props | North_Bones6
+Props / Northrend / Props | North_Bones7
+Props / Northrend / Props | North_Bones8
+Props / Northrend / Props | North_Bones9
+Props / Northrend / Props | NorthrendBrokenColumn0
+Props / Northrend / Props | NorthrendBrokenColumn1
+Props / Northrend / Props | NorthrendBrokenObilisk
+Props / Northrend / Props | NorthrendFenceAngled
+Props / Northrend / Props | NorthrendFenceStraight
+Props / Northrend / Props | NorthrendGrave
+Props / Northrend / Props | NorthrendObilisk
+Props / Northrend / Props | NorthrendTombStone0
+Props / Northrend / Props | NorthrendTombStone1
+Props / Northrend / Props | NorthrendTombStone2
+Props / Northrend / Rocks | North_IceClaw0
+Props / Northrend / Rocks | North_IceClaw1
+Props / Northrend / Rocks | North_IceClaw2
+Props / Northrend / Rocks | North_IceClaw3
+Props / Northrend / Rocks | North_IceClaw4
+Props / Northrend / Rocks | North_IceClaw5
+Props / Northrend / Rocks | North_IceClaw6
+Props / Northrend / Rocks | North_IceClaw7
+Props / Northrend / Rocks | North_IceClaw8
+Props / Northrend / Rocks | North_IceClaw9
+Props / Northrend / Rocks | North_Rocks0
+Props / Northrend / Rocks | North_Rocks1
+Props / Northrend / Rocks | North_Rocks2
+Props / Northrend / Rocks | North_Rocks3
+Props / Northrend / Rocks | North_Rocks4
+Props / Northrend / Rocks | North_Rocks5
+Props / Northrend / Rocks | North_Rocks6
+Props / Northrend / Rocks | North_Rocks7
+Props / Northrend / Rocks | North_Rocks8
+Props / Northrend / Rocks | North_Rocks9
+Props / Northrend / Rocks | North_WebRocks0
+Props / Northrend / Rocks | North_WebRocks1
+Props / Northrend / Rocks | North_WebRocks2
+Props / Northrend / Rocks | North_WebRocks3
+Props / Northrend / Rocks | North_WebRocks4
+Props / Northrend / Rocks | North_WebRocks5
+Props / Northrend / Rocks | North_WebRocks6
+Props / Northrend / Rocks | North_WebRocks7
+Props / Northrend / Rocks | NorthrendFissure0
+Props / Northrend / Rocks | NorthrendFissure1
+Props / Northrend / Structures | AncientZiggurat0
+Props / Northrend / Structures | AncientZiggurat1
+Props / Northrend / Structures | NorthrendCrypt
+Props / Northrend / Structures | NRockArch
+Props / Northrend / Structures | NRockArch45
+Props / Northrend / Water | Battleship
+Props / Northrend / Water | FloatingBox
+Props / Northrend / Water | FloatingPanel
+Props / Northrend / Water | FloatingPlank
+Props / Northrend / Water | North_Iceberg
+Props / Northrend / Water | North_Iceberg2
+Props / Northrend / Water | North_Iceberg3
+Props / Northrend / Water | North_Iceberg4
+Props / Northrend / Water | North_IceFloe
+Props / Northrend / Water | North_IceFloe2
+Props / Northrend / Water | North_IceFloe3
+Props / Northrend / Water | North_IceFloe4
+Props / Northrend / Water | Rowboat
+Props / Northrend / Water | Whale
+Props / Outland / Plants | Outland_Plant0
+Props / Outland / Plants | Outland_Plant1
+Props / Outland / Plants | Outland_Plant2
+Props / Outland / Plants | Outland_Plant3
+Props / Outland / Plants | Outland_Plant4
+Props / Outland / Plants | Outland_Plant5
+Props / Outland / Plants | Outland_Plant6
+Props / Outland / Plants | Outland_Plant7
+Props / Outland / Props | Altar
+Props / Outland / Props | Grate0
+Props / Outland / Props | Grate1
+Props / Outland / Props | Obstacle0
+Props / Outland / Props | Obstacle1
+Props / Outland / Props | Obstacle2
+Props / Outland / Props | Obstacle3
+Props / Outland / Props | Obstacle4
+Props / Outland / Props | Skull0
+Props / Outland / Props | Skull1
+Props / Outland / Props | Stake0
+Props / Outland / Props | Stake1
+Props / Outland / Props | Standard0
+Props / Outland / Props | Standard1
+Props / Outland / Rocks | Outland_MagmaRock0
+Props / Outland / Rocks | Outland_MagmaRock1
+Props / Outland / Rocks | Outland_MagmaRock2
+Props / Outland / Rocks | Outland_MagmaRock3
+Props / Outland / Rocks | Outland_MagmaRock4
+Props / Outland / Rocks | Outland_Rock0
+Props / Outland / Rocks | Outland_Rock1
+Props / Outland / Rocks | Outland_Rock2
+Props / Outland / Rocks | Outland_Rock3
+Props / Outland / Rocks | Outland_Rock4
+Props / Outland / Rocks | Outland_Rock5
+Props / Outland / Rocks | Outland_Rock6
+Props / Outland / Rocks | Outland_Rock7
+Props / Outland / Rocks | Outland_Rock8
+Props / Outland / Rocks | Outland_Rock9
+Props / Outland / Rocks | Outland_Spires0
+Props / Outland / Rocks | Outland_Spires1
+Props / Outland / Rocks | Outland_Spires2
+Props / Outland / Rocks | Outland_Spires3
+Props / Outland / Rocks | Outland_Spires4
+Props / Outland / Rocks | Outland_Spires5
+Props / Outland / Rocks | Outland_Spires6
+Props / Outland / Rocks | Outland_Spires7
+Props / Outland / Rocks | Outland_Spires8
+Props / Outland / Rocks | Outland_Spires9
+Props / Outland / Structures | Outland_RockArch
+Props / Outland / Structures | Outland_RockArch45
+Props / Ruins / Plants | VinyPlant0
+Props / Ruins / Plants | VinyPlant1
+Props / Ruins / Plants | VinyPlant2
+Props / Ruins / Plants | VinyPlant3
+Props / Ruins / Props | Brazier0
+Props / Ruins / Props | Brazier1
+Props / Ruins / Props | Firepot
+Props / Ruins / Props | LibraryShelf0
+Props / Ruins / Props | LibraryShelf1
+Props / Ruins / Props | LibraryShelf2
+Props / Ruins / Props | Statue0
+Props / Ruins / Props | Statue1
+Props / Ruins / Props | StatueBroken0
+Props / Ruins / Props | StatueBroken1
+Props / Ruins / Props | Stone0
+Props / Ruins / Props | Stone1
+Props / Ruins / Props | Stone2
+Props / Ruins / Props | Stone3
+Props / Ruins / Terrain | CityCliffVines0
+Props / Ruins / Terrain | CityCliffVines1
+Props / Ruins / Water | Coral0
+Props / Ruins / Water | Coral1
+Props / Ruins / Water | Coral2
+Props / Ruins / Water | Coral3
+Props / Ruins / Water | Coral4
+Props / Ruins / Water | Coral5
+Props / Ruins / Water | Coral6
+Props / Ruins / Water | Coral7
+Props / Ruins / Water | Coral8
+Props / Ruins / Water | Coral9
+Props / Ruins / Water | CoralArch0
+Props / Ruins / Water | CoralArch1
+Props / Ruins / Water | FishSchool
+Props / Ruins / Water | FishTropical
+Props / Ruins / Water | Seaweed00
+Props / Ruins / Water | Seaweed01
+Props / Ruins / Water | Seaweed02
+Props / Ruins / Water | Seaweed03
+Props / Ruins / Water | Seaweed04
+Props / Terrain / DalaranMagicalPen | DalaranMagicalPen
+Props / Terrain / DalaranMagicalPen45 | DalaranMagicalPen45
+Props / Terrain / DalaranMagicalPenWall | DalaranMagicalPenWall
+Props / Terrain / DalaranMagicalPenWall45 | DalaranMagicalPenWall45
+Props / Terrain / G_RockChunks | G_RockChunks0
+Props / Terrain / G_RockChunks | G_RockChunks1
+Props / Terrain / G_RockChunks | G_RockChunks2
+Props / Terrain / G_RockChunks | G_RockChunks3
+Props / Terrain / G_RockChunks | G_RockChunks4
+Props / Terrain / G_RockChunks | G_RockChunks5
+Props / Terrain / IceBridge | IceBridge
+Props / Terrain / IceBridge45 | IceBridge45
+Props / Terrain / NorthrendTree | NorthrendTree0D
+Props / Terrain / NorthrendTree | NorthrendTree1D
+Props / Terrain / NorthrendTree | NorthrendTree2D
+Props / Terrain / NorthrendTree | NorthrendTree3D
+Props / Terrain / NorthrendTree | NorthrendTree4D
+Props / Terrain / NorthrendTree | NorthrendTree5D
+Props / Terrain / NorthrendTree | NorthrendTree6D
+Props / Terrain / NorthrendTree | NorthrendTree7D
+Props / Terrain / NorthrendTree | NorthrendTree8D
+Props / Terrain / NorthrendTree | NorthrendTree9D
+Props / Terrain / RockChunks | RockChunks0
+Props / Terrain / RockChunks | RockChunks1
+Props / Terrain / RockChunks | RockChunks2
+Props / Terrain / RockChunks | RockChunks3
+Props / Terrain / RockChunks | RockChunks4
+Props / Terrain / RockChunks | RockChunks5
+Props / Terrain / Wharf | Wharf
+Props / Terrain / WoodBridgeExtraLarge0 | WoodBridgeExtraLarge0
+Props / Terrain / WoodBridgeExtraLarge45 | WoodBridgeExtraLarge45
+Props / Terrain / WoodBridgeLarge0 | WoodBridgeLarge0
+Props / Terrain / WoodBridgeLarge45 | WoodBridgeLarge45
+Props / Terrain / WoodBridgeSmall0 | WoodBridgeSmall0
+Props / Terrain / WoodBridgeSmall45 | WoodBridgeSmall45
+Props / Underground / Plants | ShroomsBlue
+Props / Underground / Props | UndergroundObilisk
+Props / Underground / Rocks | UndergoundRock0
+Props / Underground / Rocks | UndergoundRock1
+Props / Underground / Rocks | UndergoundRock2
+Props / Underground / Rocks | UndergoundRock3
+Props / Underground / Rocks | UndergoundRock4
+Props / Underground / Rocks | UndergoundRock5
+Props / Underground / Rocks | UndergoundRock6
+Props / Underground / Rocks | UndergoundRock7
+Props / Underground / Rocks | UndergoundRock8
+Props / Underground / Rocks | UndergoundRock9
+Props / Underground / Rocks | Underground_FieryCrator
+Props / Underground / Rocks | UndergroundStalagmite0
+Props / Underground / Rocks | UndergroundStalagmite1
+Props / Underground / Rocks | UndergroundStalagmite2
+Props / Underground / Rocks | UndergroundStalagmite3
+Props / Underground / Structures | GPorticulisWall0_0
+Props / Underground / Structures | GPorticulisWall0_1
+Props / Underground / Structures | GPorticulisWall0_2
+Props / Underground / Structures | GPorticulisWall45_0
+Props / Underground / Structures | GPorticulisWall45_1
+Props / Underground / Structures | GPorticulisWall45_2
+Props / Underground / Structures | GRockArch
+Props / Underground / Structures | GRockArch45
+Props / Underground / Structures | UndergroundArchway1
+Props / Underground / Structures | UndergroundArchway45
+Props / Underground / Terrain | SupportBeam
+Props / Village / Props | Village_Fencelong
+Props / Village / Props | Village_FencelongAngled
+Props / Village / Props | Village_Fenceshort
+Props / Village / Props | Village_FenceshortAngled
+Props / Village / Props | Village_Lightpost
+Props / Village / Structures | VillageBuilding0
+Props / Village / Structures | VillageBuilding1
+Props / Village / Structures | VillageBuilding2

@@ -128,3 +128,16 @@ JNIEXPORT void JNICALL Java_com_acpc_port_GameActivity_nativeTouchPad(
     g_android_touch_cstick_x = cx;
     g_android_touch_cstick_y = cy;
 }
+
+extern void pc_build_cmd(int cmd, int arg);
+extern const char* pc_build_status(void);
+
+JNIEXPORT void JNICALL Java_com_acpc_port_GameActivity_nativeBuildCmd(JNIEnv* env, jclass cls, jint cmd, jint arg) {
+    (void)env; (void)cls;
+    pc_build_cmd(cmd, arg);
+}
+
+JNIEXPORT jstring JNICALL Java_com_acpc_port_GameActivity_nativeBuildStatus(JNIEnv* env, jclass cls) {
+    (void)cls;
+    return (*env)->NewStringUTF(env, pc_build_status());
+}
