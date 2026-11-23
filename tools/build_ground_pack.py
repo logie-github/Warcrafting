@@ -108,6 +108,19 @@ def tlut_hash(data, hexs):
     return xxhash.xxh64(raw[lo * 2:(hi + 1) * 2], seed=0).intdigest()
 
 
+def make_seamless(img):
+    """Cross-fade a tile with a half-shifted copy of itself so opposite edges match."""
+    import numpy as np
+    a = np.asarray(img.convert('RGB'), dtype=float)
+    n_y, n_x = a.shape[:2]
+    wy = np.sin(np.linspace(0, np.pi, n_y)) ** 2
+    wx = np.sin(np.linspace(0, np.pi, n_x)) ** 2
+    w2 = (wy[:, None] * wx[None, :])[:, :, None]
+    shifted = np.roll(np.roll(a, n_y // 2, axis=0), n_x // 2, axis=1)
+    out = a * w2 + shifted * (1 - w2)
+    return Image.fromarray(np.clip(out, 0, 255).astype('uint8'))
+
+
 def decode_idx(b, w, h):
     g = [[0] * w for _ in range(h)]; i = 0
     for by in range(0, h, 8):
@@ -242,6 +255,56 @@ def remap_rail(idx, pal, tile, grass, wood):
     return res
 
 
+def tonal_ramp(tile_img, lo_pct, hi_pct, steps=32):
+    """Colors of the tile sorted by luminance, averaged into `steps` bins between two percentiles."""
+    import numpy as np
+    arr = np.asarray(tile_img.convert('RGB'), dtype=float).reshape(-1, 3)
+    lum = arr @ np.array([0.3, 0.59, 0.11])
+    order = np.argsort(lum)
+    n = len(order)
+    lo, hi = int(n * lo_pct / 100.0), int(n * hi_pct / 100.0)
+    sel = order[lo:hi]
+    bins = np.array_split(sel, steps)
+    return [tuple(int(v) for v in arr[b].mean(axis=0)) for b in bins]
+
+
+def remap_ramp(orig, tile_img, slot):
+    """Keep the original structure (planks, rings, bricks); take colors from the
+    Warcraft material's tonal ramp and its fine grain.
+    bridges: whole ramp.  station: brick faces use the upper ramp, mortar the dark end."""
+    from PIL import ImageFilter
+    px = orig.load()
+    blur = tile_img.filter(ImageFilter.GaussianBlur(2 if slot == 'station' else 6)).load()
+    tp = tile_img.load()
+    full = tonal_ramp(tile_img, 3, 97)
+    light = tonal_ramp(tile_img, 35, 97)
+    dark = [tuple(int(v * 0.4) for v in c) for c in tonal_ramp(tile_img, 1, 10)]
+    lums = [0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2] for row in range(orig.size[1])
+            for c in (px[x, row] for x in range(orig.size[0])) if c[3] > 0]
+    lo, hi = min(lums), max(lums)
+    res = Image.new('RGBA', orig.size); rp = res.load()
+    for y in range(orig.size[1]):
+        for x in range(orig.size[0]):
+            c = px[x, y]
+            if c[3] == 0:
+                rp[x, y] = c; continue
+            hh, ss, vv = hsv(c)
+            if ss < 0.2 and vv > 0.9:          # snow / white highlights stay
+                rp[x, y] = c; continue
+            L = (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2] - lo) / max(1.0, hi - lo)
+            L = min(1.0, max(0.0, L))
+            if slot == 'station':
+                cream = 30 <= hh <= 60 and vv > 0.75 and ss < 0.5
+                ramp = dark if cream else light
+            else:
+                ramp = full
+            base = ramp[min(len(ramp) - 1, int(L * (len(ramp) - 1) + 0.5))]
+            g = tp[x, y]; b = blur[x, y]
+            grain = [(g[i] - b[i]) * (0.5 if slot == 'station' else 0.8) for i in range(3)]
+            rp[x, y] = tuple(min(255, max(0, int(base[i] + grain[i]))) for i in range(3)) + (c[3],)
+    return res
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--iso', required=True)
@@ -272,9 +335,13 @@ def main():
             k = (slot, w, h, rotate)
             if k not in tiles:
                 base = Image.open(os.path.join(a.tiles, faction, slot + '.png')).convert('RGB')
+                if slot in ('wood', 'brick', 'sand'):
+                    base = make_seamless(base)
                 if rotate:
                     base = base.rotate(90, expand=True)
-                side = min(w, h)
+                # sample side: at least the short edge, up to half the long edge,
+                # so wide textures repeat at most twice
+                side = max(min(w, h), max(w, h) // 2)
                 base = base.resize((side, side), Image.LANCZOS)
                 canvas = Image.new('RGB', (w, h))
                 for ty in range(0, h, side):
@@ -294,6 +361,9 @@ def main():
                                  tile('rail', w * SCALE, hh * SCALE),
                                  tile('grass', w * SCALE, hh * SCALE),
                                  tile('wood', w * SCALE, hh * SCALE))
+            elif slot in WOOD_SLOTS or slot == 'station':
+                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
+                out = remap_ramp(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS), slot)
             else:
                 orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
                 out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
@@ -328,6 +398,9 @@ def main():
                                  tile('rail', w * SCALE, hh * SCALE),
                                  tile('grass', w * SCALE, hh * SCALE),
                                  tile('wood', w * SCALE, hh * SCALE))
+            elif slot in WOOD_SLOTS or slot == 'station':
+                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
+                out = remap_ramp(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS), slot)
             else:
                 orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
                 out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
