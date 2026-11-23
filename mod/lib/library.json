@@ -1,0 +1,490 @@
+[
+ {
+  "name": "Cathedral",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/Cathedral/Cathedral.mdx",
+  "w": 460.04600524902344,
+  "d": 747.2489929199219,
+  "h": 526.9384107422084
+ },
+ {
+  "name": "CityBridgeLarge45Destroyed",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/CityBridgeLarge45Destroyed/CityBridgeLarge45Destroyed.mdx",
+  "w": 1117.1589965820312,
+  "d": 1117.322998046875,
+  "h": 672.916015625
+ },
+ {
+  "name": "MoreCityBuilding0",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/MoreCityBuilding/MoreCityBuilding0.mdx",
+  "w": 310.239990234375,
+  "d": 404.51499938964844,
+  "h": 316.15487265586853
+ },
+ {
+  "name": "MoreCityBuilding1",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/MoreCityBuilding/MoreCityBuilding1.mdx",
+  "w": 310.24000549316406,
+  "d": 404.5139923095703,
+  "h": 323.23885703086853
+ },
+ {
+  "name": "MoreCityBuilding2",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/MoreCityBuilding/MoreCityBuilding2.mdx",
+  "w": 310.24000549316406,
+  "d": 404.5139923095703,
+  "h": 279.5998799800873
+ },
+ {
+  "name": "MoreCityBuilding3",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/MoreCityBuilding/MoreCityBuilding3.mdx",
+  "w": 310.24000549316406,
+  "d": 404.9669952392578,
+  "h": 277.05493664741516
+ },
+ {
+  "name": "MoreCityBuilding4",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/MoreCityBuilding/MoreCityBuilding4.mdx",
+  "w": 310.239990234375,
+  "d": 403.7829895019531,
+  "h": 320.5079095363617
+ },
+ {
+  "name": "Tavern",
+  "cat": "Alliance / Doodad structures / Cityscape",
+  "path": "ReignOfChaos/Doodads/Cityscape/Structures/Tavern/Tavern.mdx",
+  "w": 228.66899871826172,
+  "d": 271.22999572753906,
+  "h": 269.3519617319107
+ },
+ {
+  "name": "Barn",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/Barn/Barn.mdx",
+  "w": 346.06201171875,
+  "d": 378.3209991455078,
+  "h": 276.09949493408203
+ },
+ {
+  "name": "BarnScorched",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/BarnScorched/BarnScorched.mdx",
+  "w": 345.8219909667969,
+  "d": 454.06898498535156,
+  "h": 271.1034927368164
+ },
+ {
+  "name": "BridgeLog",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/BridgeLog/BridgeLog.mdx",
+  "w": 446.8040008544922,
+  "d": 605.2630004882812,
+  "h": 82.5334997177124
+ },
+ {
+  "name": "CityBridgeSmall",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/CityBridgeSmall/CityBridgeSmall.mdx",
+  "w": 764.1920166015625,
+  "d": 764.1159973144531,
+  "h": 396.52420806884766
+ },
+ {
+  "name": "ElvenVillageBuilding0",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/ElvenVillageBuilding/ElvenVillageBuilding0.mdx",
+  "w": 192.44950103759766,
+  "d": 269.0699996948242,
+  "h": 422.4519958496094
+ },
+ {
+  "name": "ElvenVillageBuilding1",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/ElvenVillageBuilding/ElvenVillageBuilding1.mdx",
+  "w": 192.44950103759766,
+  "d": 269.0699996948242,
+  "h": 520.4630126953125
+ },
+ {
+  "name": "FarmScorched",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/FarmScorched/FarmScorched.mdx",
+  "w": 234.97899627685547,
+  "d": 237.5459976196289,
+  "h": 264.8365020751953
+ },
+ {
+  "name": "GoblinShipyardRuined",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "FrozenThrone/Doodads/LordaeronSummer/Structures/GoblinShipyardRuined/GoblinShipyardRuined.mdx",
+  "w": 443.8659973144531,
+  "d": 485.3139953613281,
+  "h": 298.66510009765625
+ },
+ {
+  "name": "Granary",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/Granary/Granary.mdx",
+  "w": 271.6091995239258,
+  "d": 202.23290252685547,
+  "h": 357.0302963256836
+ },
+ {
+  "name": "GranaryBurned",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/GranaryBurned/GranaryBurned.mdx",
+  "w": 271.6091995239258,
+  "d": 202.23290252685547,
+  "h": 357.0302963256836
+ },
+ {
+  "name": "Inn",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/Inn/Inn.mdx",
+  "w": 328.05999755859375,
+  "d": 331.7980041503906,
+  "h": 285.2880096435547
+ },
+ {
+  "name": "InnScorched",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/InnScorched/InnScorched.mdx",
+  "w": 328.26100158691406,
+  "d": 410.91900634765625,
+  "h": 285.2880096435547
+ },
+ {
+  "name": "LRockArch",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/LRockArch/LRockArch.mdx",
+  "w": 936.3999938964844,
+  "d": 327.2830047607422,
+  "h": 361.324423789978
+ },
+ {
+  "name": "LRockArch45",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/LRockArch45/LRockArch45.mdx",
+  "w": 718.8290100097656,
+  "d": 747.0719909667969,
+  "h": 361.324423789978
+ },
+ {
+  "name": "LordaeronBridge",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/LordaeronBridge/LordaeronBridge.mdx",
+  "w": 1367.0950317382812,
+  "d": 1367.0950317382812,
+  "h": 483.6520004272461
+ },
+ {
+  "name": "TowerScorched",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/TowerScorched/TowerScorched.mdx",
+  "w": 188.88980102539062,
+  "d": 154.16799926757812,
+  "h": 210.08070755004883
+ },
+ {
+  "name": "WindMill",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/WindMill/WindMill.mdx",
+  "w": 263.3269958496094,
+  "d": 246.10900115966797,
+  "h": 381.96129608154297
+ },
+ {
+  "name": "WindMillBurned",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/WindMillBurned/WindMillBurned.mdx",
+  "w": 263.3269958496094,
+  "d": 242.55030059814453,
+  "h": 391.57628631591797
+ },
+ {
+  "name": "well",
+  "cat": "Alliance / Doodad structures / LordaeronSummer",
+  "path": "ReignOfChaos/Doodads/LordaeronSummer/Structures/well/well.mdx",
+  "w": 82.23770141601562,
+  "d": 78.36980056762695,
+  "h": 136.17679977416992
+ },
+ {
+  "name": "VillageBuilding0",
+  "cat": "Alliance / Doodad structures / Village",
+  "path": "ReignOfChaos/Doodads/Village/Structures/VillageBuilding/VillageBuilding0.mdx",
+  "w": 182.62339782714844,
+  "d": 158.67160034179688,
+  "h": 225.5641224384308
+ },
+ {
+  "name": "VillageBuilding1",
+  "cat": "Alliance / Doodad structures / Village",
+  "path": "ReignOfChaos/Doodads/Village/Structures/VillageBuilding/VillageBuilding1.mdx",
+  "w": 165.71399688720703,
+  "d": 158.67150115966797,
+  "h": 509.0922921895981
+ },
+ {
+  "name": "VillageBuilding2",
+  "cat": "Alliance / Doodad structures / Village",
+  "path": "ReignOfChaos/Doodads/Village/Structures/VillageBuilding/VillageBuilding2.mdx",
+  "w": 165.71399688720703,
+  "d": 158.67150115966797,
+  "h": 398.74228608608246
+ },
+ {
+  "name": "AltarOfKings",
+  "cat": "Alliance / Human buildings",
+  "path": "ReignOfChaos/Buildings/Human/AltarOfKings/AltarOfKings.mdx",
+  "w": 243.5279998779297,
+  "d": 253.4929962158203,
+  "h": 285.5780029296875
+ },
+ {
+  "name": "ArcaneSanctum",
+  "cat": "Alliance / Human buildings",
+  "path": "ReignOfChaos/Buildings/Human/ArcaneSanctum/ArcaneSanctum.mdx",
+  "w": 231.68699645996094,
+  "d": 233.11499786376953,
+  "h": 462.04400634765625
+ },
+ {
+  "name": "ArcaneVault",
+  "cat": "Alliance / Human buildings",
+  "path": "FrozenThrone/buildings/Human/ArcaneVault/ArcaneVault.mdx",
+  "w": 245.48548126220703,
+  "d": 246.83899688720703,
+  "h": 398.4932098388672
+ },
+ {
+  "name": "Blacksmith",
+  "cat": "Alliance / Human buildings",
+  "path": "ReignOfChaos/Buildings/Human/Blacksmith/Blacksmith.mdx",
+  "w": 271.5419921875,
+  "d": 224.78299713134766,
+  "h": 227.63689804077148
+ },
+ {
+  "name": "Farm",
+  "cat": "Alliance / Human buildings",
+  "path": "ReignOfChaos/Buildings/Human/Farm/Farm.mdx",
+  "w": 152.81109619140625,
+  "d": 165.13300323486328,
+  "h": 233.75650787353516
+ },
+ {
+  "name": "GryphonAviary",
+  "cat": "Alliance / Human buildings",
+  "path": "Shared/Buildings/Human/GryphonAviary/GryphonAviary.mdx",
+  "w": 282.625,
+  "d": 273.0169982910156,
+  "h": 375.99700927734375
+ },
+ {
+  "name": "HumanBarracks",
+  "cat": "Alliance / Human buildings",
+  "path": "ReignOfChaos/Buildings/Human/HumanBarracks/HumanBarracks.mdx",
+  "w": 339.4650115966797,
+  "d": 347.9750061035156,
+  "h": 370.3380126953125
+ },
+ {
+  "name": "HumanLumberMill",
+  "cat": "Alliance / Human buildings",
+  "path": "ReignOfChaos/Buildings/Human/HumanLumberMill/HumanLumberMill.mdx",
+  "w": 288.03900146484375,
+  "d": 290.73500061035156,
+  "h": 323.76509857177734
+ },
+ {
+  "name": "HumanShipyard",
+  "cat": "Alliance / Human buildings",
+  "path": "FrozenThrone/buildings/Human/HumanShipyard/HumanShipyard.mdx",
+  "w": 279.2449951171875,
+  "d": 303.5229949951172,
+  "h": 313.29098892211914
+ },
+ {
+  "name": "HumanTower",
+  "cat": "Alliance / Human buildings",
+  "path": "Shared/Buildings/Human/HumanTower/HumanTower.mdx",
+  "w": 130.91360473632812,
+  "d": 147.87939834594727,
+  "h": 326.16508865356445
+ },
+ {
+  "name": "TownHall",
+  "cat": "Alliance / Human buildings",
+  "path": "Shared/Buildings/Human/TownHall/TownHall.mdx",
+  "w": 366.0690002441406,
+  "d": 359.4830017089844,
+  "h": 496.73199462890625
+ },
+ {
+  "name": "Workshop",
+  "cat": "Alliance / Human buildings",
+  "path": "ReignOfChaos/Buildings/Human/Workshop/Workshop.mdx",
+  "w": 262.3159942626953,
+  "d": 255.03099060058594,
+  "h": 299.3529968261719
+ },
+ {
+  "name": "BRockArch",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/BRockArch/BRockArch.mdx",
+  "w": 936.3999938964844,
+  "d": 327.2830047607422,
+  "h": 361.324423789978
+ },
+ {
+  "name": "BRockArch45",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/BRockArch45/BRockArch45.mdx",
+  "w": 718.8290100097656,
+  "d": 747.0719909667969,
+  "h": 361.324423789978
+ },
+ {
+  "name": "RuinedArch0",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/RuinedArch/RuinedArch0.mdx",
+  "w": 226.60799407958984,
+  "d": 114.59640121459961,
+  "h": 196.77880191802979
+ },
+ {
+  "name": "RuinedArch1",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/RuinedArch/RuinedArch1.mdx",
+  "w": 117.84560012817383,
+  "d": 84.07569885253906,
+  "h": 194.41179752349854
+ },
+ {
+  "name": "RuinedArch2",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/RuinedArch/RuinedArch2.mdx",
+  "w": 234.61199951171875,
+  "d": 155.6530990600586,
+  "h": 212.98759841918945
+ },
+ {
+  "name": "RuinedChunk0",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/RuinedChunk/RuinedChunk0.mdx",
+  "w": 62.57880210876465,
+  "d": 62.67230033874512,
+  "h": 34.1178417801857
+ },
+ {
+  "name": "RuinedChunk1",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/RuinedChunk/RuinedChunk1.mdx",
+  "w": 87.9446029663086,
+  "d": 87.97750091552734,
+  "h": 61.61302129924297
+ },
+ {
+  "name": "RuinedCurvedWall",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/RuinedCurvedWall/RuinedCurvedWall.mdx",
+  "w": 114.57509994506836,
+  "d": 244.96099853515625,
+  "h": 68.41993236541748
+ },
+ {
+  "name": "RuinedWall",
+  "cat": "Horde / Doodad structures / Barrens",
+  "path": "ReignOfChaos/Doodads/Barrens/Structures/RuinedWall/RuinedWall.mdx",
+  "w": 138.6230010986328,
+  "d": 41.61600112915039,
+  "h": 72.72621071338654
+ },
+ {
+  "name": "AltarofStorms",
+  "cat": "Horde / Orc buildings",
+  "path": "Shared/Buildings/Orc/AltarOfStorms/AltarofStorms.mdx",
+  "w": 251.57500457763672,
+  "d": 282.4390106201172,
+  "h": 261.2230987548828
+ },
+ {
+  "name": "Beastiary",
+  "cat": "Horde / Orc buildings",
+  "path": "ReignOfChaos/Buildings/Orc/Beastiary/Beastiary.mdx",
+  "w": 325.05999755859375,
+  "d": 292.4550018310547,
+  "h": 297.7529983520508
+ },
+ {
+  "name": "GreatHall",
+  "cat": "Horde / Orc buildings",
+  "path": "ReignOfChaos/Buildings/Orc/GreatHall/GreatHall.mdx",
+  "w": 431.5919952392578,
+  "d": 391.8559875488281,
+  "h": 367.6750030517578
+ },
+ {
+  "name": "OrcBarracks",
+  "cat": "Horde / Orc buildings",
+  "path": "ReignOfChaos/Buildings/Orc/OrcBarracks/OrcBarracks.mdx",
+  "w": 328.1419982910156,
+  "d": 344.97999572753906,
+  "h": 338.2530059814453
+ },
+ {
+  "name": "SpiritLodge",
+  "cat": "Horde / Orc buildings",
+  "path": "Shared/Buildings/Orc/SpiritLodge/SpiritLodge.mdx",
+  "w": 237.51399993896484,
+  "d": 236.40599822998047,
+  "h": 324.59310150146484
+ },
+ {
+  "name": "TaurenTotem",
+  "cat": "Horde / Orc buildings",
+  "path": "ReignOfChaos/Buildings/Orc/TaurenTotem/TaurenTotem.mdx",
+  "w": 259.28399658203125,
+  "d": 259.72300720214844,
+  "h": 314.2379913330078
+ },
+ {
+  "name": "TrollBurrow",
+  "cat": "Horde / Orc buildings",
+  "path": "Shared/Buildings/Orc/TrollBurrow/TrollBurrow.mdx",
+  "w": 208.0279998779297,
+  "d": 211.29199981689453,
+  "h": 156.94110107421875
+ },
+ {
+  "name": "VoodooLounge",
+  "cat": "Horde / Orc buildings",
+  "path": "FrozenThrone/buildings/Orc/VoodooLounge/VoodooLounge.mdx",
+  "w": 271.7050018310547,
+  "d": 277.34400177001953,
+  "h": 206.27049255371094
+ },
+ {
+  "name": "WarMill",
+  "cat": "Horde / Orc buildings",
+  "path": "ReignOfChaos/Buildings/Orc/WarMill/WarMill.mdx",
+  "w": 291.63999938964844,
+  "d": 294.906005859375,
+  "h": 264.7863998413086
+ },
+ {
+  "name": "WatchTower",
+  "cat": "Horde / Orc buildings",
+  "path": "ReignOfChaos/Buildings/Orc/WatchTower/WatchTower.mdx",
+  "w": 171.625,
+  "d": 175.68090057373047,
+  "h": 283.04680252075195
+ }
+]

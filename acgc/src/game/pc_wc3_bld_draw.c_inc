@@ -15,6 +15,9 @@ extern cKF_Skeleton_R_c cKF_bs_r_obj_s_shop1, cKF_bs_r_obj_w_shop1, cKF_bs_r_obj
     cKF_bs_r_obj_w_tailor, cKF_bs_r_obj_s_yamishop, cKF_bs_r_obj_w_yamishop, cKF_bs_r_obj_s_uranai,
     cKF_bs_r_obj_w_uranai, cKF_bs_r_obj_s_douzou, cKF_bs_r_obj_w_douzou, cKF_bs_r_obj_s_toudai, cKF_bs_r_obj_w_toudai;
 extern char* getenv(const char*);
+extern Gfx* pc_lib_dls[];
+extern void pc_build_seen(int slot, f32 x, f32 z);
+extern int pc_build_override(int slot, int* m, f32* dx, f32* dz, f32* oy, f32* yaw, f32* s);
 
 static int pc_bld_index(const cKF_Skeleton_R_c* s) {
     static const cKF_Skeleton_R_c* tbl[22][2];
@@ -56,10 +59,28 @@ static int pc_bld_enabled(void) {
 static int pc_bld_try_draw(GAME* game, cKF_SkeletonInfo_R_c* keyframe) {
     GRAPH* graph;
     int i;
-    if (!pc_bld_enabled()) return 0;
     i = pc_bld_index(keyframe->skeleton);
     if (i < 0) return 0;
     graph = game->graph;
+    {
+        MtxF* mt = get_Matrix_now();
+        int om;
+        f32 odx, odz, ooy, oyaw, os;
+        pc_build_seen(i, mt->xw, mt->zw);
+        if (pc_build_override(i, &om, &odx, &odz, &ooy, &oyaw, &os)) {
+            Matrix_push();
+            Matrix_translate(odx * 100.0f, ooy * 100.0f, odz * 100.0f, MTX_MULT);
+            Matrix_RotateY((s16)(oyaw * (32768.0f / 180.0f)), MTX_MULT);
+            Matrix_scale(os * 100.0f, os * 100.0f, os * 100.0f, MTX_MULT);
+            OPEN_POLY_OPA_DISP(graph);
+            gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+            gSPDisplayList(POLY_OPA_DISP++, pc_lib_dls[om]);
+            CLOSE_POLY_OPA_DISP(graph);
+            Matrix_pull();
+            return 1;
+        }
+    }
+    if (!pc_bld_enabled()) return 0;
     Matrix_push();
     Matrix_scale(2.0f, 2.0f, 2.0f, MTX_MULT);
     OPEN_POLY_OPA_DISP(graph);

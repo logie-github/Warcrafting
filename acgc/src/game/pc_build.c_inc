@@ -1,0 +1,204 @@
+/* In-game build mode (PC/Android): place Warcraft III buildings anywhere in the town, or replace the original
+ * buildings, saved to a text file.  Commands arrive from the Android toolbar (JNI) or AC_BUILD_CMDS (tests). */
+#ifdef TARGET_PC
+#ifndef PC_BUILD_INC
+#define PC_BUILD_INC
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+
+extern int pc_lib_count;
+extern Gfx* pc_lib_dls[];
+extern const char* pc_lib_names[];
+extern float pc_lib_size[][3];
+extern char* getenv(const char*);
+
+#define PC_BUILD_MAX 512
+typedef struct { s16 model; f32 x, y, z; f32 yaw, s; } pc_build_item;
+typedef struct { s16 model; f32 dx, dz, oy, yaw, s; } pc_build_over;
+
+static pc_build_item s_bld_items[PC_BUILD_MAX];
+static int s_bld_n = 0;
+static pc_build_over s_bld_over[32];
+static int s_bld_over_set[32];
+int g_pc_build_mode = 0;
+static int s_bld_cur = 0;
+static f32 s_bld_yaw = 0.0f, s_bld_scale = 0.0f; /* scale 0 = default for the model */
+static int s_bld_loaded = 0;
+static int s_bld_msg = 0;
+static const char* s_bld_status = "";
+/* positions of the original buildings seen this frame (for Replace) */
+static int s_bld_seen_slot[32]; static f32 s_bld_seen_x[32], s_bld_seen_z[32]; static int s_bld_seen_n = 0;
+
+static const char* pc_build_path(void) {
+    const char* p = getenv("AC_BUILD_FILE");
+    return p ? p : "build_placements.txt";
+}
+
+static f32 pc_build_default_scale(int m) {
+    f32 w = pc_lib_size[m][0], d = pc_lib_size[m][1];
+    f32 mx = w > d ? w : d;
+    return mx > 1.0f ? 160.0f / mx : 1.0f;
+}
+
+static void pc_build_save(void) {
+    FILE* f = fopen(pc_build_path(), "w");
+    int i;
+    if (!f) return;
+    fprintf(f, "# Warcrafting build placements. World units: AC units (1 cell = 40). yaw in degrees, scale = AC units per native Warcraft unit\n");
+    for (i = 0; i < s_bld_n; i++) {
+        fprintf(f, "P %s %.1f %.1f %.1f %.1f %.4f\n", pc_lib_names[s_bld_items[i].model], s_bld_items[i].x, s_bld_items[i].y,
+                s_bld_items[i].z, s_bld_items[i].yaw, s_bld_items[i].s);
+    }
+    for (i = 0; i < 32; i++) {
+        if (s_bld_over_set[i]) {
+            fprintf(f, "R %d %s %.1f %.1f %.1f %.1f %.4f\n", i, pc_lib_names[s_bld_over[i].model], s_bld_over[i].dx,
+                    s_bld_over[i].dz, s_bld_over[i].oy, s_bld_over[i].yaw, s_bld_over[i].s);
+        }
+    }
+    fclose(f);
+}
+
+static int pc_build_find(const char* name) {
+    int i;
+    for (i = 0; i < pc_lib_count; i++) if (strcmp(pc_lib_names[i], name) == 0) return i;
+    return -1;
+}
+
+static void pc_build_load(void) {
+    FILE* f;
+    char line[256];
+    if (s_bld_loaded) return;
+    s_bld_loaded = 1;
+    f = fopen(pc_build_path(), "r");
+    if (!f) return;
+    while (fgets(line, sizeof(line), f)) {
+        char name[96];
+        int slot, m;
+        float a, b, c, d, e;
+        if (line[0] == 'P' && sscanf(line, "P %95s %f %f %f %f %f", name, &a, &b, &c, &d, &e) == 6 && s_bld_n < PC_BUILD_MAX) {
+            m = pc_build_find(name);
+            if (m >= 0) { s_bld_items[s_bld_n].model = m; s_bld_items[s_bld_n].x = a; s_bld_items[s_bld_n].y = b; s_bld_items[s_bld_n].z = c; s_bld_items[s_bld_n].yaw = d; s_bld_items[s_bld_n].s = e; s_bld_n++; }
+        } else if (line[0] == 'R' && sscanf(line, "R %d %95s %f %f %f %f %f", &slot, name, &a, &b, &c, &d, &e) == 7 && slot >= 0 && slot < 32) {
+            m = pc_build_find(name);
+            if (m >= 0) { s_bld_over[slot].model = m; s_bld_over[slot].dx = a; s_bld_over[slot].dz = b; s_bld_over[slot].oy = c; s_bld_over[slot].yaw = d; s_bld_over[slot].s = e; s_bld_over_set[slot] = 1; }
+        }
+    }
+    fclose(f);
+}
+
+static f32 pc_build_cur_scale(void) { return s_bld_scale > 0.0f ? s_bld_scale : pc_build_default_scale(s_bld_cur); }
+
+static int pc_build_ghost(GAME_PLAY* play, f32* x, f32* y, f32* z) {
+    PLAYER_ACTOR* pl = GET_PLAYER_ACTOR(play);
+    f32 a, dist;
+    if (pl == NULL) return 0;
+    a = (f32)pl->actor_class.shape_info.rotation.y * (3.14159265f / 32768.0f);
+    dist = 90.0f + 0.5f * (pc_lib_size[s_bld_cur][0] > pc_lib_size[s_bld_cur][1] ? pc_lib_size[s_bld_cur][0] : pc_lib_size[s_bld_cur][1]) * pc_build_cur_scale();
+    *x = pl->actor_class.world.position.x + sinf(a) * dist;
+    *z = pl->actor_class.world.position.z + cosf(a) * dist;
+    *y = pl->actor_class.world.position.y;
+    return 1;
+}
+
+/* cmd: 1 toggle, 2 next, 3 prev, 4 place, 5 delete nearest, 6 rotate 45, 7 bigger, 8 smaller, 9 replace nearest building,
+ * 10 restore nearest building, 11 undo last, 12 rotate -45 */
+static GAME_PLAY* s_bld_play = NULL;
+void pc_build_cmd(int cmd, int arg) {
+    f32 gx, gy, gz;
+    int i, best;
+    f32 bd;
+    (void)arg;
+    pc_build_load();
+    switch (cmd) {
+        case 1: g_pc_build_mode = !g_pc_build_mode; break;
+        case 2: s_bld_cur = (s_bld_cur + 1) % pc_lib_count; s_bld_scale = 0.0f; break;
+        case 3: s_bld_cur = (s_bld_cur + pc_lib_count - 1) % pc_lib_count; s_bld_scale = 0.0f; break;
+        case 6: s_bld_yaw += 45.0f; if (s_bld_yaw >= 360.0f) s_bld_yaw -= 360.0f; break;
+        case 12: s_bld_yaw -= 45.0f; if (s_bld_yaw < 0.0f) s_bld_yaw += 360.0f; break;
+        case 7: s_bld_scale = pc_build_cur_scale() * 1.12f; break;
+        case 8: s_bld_scale = pc_build_cur_scale() / 1.12f; break;
+        case 4:
+            if (s_bld_play && s_bld_n < PC_BUILD_MAX && pc_build_ghost(s_bld_play, &gx, &gy, &gz)) {
+                s_bld_items[s_bld_n].model = s_bld_cur; s_bld_items[s_bld_n].x = gx; s_bld_items[s_bld_n].y = gy; s_bld_items[s_bld_n].z = gz;
+                s_bld_items[s_bld_n].yaw = s_bld_yaw; s_bld_items[s_bld_n].s = pc_build_cur_scale(); s_bld_n++; pc_build_save();
+            }
+            break;
+        case 5:
+            if (s_bld_play && pc_build_ghost(s_bld_play, &gx, &gy, &gz)) {
+                best = -1; bd = 400.0f * 400.0f;
+                for (i = 0; i < s_bld_n; i++) {
+                    f32 dx = s_bld_items[i].x - gx, dz = s_bld_items[i].z - gz, d2 = dx * dx + dz * dz;
+                    if (d2 < bd) { bd = d2; best = i; }
+                }
+                if (best >= 0) { memmove(&s_bld_items[best], &s_bld_items[best + 1], (size_t)(s_bld_n - best - 1) * sizeof(pc_build_item)); s_bld_n--; pc_build_save(); }
+            }
+            break;
+        case 11: if (s_bld_n > 0) { s_bld_n--; pc_build_save(); } break;
+        case 9: case 10:
+            if (s_bld_play && pc_build_ghost(s_bld_play, &gx, &gy, &gz)) {
+                best = -1; bd = 900.0f * 900.0f;
+                for (i = 0; i < s_bld_seen_n; i++) {
+                    f32 dx = s_bld_seen_x[i] - gx, dz = s_bld_seen_z[i] - gz, d2 = dx * dx + dz * dz;
+                    if (d2 < bd) { bd = d2; best = i; }
+                }
+                if (best >= 0) {
+                    int slot = s_bld_seen_slot[best];
+                    if (cmd == 10) s_bld_over_set[slot] = 0;
+                    else { s_bld_over[slot].model = s_bld_cur; s_bld_over[slot].dx = gx - s_bld_seen_x[best]; s_bld_over[slot].dz = gz - s_bld_seen_z[best];
+                           s_bld_over[slot].oy = 0.0f; s_bld_over[slot].yaw = s_bld_yaw; s_bld_over[slot].s = pc_build_cur_scale(); s_bld_over_set[slot] = 1; }
+                    pc_build_save();
+                }
+            }
+            break;
+        default: break;
+    }
+}
+
+static void pc_build_draw_model(GAME_PLAY* play, int m, f32 x, f32 y, f32 z, f32 yaw_deg, f32 s) {
+    GRAPH* graph = play->game.graph;
+    s_xyz rot;
+    rot.x = 0; rot.y = (s16)(yaw_deg * (32768.0f / 180.0f)); rot.z = 0;
+    Matrix_softcv3_load(&rot, x, y, z);
+    Matrix_scale(s, s, s, MTX_MULT);
+    OPEN_POLY_OPA_DISP(graph);
+    gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPDisplayList(POLY_OPA_DISP++, pc_lib_dls[m]);
+    CLOSE_POLY_OPA_DISP(graph);
+}
+
+static void pc_build_run_test_cmds(void) {
+    static int pos = 0, started = 0;
+    static const char* e = NULL;
+    static int frames = 0;
+    if (!started) { e = getenv("AC_BUILD_CMDS"); started = 1; }
+    if (!e) return;
+    if (++frames % 20 != 0) return;
+    while (e[pos] == ' ' || e[pos] == ',') pos++;
+    if (e[pos] == 0) return;
+    { int c = 0; while (e[pos] >= '0' && e[pos] <= '9') { c = c * 10 + (e[pos] - '0'); pos++; } pc_build_cmd(c, 0); }
+}
+
+void pc_build_seen(int slot, f32 x, f32 z) {
+    if (s_bld_seen_n < 32) { s_bld_seen_slot[s_bld_seen_n] = slot; s_bld_seen_x[s_bld_seen_n] = x; s_bld_seen_z[s_bld_seen_n] = z; s_bld_seen_n++; }
+}
+
+int pc_build_override(int slot, int* m, f32* dx, f32* dz, f32* oy, f32* yaw, f32* s) {
+    if (slot < 0 || slot >= 32 || !s_bld_over_set[slot]) return 0;
+    *m = s_bld_over[slot].model; *dx = s_bld_over[slot].dx; *dz = s_bld_over[slot].dz; *oy = s_bld_over[slot].oy; *yaw = s_bld_over[slot].yaw; *s = s_bld_over[slot].s;
+    return 1;
+}
+
+void pc_build_begin(void) { s_bld_seen_n = 0; }
+
+static void pc_build_frame(GAME_PLAY* play) {
+    int i;
+    f32 gx, gy, gz;
+    s_bld_play = play;
+    pc_build_load();
+    pc_build_run_test_cmds();
+    for (i = 0; i < s_bld_n; i++) pc_build_draw_model(play, s_bld_items[i].model, s_bld_items[i].x, s_bld_items[i].y, s_bld_items[i].z, s_bld_items[i].yaw, s_bld_items[i].s);
+    if (g_pc_build_mode && pc_build_ghost(play, &gx, &gy, &gz)) pc_build_draw_model(play, s_bld_cur, gx, gy, gz, s_bld_yaw, pc_build_cur_scale());
+}
+#endif
+#endif

@@ -515,12 +515,19 @@ extern void Actor_info_call_actor(GAME_PLAY* play, Actor_info* actor_info) {
     play->game.doing_point_specific = 163;
 }
 
+#ifdef TARGET_PC
+#include "../src/game/pc_build.c_inc"
+#endif
+
 extern void Actor_info_draw_actor(GAME_PLAY* play, Actor_info* actor_info) {
     Actor_list* list;
     ACTOR* actor;
     int i;
     DRAW_CHK_PROC draw_chk_proc = play->draw_chk_proc;
 
+#ifdef TARGET_PC
+    pc_build_begin();
+#endif
     list = actor_info->list;
     for (i = 0; i < ACTOR_PART_NUM; i++) {
         int do_not_draw;
@@ -550,6 +557,9 @@ extern void Actor_info_draw_actor(GAME_PLAY* play, Actor_info* actor_info) {
         list++;
     }
 
+#ifdef TARGET_PC
+    pc_build_frame(play);
+#endif
     Light_list_point_draw(play);
 }
 
