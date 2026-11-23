@@ -149,7 +149,34 @@ def hsv(c):
     return h * 360.0, s_, v
 
 
-def remap(orig, tile, grass, slot, wood=None, snow=None, ref=None):
+def season_tone(orig, ref):
+    """Mean colour of the pixels that are green in the summer reference (the grass areas)."""
+    px = orig.load(); rp = ref.load(); n = 0; acc = [0, 0, 0]
+    for y in range(orig.size[1]):
+        for x in range(orig.size[0]):
+            if is_green(rp[x, y]):
+                c = px[x, y]; n += 1
+                for i in range(3): acc[i] += c[i]
+    return tuple(a / n for a in acc) if n else None
+
+
+def tone_grass(base, tone, summer_tone):
+    """Shift grass material toward the season tone: hue and saturation follow the palette,
+    brightness stays the material's own."""
+    import colorsys
+    if tone is None or summer_tone is None:
+        return base
+    h1, s1, _ = colorsys.rgb_to_hsv(*(v / 255.0 for v in tone))
+    h0, s0, _ = colorsys.rgb_to_hsv(*(v / 255.0 for v in summer_tone))
+    d = abs(((h1 - h0 + 0.5) % 1.0) - 0.5)
+    if d < 0.04:
+        return base
+    bh, bs, bv = colorsys.rgb_to_hsv(base[0] / 255.0, base[1] / 255.0, base[2] / 255.0)
+    r, g, b = colorsys.hsv_to_rgb(h1, min(1.0, 0.35 + 0.5 * s1), bv * 0.95)
+    return (int(r * 255), int(g * 255), int(b * 255))
+
+
+def remap(orig, tile, grass, slot, wood=None, snow=None, ref=None, sref=None):
     """Material swap guided by the original palette colors, per ground slot.
 
     water (river/beach): blue entries stay blue
@@ -162,6 +189,8 @@ def remap(orig, tile, grass, slot, wood=None, snow=None, ref=None):
     wp = wood.load() if wood is not None else None
     sp = snow.load() if snow is not None else None
     refp = ref.load() if ref is not None else None
+    tone = season_tone(orig, ref) if ref is not None else None
+    stone = season_tone(ref, ref) if ref is not None else None
     res = Image.new('RGBA', orig.size); rp = res.load()
     for y in range(orig.size[1]):
         for x in range(orig.size[0]):
@@ -176,7 +205,14 @@ def remap(orig, tile, grass, slot, wood=None, snow=None, ref=None):
             if slot in WATER_SLOTS and blue:
                 rp[x, y] = c
                 continue
-            if green and slot != 'grass':
+            gref = refp is not None and is_green(refp[x, y])
+            if (green or gref) and slot != 'grass':
+                rp[x, y] = tuple(tone_grass(gp[x, y], tone, stone)) + (c[3],)
+                continue
+            if slot == 'grass':
+                rp[x, y] = tuple(tone_grass(tp[x, y], tone, stone)) + (c[3],)
+                continue
+            if False:
                 base = gp[x, y]
             elif slot == 'rail' and wp is not None and (
                     (10 <= hh <= 50 and ss > 0.2) or (30 <= hh <= 60 and vv > 0.8)):
@@ -278,9 +314,9 @@ def is_green(c):
 
 
 def snow_px(snow, x, y, c):
-    """Snow material tinted by the original colour so AC's blue-white pattern shows."""
+    """Natural snow: the material pixel as is (no pattern from the original texture)."""
     s_ = snow[x, y]
-    return tuple(min(255, int(s_[i] * (0.42 + 0.58 * c[i] / 255.0))) for i in range(3)) + (255,)
+    return (s_[0], s_[1], s_[2], 255)
 
 
 def shift_color(base, c, cr):
@@ -318,6 +354,60 @@ def remap_steel(orig):
             v = 45 + 190 * L ** 1.2
             rp[x, y] = (int(v * 0.95), int(v * 0.99), min(255, int(v * 1.08)), c[3])
     return res
+
+
+def remap_flat(orig, tile_img, snow=None):
+    """Natural material: every opaque pixel is the material itself (snow stays snow)."""
+    px = orig.load(); tp = tile_img.load()
+    sp = snow.load() if snow is not None else None
+    res = Image.new('RGBA', orig.size); rp = res.load()
+    for y in range(orig.size[1]):
+        for x in range(orig.size[0]):
+            c = px[x, y]
+            if c[3] == 0:
+                rp[x, y] = c
+            elif sp is not None and is_snow(c):
+                rp[x, y] = snow_px(sp, x, y, c)
+            else:
+                t = tp[x, y]
+                rp[x, y] = (t[0], t[1], t[2], c[3])
+    return res
+
+
+def flatten_lowfreq(img, radius=14):
+    """Remove large light/dark blotches (what makes a repeat obvious) and keep the fine blades."""
+    import numpy as np
+    from PIL import ImageFilter
+    w, h = img.size
+    big = Image.new('RGB', (w * 3, h * 3))
+    for ty in range(3):
+        for tx in range(3):
+            big.paste(img, (tx * w, ty * h))
+    low = np.asarray(big.filter(ImageFilter.GaussianBlur(radius)), dtype=float)[h:2 * h, w:2 * w]
+    a = np.asarray(img, dtype=float)
+    lum = lambda x: x @ np.array([0.3, 0.59, 0.11])
+    scale = (lum(a).mean() / np.maximum(lum(low), 1.0))[:, :, None]
+    out = a * np.clip(scale, 0.6, 1.6)
+    return Image.fromarray(np.clip(out, 0, 255).astype('uint8'))
+
+
+def add_grain(img, sigma=3.5):
+    import numpy as np
+    rng = np.random.default_rng(7)
+    a = np.asarray(img, dtype=float)
+    a = a + rng.normal(0, sigma, a.shape[:2])[:, :, None]
+    return Image.fromarray(np.clip(a, 0, 255).astype('uint8'))
+
+
+def quilt(img):
+    """2x2 mirror quilt: 4x the area, still tileable, half the repeat frequency."""
+    w, h = img.size
+    out = Image.new('RGB', (w * 2, h * 2))
+    out.paste(img, (0, 0))
+    out.paste(img.transpose(Image.FLIP_LEFT_RIGHT), (w, 0))
+    out.paste(img.transpose(Image.FLIP_TOP_BOTTOM), (0, h))
+    out.paste(img.transpose(Image.ROTATE_180), (w, h))
+    return out
 
 
 def tonal_ramp(tile_img, lo_pct, hi_pct, steps=32):
@@ -443,8 +533,12 @@ def main():
             k = (slot, w, h, rotate)
             if k not in tiles:
                 base = Image.open(os.path.join(a.tiles, faction, slot + '.png')).convert('RGB')
-                if slot in ('wood', 'brick', 'sand'):
+                if slot in ('wood', 'sand', 'grass', 'earth', 'cliff', 'stone', 'bush_a', 'rail'):
                     base = make_seamless(base)
+                if slot == 'grass':
+                    base = flatten_lowfreq(base)
+                if slot == 'snow':
+                    base = add_grain(base)
                 if rotate:
                     base = base.rotate(90, expand=True)
                 side = max(min(w, h), max(w, h) // 2)
@@ -475,16 +569,20 @@ def main():
                 pal = pal_from_hex(palhex)
                 refhex = table[1] if kind == 'arr' else palhex
                 refpal = pal_from_hex(refhex)
-                W, H = w * SCALE, h * SCALE
+                sc = SCALE
+                W, H = w * sc, h * sc
                 snow = tile('snow', W, H) if winter else None
                 if slot == 'rail':
                     out = remap_rail(decode_idx(data, w, h), pal, tile('rail', W, H),
                                      tile('grass', W, H), tile('wood', W, H), snow, refpal)
                 elif slot == 'tekkyo':
                     out = remap_steel(decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST))
-                elif slot in WOOD_SLOTS or slot in ('station', 'tunnel'):
+                elif slot in ('station', 'tunnel'):
                     orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
-                    out = remap_ramp(orig, tile(SLOT_TILE[slot], W, H, slot in WOOD_SLOTS), slot, snow)
+                    out = remap_flat(orig, tile(SLOT_TILE[slot], W, H), snow)
+                elif slot in WOOD_SLOTS:
+                    orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
+                    out = remap_ramp(orig, tile(SLOT_TILE[slot], W, H, True), slot, snow)
                 else:
                     orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
                     ref = decode_ci4(data, w, h, refpal).resize((W, H), Image.NEAREST)
