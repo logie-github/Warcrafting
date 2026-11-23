@@ -28,13 +28,12 @@ def body(dx):
     g={k:(vv.copy() if hasattr(vv,'copy') else vv) for k,vv in orr.items()}
     g['v']=g['v']*0.42; g['v'][:,0]+=dx; return g
 def mkstem(dx,lean):
+    """Apple stem as modelled (4 triangle sprig), unstretched, upright, uniformly scaled onto the cherry top."""
     g={k:(vv.copy() if hasattr(vv,'copy') else vv) for k,vv in stem.items()}
-    p=g['v']; base=p[:,2].min(); center=p[:,:2].mean(0)
-    p[:,:2]-=center
-    h=p[:,2]-base
-    p[:,2]=base*0+0.15+h*1.0          # lift to cherry top, lengthen
-    p[:,:2]*=0.8
-    p[:,0]+=dx+lean*(p[:,2]-0.17)
+    p=g['v']; base=p[:,2].min(); cx=p[:,:2].mean(0)
+    p[:,:2]-=cx; p[:,2]-=base
+    p*=0.75
+    p[:,2]+=0.16; p[:,0]+=dx
     g['v']=p; return g
 dx=0.13
 cher={'textures':[],'materials':[],'geosets':[body(-dx),body(dx),mkstem(-dx,0.55),mkstem(dx,-0.55)]}
