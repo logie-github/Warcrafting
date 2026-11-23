@@ -399,6 +399,18 @@ def add_grain(img, sigma=3.5):
     return Image.fromarray(np.clip(a, 0, 255).astype('uint8'))
 
 
+def grass_to_snow(img):
+    """Recolour a grass tile as snow: keep its fine detail as soft shading on a white-blue base."""
+    import numpy as np
+    a = np.asarray(img, dtype=float)
+    lum = a @ np.array([0.3, 0.59, 0.11])
+    m, sd = lum.mean(), max(lum.std(), 1.0)
+    v = np.clip((lum - m) / sd, -2.5, 2.5)[:, :, None]
+    base = np.array([236.0, 244.0, 252.0])
+    out = base * (1.0 + 0.045 * v) - np.array([6.0, 2.0, 0.0]) * np.clip(-v, 0, None)
+    return Image.fromarray(np.clip(out, 0, 255).astype('uint8'))
+
+
 def quilt(img):
     """2x2 mirror quilt: 4x the area, still tileable, half the repeat frequency."""
     w, h = img.size
@@ -532,15 +544,17 @@ def main():
         def tile(slot, w, h, rotate=False):
             k = (slot, w, h, rotate)
             if k not in tiles:
-                base = Image.open(os.path.join(a.tiles, faction, slot + '.png')).convert('RGB')
+                src = 'grass' if slot == 'snow' else slot
+                base = Image.open(os.path.join(a.tiles, faction, src + '.png')).convert('RGB')
                 if slot in ('wood', 'brick', 'sand', 'grass', 'earth', 'cliff', 'stone', 'bush_a', 'rail'):
                     base = make_seamless(base)
                 if slot == 'grass':
                     base = flatten_lowfreq(base)
                 if slot == 'snow':
-                    base = add_grain(base)
+                    base = make_seamless(base)
+                    base = grass_to_snow(flatten_lowfreq(base))
                 if rotate:
-                    base = base.rotate(90, expand=True)
+                    base = base.rotate(90 if rotate is True else rotate, expand=True)
                 side = max(min(w, h), max(w, h) // 2)
                 base = base.resize((side, side), Image.LANCZOS)
                 canvas = Image.new('RGB', (w, h))
@@ -579,7 +593,7 @@ def main():
                     out = remap_steel(decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST))
                 elif slot in ('station', 'tunnel'):
                     orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
-                    out = remap_flat(orig, tile(SLOT_TILE[slot], W, H), snow)
+                    out = remap_flat(orig, tile(SLOT_TILE[slot], W, H, -90 if slot == 'station' else False), snow)
                 elif slot in WOOD_SLOTS:
                     orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
                     out = remap_ramp(orig, tile(SLOT_TILE[slot], W, H, True), slot, snow)
