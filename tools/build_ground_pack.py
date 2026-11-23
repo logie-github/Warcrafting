@@ -108,6 +108,17 @@ def tlut_hash(data, hexs):
     return xxhash.xxh64(raw[lo * 2:(hi + 1) * 2], seed=0).intdigest()
 
 
+def decode_idx(b, w, h):
+    g = [[0] * w for _ in range(h)]; i = 0
+    for by in range(0, h, 8):
+        for bx in range(0, w, 8):
+            for y in range(8):
+                for x in range(0, 8, 2):
+                    v = b[i]; i += 1
+                    g[by + y][bx + x] = v >> 4; g[by + y][bx + x + 1] = v & 15
+    return g
+
+
 def decode_ci4(b, w, h, pal):
     im = Image.new('RGBA', (w, h)); px = im.load(); i = 0
     for by in range(0, h, 8):
@@ -160,6 +171,77 @@ def remap(orig, tile, grass, slot, wood=None):
     return res
 
 
+def rail_masks(idx, pal):
+    """Return per-pixel class grid for a rail texture: g,w,m(etal),s(tone),t(ransparent)."""
+    h = len(idx); w = len(idx[0])
+    def kind(i):
+        c = pal[i]
+        if c[3] == 0:
+            return 't'
+        hh, ss, vv = hsv(c)
+        if c[1] > c[0] * 1.12 and c[1] > c[2] * 1.12:
+            return 'g'
+        if (10 <= hh <= 50 and ss > 0.2) or (30 <= hh <= 60 and vv > 0.8) or hh >= 330 or hh < 10:
+            return 'w'
+        return 's'
+    k = [[kind(idx[y][x]) for x in range(w)] for y in range(h)]
+    out = [row[:] for row in k]
+    # rails: rows that are (almost) a single purple index across the whole width
+    for y in range(h):
+        cnt = collections.Counter(idx[y])
+        top, n = cnt.most_common(1)[0]
+        if n >= 0.9 * w and k[y][0] == 's':
+            out[y] = ['m' if c == 's' else c for c in k[y]]
+    # bolts: purple pixels inside a tie: wood on both sides (left/right) and
+    # wood or rail above and below, all within 6 px
+    def hit(y, x, dy, dx):
+        for _ in range(6):
+            y += dy; x += dx
+            if not (0 <= y < h and 0 <= x < w):
+                return None
+            if out[y][x] != 's':
+                return out[y][x]
+        return None
+    bolts = []
+    for y in range(h):
+        for x in range(w):
+            if out[y][x] != 's':
+                continue
+            if (hit(y, x, 0, 1) == 'w' and hit(y, x, 0, -1) == 'w'
+                    and hit(y, x, 1, 0) in ('w', 'm') and hit(y, x, -1, 0) in ('w', 'm')):
+                bolts.append((y, x))
+    for y, x in bolts:
+        out[y][x] = 'm'
+    return out
+
+
+def remap_rail(idx, pal, tile, grass, wood):
+    """Rail slot: steel rails and bolts keep their detail, ties become wood,
+    gravel becomes the stone tile, green becomes grass. Output at SCALE x."""
+    h = len(idx); w = len(idx[0])
+    cls = rail_masks(idx, pal)
+    res = Image.new('RGBA', (w * SCALE, h * SCALE)); rp = res.load()
+    tp = tile.load(); gp = grass.load(); wp = wood.load()
+    for y in range(h):
+        for x in range(w):
+            c = pal[idx[y][x]]
+            L = (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255.0
+            k = cls[y][x]
+            for dy in range(SCALE):
+                for dx in range(SCALE):
+                    X, Y = x * SCALE + dx, y * SCALE + dy
+                    if k == 't':
+                        rp[X, Y] = (0, 0, 0, 0); continue
+                    if k == 'm':
+                        v = 40 + 190 * L ** 1.3
+                        rp[X, Y] = (int(v * 0.96), int(v * 1.0), min(255, int(v * 1.08)), 255); continue
+                    base = {'g': gp, 'w': wp}.get(k, tp)[X, Y]
+                    f = 0.55 + 0.9 * L
+                    rp[X, Y] = (min(255, int(base[0] * f)), min(255, int(base[1] * f)),
+                                min(255, int(base[2] * f)), c[3])
+    return res
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--iso', required=True)
@@ -207,10 +289,16 @@ def main():
             if slot not in SLOT_TILE:
                 continue
             data = blocks[name]
-            orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-            out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
-                        tile('grass', w * SCALE, hh * SCALE), slot,
-                        tile('wood', w * SCALE, hh * SCALE))
+            if slot == 'rail':
+                out = remap_rail(decode_idx(data, w, hh), pal_from_hex(palhex),
+                                 tile('rail', w * SCALE, hh * SCALE),
+                                 tile('grass', w * SCALE, hh * SCALE),
+                                 tile('wood', w * SCALE, hh * SCALE))
+            else:
+                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
+                out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
+                            tile('grass', w * SCALE, hh * SCALE), slot,
+                            tile('wood', w * SCALE, hh * SCALE))
             th = tlut_hash(data, palhex)
             fn = f'tex1_{w}x{hh}_{h}_{th:016x}_8.dds'
             out.save(os.path.join(od, fn), pixel_format='DXT5')
@@ -235,10 +323,16 @@ def main():
             if len(blocks[names[0]]) != w * hh // 2:
                 continue
             data = blocks[names[0]]
-            orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-            out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
-                        tile('grass', w * SCALE, hh * SCALE), slot,
-                        tile('wood', w * SCALE, hh * SCALE))
+            if slot == 'rail':
+                out = remap_rail(decode_idx(data, w, hh), pal_from_hex(palhex),
+                                 tile('rail', w * SCALE, hh * SCALE),
+                                 tile('grass', w * SCALE, hh * SCALE),
+                                 tile('wood', w * SCALE, hh * SCALE))
+            else:
+                orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
+                out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
+                            tile('grass', w * SCALE, hh * SCALE), slot,
+                            tile('wood', w * SCALE, hh * SCALE))
             out.save(os.path.join(od, f'tex1_{w}x{hh}_{h}_$_8.dds'), pixel_format='DXT5')
             count[faction + '_wildcard'] += 1
     print(dict(count), 'files;', len(seen), 'texture+palette combinations seen')
