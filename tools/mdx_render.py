@@ -159,3 +159,25 @@ def render(model, tex_for_geo, size=512, yaw=35.0, pitch=28.0, bg=(46, 46, 52), 
             sub[m] = np.clip(col[m], 0, 1)
             zb[m] = z[m]
     return Image.fromarray((np.clip(img, 0, 1) * 255).astype('uint8'))
+
+
+def parse_m2(data, skin):
+    """Chunked M2 (MD21) plus its .skin file -> same model dict as parse_mdx (one geoset)."""
+    pos = 0
+    md = None
+    while pos + 8 <= len(data):
+        tag = data[pos:pos + 4]; size = struct.unpack('<I', data[pos + 4:pos + 8])[0]
+        if tag == b'MD21':
+            md = data[pos + 8:pos + 8 + size]
+        pos += 8 + size
+    nv, ov = struct.unpack('<II', md[60:68])
+    raw = np.frombuffer(md, dtype=np.dtype([('p', '<f4', 3), ('bw', 'u1', 4), ('bi', 'u1', 4),
+                                            ('n', '<f4', 3), ('uv', '<f4', 2), ('uv2', '<f4', 2)]),
+                        count=nv, offset=ov)
+    nl, ol = struct.unpack('<II', skin[4:12]); nt, ot = struct.unpack('<II', skin[12:20])
+    lookup = np.frombuffer(skin, '<u2', nl, ol).astype(np.int64)
+    tri = np.frombuffer(skin, '<u2', nt, ot).astype(np.int64)
+    idx = lookup[tri].reshape(-1, 3)
+    geo = {'v': np.ascontiguousarray(raw['p']).astype(np.float32), 'n': np.ascontiguousarray(raw['n']).astype(np.float32),
+           'uv': np.ascontiguousarray(raw['uv']).astype(np.float32), 'idx': idx, 'mat': 0}
+    return {'textures': [], 'materials': [], 'geosets': [geo]}
