@@ -23,8 +23,10 @@ from PIL import Image
 SCALE = 4
 SLOT_TILE = {'earth': 'earth', 'cliff': 'cliff', 'grass': 'grass', 'rail': 'rail',
              'stone': 'stone', 'bushA': 'bush_a', 'bushB': 'bush_a', 'sand': 'sand',
-             'river': 'sand', 'tunnel': 'cliff', 'station': 'stone', 'bridge1': 'rail',
-             'bridge2': 'rail', 'tekkyo': 'rail', 'beach': 'sand'}
+             'river': 'sand', 'tunnel': 'cliff', 'station': 'brick', 'bridge1': 'wood',
+             'bridge2': 'wood', 'tekkyo': 'wood', 'beach': 'sand'}
+WATER_SLOTS = ('river', 'beach')
+WOOD_SLOTS = ('bridge1', 'bridge2', 'tekkyo')
 
 
 def yaz0(b):
@@ -117,20 +119,41 @@ def decode_ci4(b, w, h, pal):
     return im
 
 
-def remap(orig, tile, grass, is_grass_slot):
+def hsv(c):
+    import colorsys
+    h, s_, v = colorsys.rgb_to_hsv(c[0] / 255.0, c[1] / 255.0, c[2] / 255.0)
+    return h * 360.0, s_, v
+
+
+def remap(orig, tile, grass, slot, wood=None):
+    """Material swap guided by the original palette colors, per ground slot.
+
+    water (river/beach): blue entries stay blue
+    green entries: faction grass (except on the grass slot itself)
+    station: everything else becomes brick
+    bridges/tekkyo: everything else becomes wood
+    rail: orange/brown/cream entries (the ties) become wood, the rest gravel
+    """
     px = orig.load(); tp = tile.load(); gp = grass.load()
+    wp = wood.load() if wood is not None else None
     res = Image.new('RGBA', orig.size); rp = res.load()
     for y in range(orig.size[1]):
         for x in range(orig.size[0]):
             c = px[x, y]
             L = (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2]) / 255.0
+            hh, ss, vv = hsv(c)
             green = c[1] > c[0] * 1.12 and c[1] > c[2] * 1.12
-            blue = c[2] > c[0] * 1.15 and c[2] > c[1] * 1.05
-            if blue:
-                # water stays water: keep the original blue (shaded below)
+            blue = 190 <= hh <= 260 and ss > 0.3
+            if slot in WATER_SLOTS and blue:
                 rp[x, y] = c
                 continue
-            base = gp[x, y] if (green and not is_grass_slot) else tp[x, y]
+            if green and slot != 'grass':
+                base = gp[x, y]
+            elif slot == 'rail' and wp is not None and (
+                    (10 <= hh <= 50 and ss > 0.2) or (30 <= hh <= 60 and vv > 0.8)):
+                base = wp[x, y]
+            else:
+                base = tp[x, y]
             f = 0.55 + 0.9 * L
             rp[x, y] = (min(255, int(base[0] * f)), min(255, int(base[1] * f)),
                         min(255, int(base[2] * f)), c[3])
@@ -163,10 +186,19 @@ def main():
     for faction in ('alliance', 'horde'):
         od = os.path.join(a.out, faction); os.makedirs(od, exist_ok=True)
         tiles = {}
-        def tile(slot, w, h):
-            k = (slot, w, h)
+        def tile(slot, w, h, rotate=False):
+            k = (slot, w, h, rotate)
             if k not in tiles:
-                tiles[k] = Image.open(os.path.join(a.tiles, faction, slot + '.png')).convert('RGB').resize((w, h), Image.LANCZOS)
+                base = Image.open(os.path.join(a.tiles, faction, slot + '.png')).convert('RGB')
+                if rotate:
+                    base = base.rotate(90, expand=True)
+                side = min(w, h)
+                base = base.resize((side, side), Image.LANCZOS)
+                canvas = Image.new('RGB', (w, h))
+                for ty in range(0, h, side):
+                    for tx in range(0, w, side):
+                        canvas.paste(base, (tx, ty))
+                tiles[k] = canvas
             return tiles[k]
         for (h, palhex), (w, hh) in seen.items():
             name = byhash[h][0]
@@ -176,8 +208,9 @@ def main():
                 continue
             data = blocks[name]
             orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-            out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE),
-                        tile('grass', w * SCALE, hh * SCALE), slot == 'grass')
+            out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
+                        tile('grass', w * SCALE, hh * SCALE), slot,
+                        tile('wood', w * SCALE, hh * SCALE))
             th = tlut_hash(data, palhex)
             fn = f'tex1_{w}x{hh}_{h}_{th:016x}_8.dds'
             out.save(os.path.join(od, fn), pixel_format='DXT5')
@@ -203,8 +236,9 @@ def main():
                 continue
             data = blocks[names[0]]
             orig = decode_ci4(data, w, hh, pal_from_hex(palhex)).resize((w * SCALE, hh * SCALE), Image.NEAREST)
-            out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE),
-                        tile('grass', w * SCALE, hh * SCALE), slot == 'grass')
+            out = remap(orig, tile(SLOT_TILE[slot], w * SCALE, hh * SCALE, slot in WOOD_SLOTS),
+                        tile('grass', w * SCALE, hh * SCALE), slot,
+                        tile('wood', w * SCALE, hh * SCALE))
             out.save(os.path.join(od, f'tex1_{w}x{hh}_{h}_$_8.dds'), pixel_format='DXT5')
             count[faction + '_wildcard'] += 1
     print(dict(count), 'files;', len(seen), 'texture+palette combinations seen')
