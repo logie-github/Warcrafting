@@ -3,6 +3,7 @@
  * the positioned Warcraft mesh (tools/make_building_meshes.py) is drawn in the actor's current matrix. */
 #ifdef TARGET_PC
 extern Gfx* pc_bld_dls[];
+extern Gfx* pc_bldh_dls[];
 extern cKF_Skeleton_R_c cKF_bs_r_obj_s_shop1, cKF_bs_r_obj_w_shop1, cKF_bs_r_obj_s_shop2, cKF_bs_r_obj_w_shop2,
     cKF_bs_r_obj_s_shop3, cKF_bs_r_obj_w_shop3, cKF_bs_r_obj_s_shop4, cKF_bs_r_obj_w_shop4, cKF_bs_r_obj_s_house1,
     cKF_bs_r_obj_w_house1, cKF_bs_r_obj_s_house2, cKF_bs_r_obj_w_house2, cKF_bs_r_obj_s_house3, cKF_bs_r_obj_w_house3,
@@ -46,7 +47,7 @@ static int pc_bld_enabled(void) {
     if (on < 0) {
         const char* t = getenv("AC_TOWN");
         const char* d = getenv("AC_NO_WC3_BUILDINGS");
-        on = (!d && !(t && t[0] == 'h')) ? 1 : 0;
+        on = d ? 0 : ((t && t[0] == 'h') ? 2 : 1);
     }
     return on;
 }
@@ -63,7 +64,7 @@ static int pc_bld_try_draw(GAME* game, cKF_SkeletonInfo_R_c* keyframe) {
     Matrix_scale(2.0f, 2.0f, 2.0f, MTX_MULT);
     OPEN_POLY_OPA_DISP(graph);
     gSPMatrix(POLY_OPA_DISP++, _Matrix_to_Mtx_new(graph), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPDisplayList(POLY_OPA_DISP++, pc_bld_dls[i]);
+    gSPDisplayList(POLY_OPA_DISP++, (pc_bld_enabled() == 2 ? pc_bldh_dls : pc_bld_dls)[i]);
     CLOSE_POLY_OPA_DISP(graph);
     Matrix_pull();
     return 1;

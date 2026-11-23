@@ -26,7 +26,7 @@ def f32(b): return np.frombuffer(base64.b64decode(b), np.float32)
 def u16(b): return np.frombuffer(base64.b64decode(b), np.uint16)
 
 
-def main(w3files, plc_path, bbox_path, out_c, out_dir):
+def main(w3files, plc_path, bbox_path, out_c, out_dir, prefix='pc_bld'):
     models = {}; textures = []
     for fn in w3files.split(','):
         d = json.load(open(fn)); off = len(textures)
@@ -76,7 +76,7 @@ def main(w3files, plc_path, bbox_path, out_c, out_dir):
             lam = np.clip(np.maximum(N2 @ LIGHT, 0) * .55 + .55, 0, 1)
             col = np.round(lam * 255).astype(int)
             n = (i + 1) * 64 + mi + 100
-            placeholder = b''.join(xxhash.xxh64(b'bld%d_%d' % (n, j), seed=7).digest() for j in range(64))
+            placeholder = b''.join(xxhash.xxh64(((b'bld' if prefix == 'pc_bld' else prefix.encode()) + b'%d_%d') % (n, j), seed=7).digest() for j in range(64))
             h = xxhash.xxh64(placeholder, seed=0).hexdigest()
             assert h not in hashes; hashes.add(h)
             du = textures[me['tex']]
@@ -116,8 +116,8 @@ def main(w3files, plc_path, bbox_path, out_c, out_dir):
         print(i, p['model'], 'meshes', len(m['meshes']), 'tris', tris_total, 'scale', round(s, 4), flush=True)
     n = len(ids)
     L.append(f'Gfx* pc_bld_dls[{n}] = {{ ' + ', '.join(f'pc_bld_{i}_dl' for i in range(n)) + ' };')
-    open(out_c, 'w').write('\n'.join(L) + '\n')
+    open(out_c, 'w').write('\n'.join(L).replace('pc_bld_', prefix + '_') + '\n')
 
 
 if __name__ == '__main__':
-    main(*sys.argv[1:6])
+    main(*sys.argv[1:7])

@@ -1,0 +1,178 @@
+[
+ {
+  "model": "War Mill",
+  "s": 0.8663,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -68.82
+ },
+ {
+  "model": "Barracks",
+  "s": 1.1775,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -119.48
+ },
+ {
+  "model": "Bestiary",
+  "s": 1.477,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -131.93
+ },
+ {
+  "model": "Great Hall",
+  "s": 1.99,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -219.51
+ },
+ {
+  "model": "Troll Burrow",
+  "s": 0.762,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -35.88
+ },
+ {
+  "model": "Spirit Lodge",
+  "s": 0.6631,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -64.57
+ },
+ {
+  "model": "Voodoo Lounge",
+  "s": 0.6057,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -37.48
+ },
+ {
+  "model": "Tauren Totem",
+  "s": 0.6199,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -58.44
+ },
+ {
+  "model": "Troll Burrow",
+  "s": 0.7686,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -36.19
+ },
+ {
+  "model": "Troll Burrow",
+  "s": 1.2003,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -56.51
+ },
+ {
+  "model": "Spirit Lodge",
+  "s": 0.9618,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -93.66
+ },
+ {
+  "model": "Voodoo Lounge",
+  "s": 1.0284,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -63.64
+ },
+ {
+  "model": "Barracks",
+  "s": 0.8623,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -87.5
+ },
+ {
+  "model": "Great Hall",
+  "s": 1.0056,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -110.92
+ },
+ {
+  "model": "Altar of Storms",
+  "s": 1.5465,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -121.2
+ },
+ {
+  "model": "Great Hall",
+  "s": 1.0445,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -115.21
+ },
+ {
+  "model": "Watch Tower",
+  "s": 1.7932,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -152.27
+ },
+ {
+  "model": "Spirit Lodge",
+  "s": 1.1488,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -111.87
+ },
+ {
+  "model": "Voodoo Lounge",
+  "s": 1.4134,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -87.46
+ },
+ {
+  "model": "Tauren Totem",
+  "s": 0.6832,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -64.4
+ },
+ {
+  "model": "Altar of Storms",
+  "s": 1.2343,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -96.73
+ },
+ {
+  "model": "Watch Tower",
+  "s": 2.0055,
+  "yaw": 0,
+  "ox": 0,
+  "oz": 0,
+  "oy": -170.29
+ }
+]
