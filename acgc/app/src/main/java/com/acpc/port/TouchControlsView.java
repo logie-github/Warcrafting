@@ -28,7 +28,9 @@ public class TouchControlsView extends View {
     private int gPointer = -1, gStickX, gStickY, gC, gButtons;
     private float gStartX, gStartY, gPinchLast;
     private long gDownTime;
-    private boolean gMoved, gHeld, gPinch, gIgnore;
+    private boolean gMoved, gHeld, gPinch, gIgnore, gPinchMoved;
+    private long gPinchTime;
+    private final Runnable startRelease = () -> { gButtons &= ~BTN_START; pushGesture(); };
     private final Runnable holdRun = () -> {
         if (gPointer >= 0 && !gMoved && !gPinch) { gHeld = true; gButtons |= BTN_B; pushGesture(); }
     };
@@ -214,6 +216,8 @@ public class TouchControlsView extends View {
                 if (e.getPointerCount() >= 2) {
                     handler.removeCallbacks(holdRun);
                     gPinch = true;
+                    gPinchMoved = false;
+                    gPinchTime = e.getEventTime();
                     gStickX = gStickY = 0;
                     gButtons &= ~BTN_B;
                     gPinchLast = dist(e.getX(0), e.getY(0), e.getX(1), e.getY(1));
@@ -225,6 +229,7 @@ public class TouchControlsView extends View {
                     float d = dist(e.getX(0), e.getY(0), e.getX(1), e.getY(1));
                     float delta = d - gPinchLast;
                     if (Math.abs(delta) > 3f * getResources().getDisplayMetrics().density) {
+                        gPinchMoved = true;
                         gC = delta > 0 ? STICK_MAX : -STICK_MAX;   // fingers apart = C-stick up, together = down
                         gPinchLast = d;
                         handler.removeCallbacks(pinchIdle);
@@ -253,7 +258,14 @@ public class TouchControlsView extends View {
                         && e.getEventTime() - gDownTime < HOLD_MS;
                 gStickX = gStickY = 0;
                 gButtons &= ~BTN_B;
-                if (gPinch) { handler.removeCallbacks(pinchIdle); gC = 0; }
+                if (gPinch) {
+                    handler.removeCallbacks(pinchIdle); gC = 0;
+                    if (!gPinchMoved && !gMoved && e.getEventTime() - gPinchTime < 350) {   // two-finger tap = START
+                        gButtons |= BTN_START;
+                        handler.removeCallbacks(startRelease);
+                        handler.postDelayed(startRelease, 120);
+                    }
+                }
                 gPointer = -1; gHeld = gMoved = gPinch = false;
                 if (tap) {
                     gButtons |= BTN_A;
