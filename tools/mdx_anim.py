@@ -102,6 +102,24 @@ class Model:
                 inc = struct.unpack('<I', t[p:p + 4])[0]
                 self.geosets.append(self._geoset(t[p + 4:p + inc]))
                 p += inc
+        self.geoanim = {}
+        for t in ch.get(b'GEOA', []):
+            p = 0
+            while p < len(t):
+                inc = struct.unpack('<I', t[p:p + 4])[0]
+                b = t[p:p + inc]
+                alpha = struct.unpack('<f', b[4:8])[0]
+                gid = struct.unpack("<I", b[24:28])[0]
+                keys = []
+                q = 28
+                if b[q:q + 4] == b'KGAO':
+                    cnt, interp, gseq = struct.unpack('<IIi', b[q + 4:q + 16]); q += 16
+                    for _ in range(cnt):
+                        tm = struct.unpack('<i', b[q:q + 4])[0]; v = struct.unpack('<f', b[q + 4:q + 8])[0]; q += 8
+                        if interp > 1: q += 8
+                        keys.append((tm, v))
+                self.geoanim[gid] = (alpha, keys)
+                p += inc
         self.order = sorted(self.nodes)
 
     def _node(self, b, is_bone):
@@ -225,3 +243,22 @@ class Model:
         _, st, en = s
         times = [st + (en - st) * k / float(frames) for k in range(frames)]
         return [self.pose(t) for t in times]
+
+
+def geoset_visible(model, gi, seq):
+    """Geoset alpha for a sequence (name, start, end): keys are only used when some fall inside the
+    sequence interval, otherwise the static alpha applies (the Warcraft III rule)."""
+    if gi not in model.geoanim:
+        return 1.0
+    alpha, keys = model.geoanim[gi]
+    _, st, en = seq
+    inside = [(t, v) for t, v in keys if st <= t <= en]
+    if not inside:
+        return alpha
+    t = (st + en) / 2.0
+    if t <= inside[0][0]:
+        return inside[0][1]
+    for i in range(len(inside) - 1):
+        if inside[i][0] <= t <= inside[i + 1][0]:
+            return inside[i][1]
+    return inside[-1][1]

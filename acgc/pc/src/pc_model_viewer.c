@@ -1,3 +1,4 @@
+#include <stdio.h>
 /* Multi-category debug model viewer scene (--model-viewer flag)
  *
  * Categories:
@@ -428,6 +429,14 @@ static void mv_reset_camera(GAME_MODEL_VIEWER* mv) {
     mv->cam_angle_y = CAM_DEFAULT_ANGLE_Y;
     mv->cam_pan_x = 0.0f;
     mv->cam_pan_z = 0.0f;
+    {
+        extern char* getenv(const char*);
+        extern double atof(const char*);
+        const char* e;
+        if ((e = getenv("AC_MV_DIST"))) mv->cam_distance *= (f32)atof(e);
+        if ((e = getenv("AC_MV_AX"))) mv->cam_angle_x = (f32)atof(e);
+        if ((e = getenv("AC_MV_AY"))) mv->cam_angle_y = (f32)atof(e);
+    }
 }
 
 /* MODEL SETUP (per-category skeleton initialization) */
@@ -482,7 +491,38 @@ static void mv_setup_model(GAME_MODEL_VIEWER* mv) {
 
 /* INPUT HANDLING */
 
+extern int g_pc_dump_request;
+extern char g_pc_dump_request_path[512];
+
+/* AC_MV_SPIN=N AC_MV_SPIN_DIR=dir: after a short settle, rotate the camera N steps around the model and
+ * dump one frame per step (dir/NN.ppm), then exit. Used to capture building turntables. */
+static void mv_spin_capture(GAME_MODEL_VIEWER* mv) {
+    extern char* getenv(const char*);
+    extern int atoi(const char*);
+    extern void _exit(int);
+    static int n = -1, tick = 0, step = -1;
+    static const char* dir = NULL;
+    static float base = 0.0f;
+    if (n < 0) {
+        const char* e = getenv("AC_MV_SPIN");
+        dir = getenv("AC_MV_SPIN_DIR");
+        n = (e && dir) ? atoi(e) : 0;
+        base = mv->cam_angle_y;
+    }
+    if (n <= 0) return;
+    tick++;
+    if (tick < 45) return;
+    if (((tick - 45) % 4) == 0) {
+        step++;
+        if (step >= n) _exit(0);
+        mv->cam_angle_y = base + (float)step * 6.2831853f / (float)n;
+        snprintf(g_pc_dump_request_path, sizeof(g_pc_dump_request_path), "%s/%02d.ppm", dir, step);
+        g_pc_dump_request = 2; /* dump after the next swap-bound frame has been drawn with the new angle */
+    }
+}
+
 static void mv_handle_input(GAME_MODEL_VIEWER* mv) {
+    mv_spin_capture(mv);
     int cat = mv->category;
     int count = mv_cat_count(cat);
     int changed_model = 0;
@@ -628,7 +668,14 @@ static void mv_draw_common_setup(GAME_MODEL_VIEWER* mv) {
         vp->vp.vtrans[2] = 511;
         vp->vp.vtrans[3] = 0;
 
-        guPerspective(proj_mtx, &perspNorm, 45.0f,
+        float fov_deg = 45.0f;
+        {
+            extern char* getenv(const char*);
+            extern double atof(const char*);
+            const char* e = getenv("AC_MV_FOV");
+            if (e) fov_deg = (float)atof(e);
+        }
+        guPerspective(proj_mtx, &perspNorm, fov_deg,
                       640.0f / 480.0f, near_plane, far_plane, 1.0f);
 
         guLookAt(look_mtx,

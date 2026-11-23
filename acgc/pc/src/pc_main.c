@@ -1,3 +1,4 @@
+#include <unistd.h>
 #if defined(TARGET_PC) && __SIZEOF_POINTER__ == 8
 /* pc_main.c - PC entry point: SDL2/GL init, crash protection, boot sequence */
 #ifndef _WIN32
@@ -271,6 +272,58 @@ void pc_platform_update_window_size(void) {
 
 extern float pc_titledemo_time(void);
 extern int pc_titledemo_no(void);
+int g_pc_dump_request = 0;
+char g_pc_dump_request_path[512];
+
+static void pc_dump_request_hook(void) {
+    if (g_pc_dump_request <= 0) return;
+    if (--g_pc_dump_request > 0) return;
+    int w = g_pc_window_w, h = g_pc_window_h;
+    unsigned char* px = (unsigned char*)malloc((size_t)w * h * 3);
+    if (!px) return;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glReadBuffer(GL_BACK);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, px);
+    FILE* f = fopen(g_pc_dump_request_path, "wb");
+    if (f) {
+        fprintf(f, "P6\n%d %d\n255\n", w, h);
+        for (int y = h - 1; y >= 0; y--) fwrite(px + (size_t)y * w * 3, 1, (size_t)w * 3, f);
+        fclose(f);
+    }
+    free(px);
+}
+
+static void pc_dump_at_hook(void) {
+    pc_dump_request_hook();
+    static int frame = 0;
+    static int at = -1;
+    static const char* path = NULL;
+    if (at < 0) {
+        const char* e = getenv("AC_DUMP_AT");
+        path = getenv("AC_DUMP_FILE");
+        at = (e && path) ? atoi(e) : 0;
+    }
+    if (at <= 0) return;
+    if (++frame != at) return;
+    int w = g_pc_window_w, h = g_pc_window_h;
+    unsigned char* px = (unsigned char*)malloc((size_t)w * h * 3);
+    if (!px) return;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glReadBuffer(GL_BACK);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, px);
+    FILE* f = fopen(path, "wb");
+    if (f) {
+        fprintf(f, "P6\n%d %d\n255\n", w, h);
+        for (int y = h - 1; y >= 0; y--) fwrite(px + (size_t)y * w * 3, 1, (size_t)w * 3, f);
+        fclose(f);
+    }
+    free(px);
+    fflush(stdout);
+    _exit(0);
+}
+
 static void pc_dump_frame_hook(void) {
     static int every = -1;
     static const char* dir = NULL;
@@ -308,6 +361,7 @@ static void pc_dump_frame_hook(void) {
 void pc_platform_swap_buffers(void) {
     pc_gx_draw_pending();
     pc_dump_frame_hook();
+    pc_dump_at_hook();
     SDL_GL_SwapWindow(g_pc_window);
 }
 

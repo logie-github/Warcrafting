@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Warcrafting Building Match</title>
+<style>
+:root{--bg:#17181c;--panel:#22242a;--panel2:#2b2d35;--text:#eceae4;--dim:#9a9ca5;--gold:#e6b94a;--ok:#5fcf80;--no:#e2594f;--up:#6aa8ff}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 16px;background:var(--panel);position:sticky;top:0;z-index:5}
+h1{font-size:17px;margin:0;color:var(--gold);letter-spacing:.3px;flex:1 1 220px}
+.seg{display:flex;border:1px solid #3a3d47;border-radius:10px;overflow:hidden}
+.seg button{background:transparent;color:var(--dim);border:0;padding:8px 14px;font:inherit;cursor:pointer}
+.seg button.on{background:var(--gold);color:#1b1a14;font-weight:700}
+.btn{background:var(--panel2);color:var(--text);border:1px solid #3a3d47;border-radius:10px;padding:8px 12px;font:inherit;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.progress{font-size:13px;color:var(--dim);width:100%}
+.bar{height:5px;background:#33363f;border-radius:3px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:var(--gold);width:0}
+main{padding:14px 16px 28px;max-width:1100px;margin:0 auto}
+.stage{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media (max-width:640px){.stage{grid-template-columns:1fr}}
+.card{background:var(--panel);border-radius:16px;padding:12px;position:relative;user-select:none;-webkit-user-select:none}
+.card h2{font-size:12px;letter-spacing:.8px;text-transform:uppercase;color:var(--dim);margin:0 0 6px}
+.card .name{font-size:18px;font-weight:700;margin:0 0 2px}
+.card .src{font-size:12px;color:var(--dim);margin:0 0 8px;min-height:16px}
+.view{position:relative;border-radius:12px;overflow:hidden;background:#282840;aspect-ratio:4/3;touch-action:none}
+.view img{width:100%;height:100%;display:block;object-fit:contain;pointer-events:none}
+.scrub{width:100%;margin:10px 0 0}
+.hint{font-size:12px;color:var(--dim);margin-top:6px;text-align:center}
+#swipe{transition:transform .22s ease,opacity .22s ease;will-change:transform}
+#swipe.drag{transition:none}
+.stamp{position:absolute;top:16px;font-weight:800;font-size:28px;padding:2px 12px;border:4px solid;border-radius:10px;opacity:0;pointer-events:none;transform:rotate(-12deg);letter-spacing:2px}
+.stamp.ok{left:14px;color:var(--ok)}
+.stamp.no{right:14px;color:var(--no);transform:rotate(12deg)}
+.stamp.up{left:50%;top:auto;bottom:18px;margin-left:-50px;color:var(--up);transform:none}
+.actions{display:flex;gap:10px;justify-content:center;margin:14px 0 4px;flex-wrap:wrap}
+.actions .btn{min-width:94px;font-weight:700}
+.btn.no{border-color:var(--no);color:var(--no)}.btn.ok{border-color:var(--ok);color:var(--ok)}.btn.up{border-color:var(--up);color:var(--up)}
+.tally{font-size:13px;color:var(--dim);margin-top:8px}
+.tally b{color:var(--text)}
+dialog{background:var(--panel);color:var(--text);border:1px solid #3a3d47;border-radius:16px;max-width:760px;width:92vw;padding:16px}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+textarea{width:100%;height:50vh;background:#14151a;color:var(--text);border:1px solid #3a3d47;border-radius:10px;padding:10px;font:12.5px/1.45 ui-monospace,Menlo,Consolas,monospace}
+.row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.done{text-align:center;padding:40px 10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Warcrafting – building match</h1>
+  <div class="seg" id="mode"><button data-m="alliance" class="on">Alliance · Human</button><button data-m="horde">Horde · Orc</button></div>
+  <button class="btn" id="undo">↶ Undo</button>
+  <button class="btn" id="results">Results .txt</button>
+  <div class="progress"><span id="ptext"></span><div class="bar"><i id="pbar"></i></div></div>
+</header>
+<main>
+  <div id="stage" class="stage">
+    <section class="card" id="acCard">
+      <h2>Animal Crossing</h2>
+      <p class="name" id="acName"></p><p class="src" id="acSrc"></p>
+      <div class="view" id="acView"><img id="acImg" alt=""></div>
+      <input class="scrub" id="acScrub" type="range" min="0" max="15" value="0" aria-label="rotate Animal Crossing building">
+      <div class="hint">drag the picture or the slider to rotate</div>
+    </section>
+    <section class="card" id="swipe">
+      <h2 id="w3Head">Warcraft III</h2>
+      <p class="name" id="w3Name"></p><p class="src" id="w3Src"></p>
+      <div class="view" id="w3View"><img id="w3Img" alt="">
+        <div class="stamp ok" id="stOk">MATCH</div><div class="stamp no" id="stNo">NOPE</div><div class="stamp up" id="stUp">NEXT</div>
+      </div>
+      <input class="scrub" id="w3Scrub" type="range" min="0" max="15" value="0" aria-label="rotate Warcraft building">
+      <div class="hint">swipe this card: right = match · left = reject · up = done, next building</div>
+    </section>
+  </div>
+  <div class="actions" id="actions">
+    <button class="btn no" id="bNo">✗ Reject</button>
+    <button class="btn up" id="bUp">↑ Done</button>
+    <button class="btn ok" id="bOk">✓ Match</button>
+  </div>
+  <div class="tally" id="tally"></div>
+  <div class="done" id="doneBox" hidden>
+    <h2 id="doneTitle"></h2><p>Every building in this town is finished.</p>
+    <button class="btn" id="doneRes">Show results .txt</button>
+  </div>
+</main>
+<dialog id="dlg">
+  <h3 style="margin:0 0 8px">Your choices</h3>
+  <textarea id="outText" readonly></textarea>
+  <div class="row"><button class="btn ok" id="dl">⬇ Download choices.txt</button><button class="btn" id="cp">Copy</button><button class="btn" id="closeDlg">Close</button></div>
+</dialog>
+<script>
+const DATA = /*DATA*/null;
+const KEY = 'warcrafting-building-match-v1';
+let mode = 'alliance';
+let st = {};
+try { st = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(st)); }catch(e){} }
+const modeInfo = { alliance:{key:'human', label:'ALLIANCE (Human buildings)'}, horde:{key:'orc', label:'HORDE (Orc buildings)'} };
+function S(){ const m=mode; if(!st[m]) st[m]={cur:0,queue:{},per:{},log:[]}; return st[m]; }
+function seeded(n,seed){ let a=[...Array(n).keys()], s=seed>>>0||1; for(let i=n-1;i>0;i--){ s=(s*1664525+1013904223)>>>0; const j=s%(i+1); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function cands(){ return DATA.w3[modeInfo[mode].key]; }
+function queueFor(acIdx){ const s=S(); if(!s.queue[acIdx]) s.queue[acIdx]=seeded(cands().length, 7+acIdx*131+(mode==='horde'?9:0)); return s.queue[acIdx]; }
+function per(acIdx){ const s=S(); if(!s.per[acIdx]) s.per[acIdx]={pos:0,matches:[],rejects:[],end:null}; return s.per[acIdx]; }
+const $=id=>document.getElementById(id);
+const acImgs=()=>DATA.ac[S().cur].frames;
+let acF=0,w3F=0,acPause=0,w3Pause=0;
+function setAc(i){ const f=acImgs(); acF=((i%f.length)+f.length)%f.length; $('acImg').src=f[acF]; $('acScrub').value=acF; }
+function setW3(i){ const c=currentCand(); if(!c) return; const f=c.frames; w3F=((i%f.length)+f.length)%f.length; $('w3Img').src=f[w3F]; $('w3Scrub').value=w3F; }
+function currentCand(){ const s=S(); if(s.cur>=DATA.ac.length) return null; const p=per(s.cur); const q=queueFor(s.cur); if(p.pos>=q.length) return null; return cands()[q[p.pos]]; }
+function render(){
+  const s=S(), total=DATA.ac.length;
+  const doneN=Math.min(s.cur,total);
+  $('ptext').textContent=`${doneN} of ${total} Animal Crossing buildings done · ${modeInfo[mode].label}`;
+  $('pbar').style.width=(100*doneN/total)+'%';
+  document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.m===mode));
+  const fin=s.cur>=total;
+  $('stage').hidden=fin; $('actions').hidden=fin; $('tally').hidden=fin; $('doneBox').hidden=!fin;
+  if(fin){ $('doneTitle').textContent=(mode==='alliance'?'Alliance':'Horde')+' done'; return; }
+  const ac=DATA.ac[s.cur]; $('acName').textContent=ac.name; $('acSrc').textContent=ac.src;
+  $('acScrub').max=ac.frames.length-1; setAc(0);
+  const c=currentCand(); const p=per(s.cur), q=queueFor(s.cur);
+  if(!c){ advance('ran out of candidates'); return; }
+  $('w3Name').textContent=c.name; $('w3Src').textContent=c.src; $('w3Head').textContent='Warcraft III '+(mode==='alliance'?'Human':'Orc')+`  ·  ${p.pos+1}/${q.length}`;
+  $('w3Scrub').max=c.frames.length-1; setW3(0);
+  $('tally').innerHTML=`Matches so far for this building: <b>${p.matches.length?p.matches.join(', '):'none'}</b>`;
+  const sw=$('swipe'); sw.classList.remove('drag'); sw.style.transform=''; sw.style.opacity=1;
+}
+function advance(reason){ const s=S(); const p=per(s.cur); if(!p.end) p.end=reason; s.cur++; save(); render(); }
+function decide(kind){
+  const s=S(); if(s.cur>=DATA.ac.length) return; const p=per(s.cur), c=currentCand();
+  if(kind==='up'){ s.log.push({ac:s.cur,k:'up'}); advance('swiped up'+(c?'':'')); return; }
+  if(!c) return;
+  (kind==='ok'?p.matches:p.rejects).push(c.name); p.pos++; s.log.push({ac:s.cur,k:kind}); save();
+  const sw=$('swipe'); sw.style.transform=`translateX(${kind==='ok'?'':'-'}120%) rotate(${kind==='ok'?14:-14}deg)`; sw.style.opacity=0;
+  setTimeout(render,200);
+}
+function undo(){
+  const s=S(); const e=s.log.pop(); if(!e) return;
+  if(e.k==='up'){ s.cur=e.ac; const p=per(e.ac); p.end=null; }
+  else { s.cur=e.ac; const p=per(e.ac); p.pos--; (e.k==='ok'?p.matches:p.rejects).pop(); p.end=null; }
+  save(); render();
+}
+// ---- swipe gestures on the Warcraft card ----
+(function(){
+  const sw=$('swipe'), view=$('w3View'); let sx=0,sy=0,dx=0,dy=0,on=false;
+  function stamps(){ const a=Math.min(1,Math.abs(dx)/110), u=Math.min(1,-dy/110);
+    $('stOk').style.opacity=dx>0&&Math.abs(dx)>Math.abs(dy)?a:0; $('stNo').style.opacity=dx<0&&Math.abs(dx)>Math.abs(dy)?a:0; $('stUp').style.opacity=dy<0&&-dy>Math.abs(dx)?u:0; }
+  view.addEventListener('pointerdown',e=>{ on=true; sx=e.clientX; sy=e.clientY; dx=dy=0; view.setPointerCapture(e.pointerId); sw.classList.add('drag'); w3Pause=Date.now()+3500; });
+  view.addEventListener('pointermove',e=>{ if(!on) return; dx=e.clientX-sx; dy=e.clientY-sy; sw.style.transform=`translate(${dx}px,${Math.min(0,dy)}px) rotate(${dx/18}deg)`; stamps(); });
+  function end(){ if(!on) return; on=false; sw.classList.remove('drag');
+    const T=110; let k=null;
+    if(-dy>T && -dy>Math.abs(dx)) k='up'; else if(dx>T) k='ok'; else if(dx<-T) k='no';
+    ['stOk','stNo','stUp'].forEach(i=>$(i).style.opacity=0);
+    if(k){ if(k==='up'){ sw.style.transform='translateY(-120%)'; sw.style.opacity=0; setTimeout(()=>decide('up'),180); } else decide(k); }
+    else { sw.style.transform=''; }
+  }
+  view.addEventListener('pointerup',end); view.addEventListener('pointercancel',end);
+})();
+// ---- rotating the Animal Crossing building by dragging ----
+(function(){
+  const v=$('acView'); let on=false,lx=0,acc=0;
+  v.addEventListener('pointerdown',e=>{ on=true; lx=e.clientX; acc=0; v.setPointerCapture(e.pointerId); acPause=Date.now()+3500; });
+  v.addEventListener('pointermove',e=>{ if(!on) return; acc+=e.clientX-lx; lx=e.clientX; const step=Math.trunc(acc/16); if(step){ setAc(acF-step); acc-=step*16; acPause=Date.now()+3500; } });
+  v.addEventListener('pointerup',()=>on=false); v.addEventListener('pointercancel',()=>on=false);
+})();
+$('acScrub').addEventListener('input',e=>{ setAc(+e.target.value); acPause=Date.now()+3500; });
+$('w3Scrub').addEventListener('input',e=>{ setW3(+e.target.value); w3Pause=Date.now()+3500; });
+setInterval(()=>{ const n=Date.now(); if(n>acPause && !$('stage').hidden) setAc(acF+1); if(n>w3Pause && !$('stage').hidden) setW3(w3F+1); },110);
+$('bOk').onclick=()=>decide('ok'); $('bNo').onclick=()=>decide('no'); $('bUp').onclick=()=>decide('up'); $('undo').onclick=undo;
+addEventListener('keydown',e=>{ if($('dlg').open) return; if(e.key==='ArrowRight') decide('ok'); else if(e.key==='ArrowLeft') decide('no'); else if(e.key==='ArrowUp') decide('up'); else if((e.key==='z'||e.key==='Z')) undo(); });
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{ mode=b.dataset.m; render(); });
+// ---- output ----
+function report(){
+  const L=['WARCRAFTING BUILDING MATCHES','Generated: '+new Date().toISOString(),''];
+  for(const m of ['alliance','horde']){
+    const info=modeInfo[m], s=st[m]; L.push('== '+info.label+' ==');
+    if(!s){ L.push('(not started)',''); continue; }
+    const cl=DATA.w3[info.key];
+    DATA.ac.forEach((ac,i)=>{
+      const p=s.per&&s.per[i]; L.push(`${i+1}. ${ac.name}  [${ac.src}]`);
+      if(!p){ L.push('   (not reviewed)'); return; }
+      const src=n=>{ const c=cl.find(x=>x.name===n); return c? `${n} [${c.src}]`:n; };
+      L.push('   MATCHES: '+(p.matches.length?p.matches.map(src).join(' | '):'none'));
+      L.push('   REJECTED: '+(p.rejects.length?p.rejects.join(', '):'none'));
+      L.push('   ENDED: '+(p.end||'in progress'));
+    });
+    L.push('');
+  }
+  return L.join('\n');
+}
+function showResults(){ $('outText').value=report(); $('dlg').showModal(); }
+$('results').onclick=showResults; $('doneRes').onclick=showResults; $('closeDlg').onclick=()=>$('dlg').close();
+$('cp').onclick=async()=>{ try{ await navigator.clipboard.writeText($('outText').value); $('cp').textContent='Copied'; setTimeout(()=>$('cp').textContent='Copy',1200);}catch(e){ $('outText').select(); document.execCommand('copy'); } };
+$('dl').onclick=()=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([$('outText').value],{type:'text/plain'})); a.download='choices.txt'; document.body.appendChild(a); a.click(); a.remove(); };
+render();
+</script>
+</body>
+</html>
