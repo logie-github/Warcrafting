@@ -303,6 +303,23 @@ def shift_color(base, c, cr):
     return (int((r0 + (r - r0) * w) * 255), int((g0 + (g - g0) * w) * 255), int((b0 + (b - b0) * w) * 255))
 
 
+def remap_steel(orig):
+    """Iron girders: keep every pixel of the original structure as steel, shaded by its luminance."""
+    px = orig.load()
+    res = Image.new('RGBA', orig.size); rp = res.load()
+    lums = [0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2] for c in orig.getdata() if c[3] > 0]
+    lo, hi = min(lums), max(lums)
+    for y in range(orig.size[1]):
+        for x in range(orig.size[0]):
+            c = px[x, y]
+            if c[3] == 0:
+                rp[x, y] = c; continue
+            L = min(1.0, max(0.0, (0.3 * c[0] + 0.59 * c[1] + 0.11 * c[2] - lo) / max(1.0, hi - lo)))
+            v = 45 + 190 * L ** 1.2
+            rp[x, y] = (int(v * 0.95), int(v * 0.99), min(255, int(v * 1.08)), c[3])
+    return res
+
+
 def tonal_ramp(tile_img, lo_pct, hi_pct, steps=32):
     """Colors of the tile sorted by luminance, averaged into `steps` bins between two percentiles."""
     import numpy as np
@@ -374,6 +391,7 @@ SLOT_INFO = {
     'bridge2': (128, 32, ('fix', 'mFM_grd_s_bridge2_pal')),
     'station': (128, 32, ('fix', 'mFM_grd_s_station1_pal')),
     'tunnel':  (64, 64, ('fix', 'mFM_grd_s_station1_pal')),
+    'tekkyo':  (128, 32, ('fix', 'mFM_grd_s_bridge1_pal')),
 }
 
 
@@ -462,6 +480,8 @@ def main():
                 if slot == 'rail':
                     out = remap_rail(decode_idx(data, w, h), pal, tile('rail', W, H),
                                      tile('grass', W, H), tile('wood', W, H), snow, refpal)
+                elif slot == 'tekkyo':
+                    out = remap_steel(decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST))
                 elif slot in WOOD_SLOTS or slot in ('station', 'tunnel'):
                     orig = decode_ci4(data, w, h, pal).resize((W, H), Image.NEAREST)
                     out = remap_ramp(orig, tile(SLOT_TILE[slot], W, H, slot in WOOD_SLOTS), slot, snow)
