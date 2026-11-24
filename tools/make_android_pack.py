@@ -43,7 +43,7 @@ def main(root, assets):
     for town in ('alliance', 'horde'):
         for fn in convert_dir(os.path.join(root, 'mod/pack', town), os.path.join(out, town)):
             manifest.append(f'{town}/{fn}')
-    for sub in ('mod/logo', 'mod/players', 'mod/buildings', 'mod/lib2'):
+    for sub in ('mod/logo', 'mod/players', 'mod/buildings', 'mod/lib2', 'mod/villagers'):
         for fn in convert_dir(os.path.join(root, sub), os.path.join(out, 'common')):
             manifest.append(f'common/{fn}')
     mb = os.path.join(root, 'mod/lib2/models.bin')
@@ -51,6 +51,11 @@ def main(root, assets):
         with open(mb, 'rb') as a, open(os.path.join(out, 'models.bin'), 'wb') as b:
             b.write(a.read())
         manifest.append('models.bin')
+    vb = os.path.join(root, 'mod/villagers/villagers.bin')
+    if os.path.exists(vb):
+        with open(vb, 'rb') as a, open(os.path.join(out, 'villagers.bin'), 'wb') as b:
+            b.write(a.read())
+        manifest.append('villagers.bin')
     lt = os.path.join(root, 'mod/lib2/library.txt')
     if os.path.exists(lt):
         with open(lt, 'rb') as a, open(os.path.join(out, 'library.txt'), 'wb') as b:

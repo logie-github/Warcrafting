@@ -1,5 +1,6 @@
 #ifdef TARGET_PC
 #include "../src/game/pc_wc3_draw.c_inc"
+#include "../src/game/pc_villagers.c_inc"
 #endif
 //
 
@@ -321,6 +322,7 @@ static void aNPC_actor_draw_sub(ACTOR* actorx, GAME* game) {
             if (pc_k >= 0) {
                 pc_wc3_npc_draw(game, pc_k, nactorx->draw.animation_id, kf_p->frame_control.current_frame,
                                 kf_p->frame_control.end_frame, actorx->speed);
+            } else if (pc_vil_try(game, nactorx, kf_p)) {
             } else
 #endif
         cKF_Si3_draw_R_SV(game, kf_p, mtx, &aNPC_actor_draw_before, &aNPC_actor_draw_after, actorx);

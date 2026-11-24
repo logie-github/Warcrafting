@@ -46,6 +46,7 @@ public class GameActivity extends SDLActivity {
             android.system.Os.setenv("AC_MUSIC", "horde".equals(town) ? "orgrimmar" : "off", true);
             if (getIntent() != null && getIntent().getBooleanExtra("builder", false)) android.system.Os.setenv("AC_BUILDER", "1", true);
             else android.system.Os.unsetenv("AC_BUILDER");
+            android.system.Os.setenv("AC_VILLAGERS_BIN", new File(getFilesDir(), "villagers.bin").getAbsolutePath(), true);
             android.system.Os.setenv("AC_MODELS_BIN", new File(getFilesDir(), "models.bin").getAbsolutePath(), true);
             android.system.Os.setenv("AC_BUILD_FILE", BuilderActivity.placementsFile(this, "horde".equals(town) ? "Horde" : "Alliance").getAbsolutePath(), true);
         } catch (Exception ignored) {
@@ -158,6 +159,14 @@ public class GameActivity extends SDLActivity {
                         while ((c = in.read(buf)) > 0) os.write(buf, 0, c);
                     }
                 }
+            }
+            // Warcraft III villager units
+            try (InputStream in = getAssets().open("mod/villagers.bin");
+                 OutputStream os = new FileOutputStream(new File(filesDir, "villagers.bin"))) {
+                byte[] buf = new byte[1 << 16];
+                int c;
+                while ((c = in.read(buf)) > 0) os.write(buf, 0, c);
+            } catch (java.io.IOException ignored) {
             }
             // Warcraft III model library for the build mode
             try (InputStream in = getAssets().open("mod/models.bin");

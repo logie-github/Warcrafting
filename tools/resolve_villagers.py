@@ -14,9 +14,9 @@ def M(*names):
     return out
 # pools: list of (keywords, models) in priority order; last entry (None,..) = default cycle
 POOL={
-'Human':[(('footman','captain','marshal','watchman','shieldbearer','militia','banner'),M('Footman','Militia')),(('knight','outrider','stablemaster'),M('Knight','KnightNoRider')),(('rifleman','archer','crossbow','scout'),M('Rifleman')),(('priest','cleric','medic','inquisitor'),M('Priest')),(('sorceress','conjurer'),M('Sorceress')),(('archmage','apprentice','mage'),M('HumanMage')),(('paladin',),M('Uther')),(('peasant','farmer','merchant','herbalist','cartographer'),M('Peasant','VillagerMan','VillagerWoman')),(None,M('VillagerMan','VillagerWoman','Peasant','Footman','VillagerMan1'))],
+'Human':[(('footman','captain','marshal','watchman','shieldbearer','militia','banner'),M('Footman','Militia')),(('knight','outrider','stablemaster'),M('Knight')),(('rifleman','archer','crossbow','scout'),M('Rifleman')),(('priest','cleric','medic','inquisitor'),M('Priest')),(('sorceress','conjurer'),M('Sorceress')),(('archmage','apprentice','mage'),M('HumanMage')),(('paladin',),M('Uther')),(('peasant','farmer','merchant','herbalist','cartographer'),M('Peasant','VillagerMan','VillagerWoman')),(None,M('VillagerMan','VillagerWoman','Peasant','Footman','VillagerMan1'))],
 'Dwarf':[(('rifleman','thunderer','mountaineer'),M('Rifleman')),(('mortar','artillerist','siege','demolition','steam'),M('MortarTeam')),(('mountain king','shieldguard'),M('HeroMountainKing')),(('gryphon',),M('GryphonRider')),(None,M('Muradin','HeroMountainKing'))],
-'Gnome':[(None,M('VillagerKid','VillagerKid1','Peasant'))],
+'Gnome':[(None,M('Peasant','Militia'))],
 'Night Elf':[(('archer','scout','tracker','ranger'),M('Archer')),(('huntress','sentinel'),M('Huntress')),(('priestess','moon','sage'),M('HeroMoonPriestess')),(('warden',),M('HeroWarden','Maiev')),(('druid','herbalist','dryad'),M('Dryad')),(None,M('Archer','Huntress','ElfVillagerWoman','Shandris','Maiev'))],
 'High Elf':[(('archer','ranger','scout'),M('HighElfArcher')),(None,M('HighElfPeasant','HighElfArcher','HumanMage'))],
 'Blood Elf':[(('peasant','farmer','merchant'),M('BloodElfPeasant')),(('thief','spell','rogue'),M('BloodElfSpellThief')),(('lieutenant','captain','knight'),M('BloodElfLieutenant')),(None,M('BloodElfPeasant','BloodElfSpellThief','BloodElfLieutenant','Kael'))],
