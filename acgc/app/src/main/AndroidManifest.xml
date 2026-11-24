@@ -36,6 +36,9 @@
             </intent-filter>
         </activity>
 
+        <activity android:name=".ReferenceStudioActivity" android:exported="false"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize" />
+
         <activity
             android:name=".BuilderActivity"
             android:exported="false"

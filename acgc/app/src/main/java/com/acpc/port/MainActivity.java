@@ -143,7 +143,7 @@ public class MainActivity extends Activity {
         root.addView(hint);
 
         // cards, two columns on wide screens
-        View[] cards = {discCard(rom), characterCard(), builderCard(), hdCard(), languageCard(), controlsCard(), multiplayerCard(), deluxeCard()};
+        View[] cards = {discCard(rom), characterCard(), builderCard(), referenceStudioCard(), hdCard(), languageCard(), controlsCard(), multiplayerCard(), deluxeCard()};
         if (getResources().getConfiguration().screenWidthDp >= 700) {
             for (int i = 0; i < cards.length; i += 2) {
                 if (i + 1 < cards.length) root.addView(pair(cards[i], cards[i + 1]));
@@ -224,6 +224,14 @@ public class MainActivity extends Activity {
     /* ---------- Warcrafting: player character and town ---------- */
 
     static final String[] CHARACTERS = { "Peasant", "Peon", "Sorceress", "Dark Ranger" };
+
+    private View referenceStudioCard() {
+        LinearLayout c = card("📷", "Character Reference Studio");
+        desc(c, "Keep generated character reference images on this device. 3D reconstruction is in development.");
+        actions(c, pill("Open Reference Studio", GREEN, ON_ACCENT,
+                () -> startActivity(new Intent(this, ReferenceStudioActivity.class))));
+        return c;
+    }
 
     private View builderCard() {
         LinearLayout c = card("🏰", "Town Builder");
